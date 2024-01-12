@@ -5,7 +5,7 @@ from flask import  Response, request, jsonify
 
 class BaseOrchestrator(Orchestrator):
     # Post chat info if data configured
-    def conversation_with_data(self, request_body):
+    def conversation_with_data(request_body, message_uuid):
         # Set up request variables
         body, headers = super().prepare_body_headers_with_data(request)
         base_url = super().AZURE_OPENAI_ENDPOINT if super().AZURE_OPENAI_ENDPOINT else f"https://{super().AZURE_OPENAI_RESOURCE}.openai.azure.com/"
@@ -29,10 +29,10 @@ class BaseOrchestrator(Orchestrator):
 
         # Return response if streaming is enabled
         else:
-            return Response(super().stream_with_data(body, headers, endpoint, history_metadata), mimetype='text/event-stream')
+            return Response(super().stream_with_data(body, headers, endpoint, message_uuid, history_metadata), mimetype='text/event-stream')
 
     # Post chat info if data not configured
-    def conversation_without_data(self, request_body):
+    def conversation_without_data(request_body, message_uuid):
         # Setup for direct query to OpenAI
         openai.api_type = "azure"
         openai.api_base = super().AZURE_OPENAI_ENDPOINT if super().AZURE_OPENAI_ENDPOINT else f"https://{super().AZURE_OPENAI_RESOURCE}.openai.azure.com/"
@@ -88,4 +88,4 @@ class BaseOrchestrator(Orchestrator):
         
         # Format and return response if streaming is enabled
         else:
-            return Response(super().stream_without_data(response, history_metadata), mimetype='text/event-stream')
+            return Response(super().stream_without_data(response, message_uuid, history_metadata), mimetype='text/event-stream')
