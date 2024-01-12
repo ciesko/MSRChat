@@ -6,11 +6,81 @@ import requests
 import copy
 from dotenv import load_dotenv
 
-class Orchestrator(ABC):
-    load_dotenv()
+load_dotenv()
 
-    DEBUG = os.environ.get("DEBUG", "false")
-    DEBUG_LOGGING = DEBUG.lower() == "true"
+DEBUG = os.environ.get("DEBUG", "false")
+DEBUG_LOGGING = DEBUG.lower() == "true"
+
+# Initialize search variables
+DATASOURCE_TYPE = os.environ.get("DATASOURCE_TYPE", "AzureCognitiveSearch")
+SEARCH_TOP_K = os.environ.get("SEARCH_TOP_K", 5)
+SEARCH_STRICTNESS = os.environ.get("SEARCH_STRICTNESS", 3)
+SEARCH_ENABLE_IN_DOMAIN = os.environ.get("SEARCH_ENABLE_IN_DOMAIN", "true")
+
+# Azure OpenAI Settings
+AZURE_OPENAI_TEMPERATURE = os.environ.get("AZURE_OPENAI_TEMPERATURE", 0)
+AZURE_OPENAI_EMBEDDING_ENDPOINT = os.environ.get("AZURE_OPENAI_EMBEDDING_ENDPOINT")
+AZURE_OPENAI_MAX_TOKENS = os.environ.get("AZURE_OPENAI_MAX_TOKENS", 1000)
+AZURE_OPENAI_MODEL = os.environ.get("AZURE_OPENAI_MODEL")
+AZURE_OPENAI_TOP_P = os.environ.get("AZURE_OPENAI_TOP_P", 1.0)
+AZURE_OPENAI_ENDPOINT = os.environ.get("AZURE_OPENAI_ENDPOINT")
+AZURE_OPENAI_STOP_SEQUENCE = os.environ.get("AZURE_OPENAI_STOP_SEQUENCE")
+AZURE_OPENAI_STREAM = os.environ.get("AZURE_OPENAI_STREAM", "true")
+AZURE_OPENAI_EMBEDDING_KEY = os.environ.get("AZURE_OPENAI_EMBEDDING_KEY")
+AZURE_OPENAI_KEY = os.environ.get("AZURE_OPENAI_KEY")
+AZURE_OPENAI_EMBEDDING_NAME = os.environ.get("AZURE_OPENAI_EMBEDDING_NAME", "")
+AZURE_OPENAI_RESOURCE = os.environ.get("AZURE_OPENAI_RESOURCE")
+AZURE_OPENAI_PREVIEW_API_VERSION = os.environ.get("AZURE_OPENAI_PREVIEW_API_VERSION", "2023-08-01-preview")
+AZURE_OPENAI_SYSTEM_MESSAGE = os.environ.get("AZURE_OPENAI_SYSTEM_MESSAGE", "You are an AI assistant that helps people find information.")
+
+# Azure Search Settings
+AZURE_SEARCH_QUERY_TYPE = os.environ.get("AZURE_SEARCH_QUERY_TYPE")
+AZURE_SEARCH_USE_SEMANTIC_SEARCH = os.environ.get("AZURE_SEARCH_USE_SEMANTIC_SEARCH", "false")
+AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG = os.environ.get("AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG", "default")
+AZURE_SEARCH_PERMITTED_GROUPS_COLUMN = os.environ.get("AZURE_SEARCH_PERMITTED_GROUPS_COLUMN")
+AZURE_SEARCH_SERVICE = os.environ.get("AZURE_SEARCH_SERVICE")
+AZURE_SEARCH_KEY = os.environ.get("AZURE_SEARCH_KEY")
+AZURE_SEARCH_INDEX = os.environ.get("AZURE_SEARCH_INDEX")
+AZURE_SEARCH_CONTENT_COLUMNS = os.environ.get("AZURE_SEARCH_CONTENT_COLUMNS")
+AZURE_SEARCH_TITLE_COLUMN = os.environ.get("AZURE_SEARCH_TITLE_COLUMN")
+AZURE_SEARCH_URL_COLUMN = os.environ.get("AZURE_SEARCH_URL_COLUMN")
+AZURE_SEARCH_FILENAME_COLUMN = os.environ.get("AZURE_SEARCH_FILENAME_COLUMN")
+AZURE_SEARCH_VECTOR_COLUMNS = os.environ.get("AZURE_SEARCH_VECTOR_COLUMNS")
+AZURE_SEARCH_ENABLE_IN_DOMAIN = os.environ.get("AZURE_SEARCH_ENABLE_IN_DOMAIN", SEARCH_ENABLE_IN_DOMAIN)
+AZURE_SEARCH_TOP_K = os.environ.get("AZURE_SEARCH_TOP_K", SEARCH_TOP_K)
+AZURE_SEARCH_STRICTNESS = os.environ.get("AZURE_SEARCH_STRICTNESS", SEARCH_STRICTNESS)
+
+# CosmosDB Mongo vcore vector db Settings
+AZURE_COSMOSDB_MONGO_VCORE_CONNECTION_STRING = os.environ.get("AZURE_COSMOSDB_MONGO_VCORE_CONNECTION_STRING")  #This has to be secure string
+AZURE_COSMOSDB_MONGO_VCORE_DATABASE = os.environ.get("AZURE_COSMOSDB_MONGO_VCORE_DATABASE")
+AZURE_COSMOSDB_MONGO_VCORE_CONTAINER = os.environ.get("AZURE_COSMOSDB_MONGO_VCORE_CONTAINER")
+AZURE_COSMOSDB_MONGO_VCORE_INDEX = os.environ.get("AZURE_COSMOSDB_MONGO_VCORE_INDEX")
+AZURE_COSMOSDB_MONGO_VCORE_TOP_K = os.environ.get("AZURE_COSMOSDB_MONGO_VCORE_TOP_K", AZURE_SEARCH_TOP_K)
+AZURE_COSMOSDB_MONGO_VCORE_STRICTNESS = os.environ.get("AZURE_COSMOSDB_MONGO_VCORE_STRICTNESS", AZURE_SEARCH_STRICTNESS)  
+AZURE_COSMOSDB_MONGO_VCORE_ENABLE_IN_DOMAIN = os.environ.get("AZURE_COSMOSDB_MONGO_VCORE_ENABLE_IN_DOMAIN", AZURE_SEARCH_ENABLE_IN_DOMAIN)
+AZURE_COSMOSDB_MONGO_VCORE_CONTENT_COLUMNS = os.environ.get("AZURE_COSMOSDB_MONGO_VCORE_CONTENT_COLUMNS", "")
+AZURE_COSMOSDB_MONGO_VCORE_FILENAME_COLUMN = os.environ.get("AZURE_COSMOSDB_MONGO_VCORE_FILENAME_COLUMN")
+AZURE_COSMOSDB_MONGO_VCORE_TITLE_COLUMN = os.environ.get("AZURE_COSMOSDB_MONGO_VCORE_TITLE_COLUMN")
+AZURE_COSMOSDB_MONGO_VCORE_URL_COLUMN = os.environ.get("AZURE_COSMOSDB_MONGO_VCORE_URL_COLUMN")
+AZURE_COSMOSDB_MONGO_VCORE_VECTOR_COLUMNS = os.environ.get("AZURE_COSMOSDB_MONGO_VCORE_VECTOR_COLUMNS")
+
+# Elasticsearch Integration Settings
+ELASTICSEARCH_ENDPOINT = os.environ.get("ELASTICSEARCH_ENDPOINT")
+ELASTICSEARCH_ENCODED_API_KEY = os.environ.get("ELASTICSEARCH_ENCODED_API_KEY")
+ELASTICSEARCH_INDEX = os.environ.get("ELASTICSEARCH_INDEX")
+ELASTICSEARCH_QUERY_TYPE = os.environ.get("ELASTICSEARCH_QUERY_TYPE", "simple")
+ELASTICSEARCH_TOP_K = os.environ.get("ELASTICSEARCH_TOP_K", SEARCH_TOP_K)
+ELASTICSEARCH_ENABLE_IN_DOMAIN = os.environ.get("ELASTICSEARCH_ENABLE_IN_DOMAIN", SEARCH_ENABLE_IN_DOMAIN)
+ELASTICSEARCH_CONTENT_COLUMNS = os.environ.get("ELASTICSEARCH_CONTENT_COLUMNS")
+ELASTICSEARCH_FILENAME_COLUMN = os.environ.get("ELASTICSEARCH_FILENAME_COLUMN")
+ELASTICSEARCH_TITLE_COLUMN = os.environ.get("ELASTICSEARCH_TITLE_COLUMN")
+ELASTICSEARCH_URL_COLUMN = os.environ.get("ELASTICSEARCH_URL_COLUMN")
+ELASTICSEARCH_VECTOR_COLUMNS = os.environ.get("ELASTICSEARCH_VECTOR_COLUMNS")
+ELASTICSEARCH_STRICTNESS = os.environ.get("ELASTICSEARCH_STRICTNESS", SEARCH_STRICTNESS)
+ELASTICSEARCH_EMBEDDING_MODEL_ID = os.environ.get("ELASTICSEARCH_EMBEDDING_MODEL_ID")
+
+SHOULD_STREAM = True if AZURE_OPENAI_STREAM.lower() == "true" else False
+class Orchestrator(ABC):
 
     @abstractmethod
     def conversation_with_data(self, request_body):
@@ -19,76 +89,6 @@ class Orchestrator(ABC):
     @abstractmethod
     def conversation_without_data(self, request_body):
         pass
-
-    # Initialize search variables
-    DATASOURCE_TYPE = os.environ.get("DATASOURCE_TYPE", "AzureCognitiveSearch")
-    SEARCH_TOP_K = os.environ.get("SEARCH_TOP_K", 5)
-    SEARCH_STRICTNESS = os.environ.get("SEARCH_STRICTNESS", 3)
-    SEARCH_ENABLE_IN_DOMAIN = os.environ.get("SEARCH_ENABLE_IN_DOMAIN", "true")
-
-    # Azure OpenAI Settings
-    AZURE_OPENAI_TEMPERATURE = os.environ.get("AZURE_OPENAI_TEMPERATURE", 0)
-    AZURE_OPENAI_EMBEDDING_ENDPOINT = os.environ.get("AZURE_OPENAI_EMBEDDING_ENDPOINT")
-    AZURE_OPENAI_MAX_TOKENS = os.environ.get("AZURE_OPENAI_MAX_TOKENS", 1000)
-    AZURE_OPENAI_MODEL = os.environ.get("AZURE_OPENAI_MODEL")
-    AZURE_OPENAI_TOP_P = os.environ.get("AZURE_OPENAI_TOP_P", 1.0)
-    AZURE_OPENAI_ENDPOINT = os.environ.get("AZURE_OPENAI_ENDPOINT")
-    AZURE_OPENAI_STOP_SEQUENCE = os.environ.get("AZURE_OPENAI_STOP_SEQUENCE")
-    AZURE_OPENAI_STREAM = os.environ.get("AZURE_OPENAI_STREAM", "true")
-    AZURE_OPENAI_EMBEDDING_KEY = os.environ.get("AZURE_OPENAI_EMBEDDING_KEY")
-    AZURE_OPENAI_KEY = os.environ.get("AZURE_OPENAI_KEY")
-    AZURE_OPENAI_EMBEDDING_NAME = os.environ.get("AZURE_OPENAI_EMBEDDING_NAME", "")
-    AZURE_OPENAI_RESOURCE = os.environ.get("AZURE_OPENAI_RESOURCE")
-    AZURE_OPENAI_PREVIEW_API_VERSION = os.environ.get("AZURE_OPENAI_PREVIEW_API_VERSION", "2023-08-01-preview")
-    AZURE_OPENAI_SYSTEM_MESSAGE = os.environ.get("AZURE_OPENAI_SYSTEM_MESSAGE", "You are an AI assistant that helps people find information.")
-
-    # Azure Search Settings
-    AZURE_SEARCH_QUERY_TYPE = os.environ.get("AZURE_SEARCH_QUERY_TYPE")
-    AZURE_SEARCH_USE_SEMANTIC_SEARCH = os.environ.get("AZURE_SEARCH_USE_SEMANTIC_SEARCH", "false")
-    AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG = os.environ.get("AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG", "default")
-    AZURE_SEARCH_PERMITTED_GROUPS_COLUMN = os.environ.get("AZURE_SEARCH_PERMITTED_GROUPS_COLUMN")
-    AZURE_SEARCH_SERVICE = os.environ.get("AZURE_SEARCH_SERVICE")
-    AZURE_SEARCH_KEY = os.environ.get("AZURE_SEARCH_KEY")
-    AZURE_SEARCH_INDEX = os.environ.get("AZURE_SEARCH_INDEX")
-    AZURE_SEARCH_CONTENT_COLUMNS = os.environ.get("AZURE_SEARCH_CONTENT_COLUMNS")
-    AZURE_SEARCH_TITLE_COLUMN = os.environ.get("AZURE_SEARCH_TITLE_COLUMN")
-    AZURE_SEARCH_URL_COLUMN = os.environ.get("AZURE_SEARCH_URL_COLUMN")
-    AZURE_SEARCH_FILENAME_COLUMN = os.environ.get("AZURE_SEARCH_FILENAME_COLUMN")
-    AZURE_SEARCH_VECTOR_COLUMNS = os.environ.get("AZURE_SEARCH_VECTOR_COLUMNS")
-    AZURE_SEARCH_ENABLE_IN_DOMAIN = os.environ.get("AZURE_SEARCH_ENABLE_IN_DOMAIN", SEARCH_ENABLE_IN_DOMAIN)
-    AZURE_SEARCH_TOP_K = os.environ.get("AZURE_SEARCH_TOP_K", SEARCH_TOP_K)
-    AZURE_SEARCH_STRICTNESS = os.environ.get("AZURE_SEARCH_STRICTNESS", SEARCH_STRICTNESS)
-
-    # CosmosDB Mongo vcore vector db Settings
-    AZURE_COSMOSDB_MONGO_VCORE_CONNECTION_STRING = os.environ.get("AZURE_COSMOSDB_MONGO_VCORE_CONNECTION_STRING")  #This has to be secure string
-    AZURE_COSMOSDB_MONGO_VCORE_DATABASE = os.environ.get("AZURE_COSMOSDB_MONGO_VCORE_DATABASE")
-    AZURE_COSMOSDB_MONGO_VCORE_CONTAINER = os.environ.get("AZURE_COSMOSDB_MONGO_VCORE_CONTAINER")
-    AZURE_COSMOSDB_MONGO_VCORE_INDEX = os.environ.get("AZURE_COSMOSDB_MONGO_VCORE_INDEX")
-    AZURE_COSMOSDB_MONGO_VCORE_TOP_K = os.environ.get("AZURE_COSMOSDB_MONGO_VCORE_TOP_K", AZURE_SEARCH_TOP_K)
-    AZURE_COSMOSDB_MONGO_VCORE_STRICTNESS = os.environ.get("AZURE_COSMOSDB_MONGO_VCORE_STRICTNESS", AZURE_SEARCH_STRICTNESS)  
-    AZURE_COSMOSDB_MONGO_VCORE_ENABLE_IN_DOMAIN = os.environ.get("AZURE_COSMOSDB_MONGO_VCORE_ENABLE_IN_DOMAIN", AZURE_SEARCH_ENABLE_IN_DOMAIN)
-    AZURE_COSMOSDB_MONGO_VCORE_CONTENT_COLUMNS = os.environ.get("AZURE_COSMOSDB_MONGO_VCORE_CONTENT_COLUMNS", "")
-    AZURE_COSMOSDB_MONGO_VCORE_FILENAME_COLUMN = os.environ.get("AZURE_COSMOSDB_MONGO_VCORE_FILENAME_COLUMN")
-    AZURE_COSMOSDB_MONGO_VCORE_TITLE_COLUMN = os.environ.get("AZURE_COSMOSDB_MONGO_VCORE_TITLE_COLUMN")
-    AZURE_COSMOSDB_MONGO_VCORE_URL_COLUMN = os.environ.get("AZURE_COSMOSDB_MONGO_VCORE_URL_COLUMN")
-    AZURE_COSMOSDB_MONGO_VCORE_VECTOR_COLUMNS = os.environ.get("AZURE_COSMOSDB_MONGO_VCORE_VECTOR_COLUMNS")
-
-    # Elasticsearch Integration Settings
-    ELASTICSEARCH_ENDPOINT = os.environ.get("ELASTICSEARCH_ENDPOINT")
-    ELASTICSEARCH_ENCODED_API_KEY = os.environ.get("ELASTICSEARCH_ENCODED_API_KEY")
-    ELASTICSEARCH_INDEX = os.environ.get("ELASTICSEARCH_INDEX")
-    ELASTICSEARCH_QUERY_TYPE = os.environ.get("ELASTICSEARCH_QUERY_TYPE", "simple")
-    ELASTICSEARCH_TOP_K = os.environ.get("ELASTICSEARCH_TOP_K", SEARCH_TOP_K)
-    ELASTICSEARCH_ENABLE_IN_DOMAIN = os.environ.get("ELASTICSEARCH_ENABLE_IN_DOMAIN", SEARCH_ENABLE_IN_DOMAIN)
-    ELASTICSEARCH_CONTENT_COLUMNS = os.environ.get("ELASTICSEARCH_CONTENT_COLUMNS")
-    ELASTICSEARCH_FILENAME_COLUMN = os.environ.get("ELASTICSEARCH_FILENAME_COLUMN")
-    ELASTICSEARCH_TITLE_COLUMN = os.environ.get("ELASTICSEARCH_TITLE_COLUMN")
-    ELASTICSEARCH_URL_COLUMN = os.environ.get("ELASTICSEARCH_URL_COLUMN")
-    ELASTICSEARCH_VECTOR_COLUMNS = os.environ.get("ELASTICSEARCH_VECTOR_COLUMNS")
-    ELASTICSEARCH_STRICTNESS = os.environ.get("ELASTICSEARCH_STRICTNESS", SEARCH_STRICTNESS)
-    ELASTICSEARCH_EMBEDDING_MODEL_ID = os.environ.get("ELASTICSEARCH_EMBEDDING_MODEL_ID")
-
-    SHOULD_STREAM = True if AZURE_OPENAI_STREAM.lower() == "true" else False
 
     # methods to implement in orchestrator
     def fetchUserGroups(self, userToken, nextLink=None):
@@ -141,7 +141,7 @@ class Orchestrator(ABC):
             return columns.split(",")
 
     # Format request body and headers with relevant info based on search type
-    def prepare_body_headers_with_data(request):
+    def prepare_body_headers_with_data(self, request):
         request_messages = request.json["messages"]
 
         body = {
@@ -170,7 +170,7 @@ class Orchestrator(ABC):
                     if DEBUG_LOGGING:
                         logging.debug(f"USER TOKEN is {'present' if userToken else 'not present'}")
 
-                    filter = generateFilterString(userToken)
+                    filter = self.generateFilterString(userToken)
                     if DEBUG_LOGGING:
                         logging.debug(f"FILTER: {filter}")
 
@@ -242,11 +242,11 @@ class Orchestrator(ABC):
                                     "encodedApiKey": ELASTICSEARCH_ENCODED_API_KEY,
                                     "indexName": ELASTICSEARCH_INDEX,
                                     "fieldsMapping": {
-                                        "contentFields": parse_multi_columns(ELASTICSEARCH_CONTENT_COLUMNS) if ELASTICSEARCH_CONTENT_COLUMNS else [],
+                                        "contentFields": self.parse_multi_columns(ELASTICSEARCH_CONTENT_COLUMNS) if ELASTICSEARCH_CONTENT_COLUMNS else [],
                                         "titleField": ELASTICSEARCH_TITLE_COLUMN if ELASTICSEARCH_TITLE_COLUMN else None,
                                         "urlField": ELASTICSEARCH_URL_COLUMN if ELASTICSEARCH_URL_COLUMN else None,
                                         "filepathField": ELASTICSEARCH_FILENAME_COLUMN if ELASTICSEARCH_FILENAME_COLUMN else None,
-                                        "vectorFields": parse_multi_columns(ELASTICSEARCH_VECTOR_COLUMNS) if ELASTICSEARCH_VECTOR_COLUMNS else []
+                                        "vectorFields": self.parse_multi_columns(ELASTICSEARCH_VECTOR_COLUMNS) if ELASTICSEARCH_VECTOR_COLUMNS else []
                                     },
                                     "inScope": True if ELASTICSEARCH_ENABLE_IN_DOMAIN.lower() == "true" else False,
                                     "topNDocuments": int(ELASTICSEARCH_TOP_K),
@@ -364,7 +364,7 @@ class Orchestrator(ABC):
         return response
         
     # Stream chat response with appropriate role referencing data source 
-    def stream_with_data(body, headers, endpoint, message_uuid, history_metadata={}):
+    def stream_with_data(self, body, headers, endpoint, message_uuid, history_metadata={}):
         s = requests.Session()
         try:
             with s.post(endpoint, json=body, headers=headers, stream=True) as r:
@@ -386,12 +386,12 @@ class Orchestrator(ABC):
                         else:
                             try:
                                 rawResponse = json.loads(line.lstrip(b'data:').decode('utf-8'))
-                                lineJson = formatApiResponseStreaming(rawResponse)
+                                lineJson = self.formatApiResponseStreaming(rawResponse)
                             except json.decoder.JSONDecodeError:
                                 continue
 
                         if 'error' in lineJson:
-                            yield format_as_ndjson(lineJson)
+                            yield self.format_as_ndjson(lineJson)
                         response["id"] = message_uuid
                         response["model"] = lineJson["model"]
                         response["created"] = lineJson["created"]
@@ -402,7 +402,7 @@ class Orchestrator(ABC):
 
                         if role == "tool":
                             response["choices"][0]["messages"].append(lineJson["choices"][0]["messages"][0]["delta"])
-                            yield format_as_ndjson(response)
+                            yield self.format_as_ndjson(response)
                         elif role == "assistant": 
                             if response['apim-request-id'] and DEBUG_LOGGING: 
                                 logging.debug(f"RESPONSE apim-request-id: {response['apim-request-id']}")
@@ -410,7 +410,7 @@ class Orchestrator(ABC):
                                 "role": "assistant",
                                 "content": ""
                             })
-                            yield format_as_ndjson(response)
+                            yield self.format_as_ndjson(response)
                         else:
                             deltaText = lineJson["choices"][0]["messages"][0]["delta"]["content"]
                             if deltaText != "[DONE]":
@@ -418,9 +418,9 @@ class Orchestrator(ABC):
                                     "role": "assistant",
                                     "content": deltaText
                                 })
-                                yield format_as_ndjson(response)
+                                yield self.format_as_ndjson(response)
         except Exception as e:
-            yield format_as_ndjson({"error" + str(e)})
+            yield self.format_as_ndjson({"error" + str(e)})
 
     # Stream chat response with assistant role from default endpoint
     def stream_without_data(self, response, history_metadata={}):
