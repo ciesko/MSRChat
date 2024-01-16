@@ -320,7 +320,7 @@ class Orchestrator(ABC):
         return response
     
     # Format chat response with streaming output
-    def formatApiResponseStreaming(rawResponse):
+    def formatApiResponseStreaming(self, rawResponse):
         if 'error' in rawResponse:
             return {"error": rawResponse["error"]}
         response = {
@@ -384,7 +384,6 @@ class Orchestrator(ABC):
                         'history_metadata': history_metadata
                     }
                     if line:
-                        print(self.AZURE_OPENAI_PREVIEW_API_VERSION)
                         if self.AZURE_OPENAI_PREVIEW_API_VERSION == '2023-06-01-preview':
                             lineJson = json.loads(line.lstrip(b'data:').decode('utf-8'))
                         else:

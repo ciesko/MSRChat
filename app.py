@@ -81,7 +81,7 @@ frontend_settings = { "auth_enabled": AUTH_ENABLED }
 frontend_settings = { 
     "auth_enabled": AUTH_ENABLED, 
     "feedback_enabled": AZURE_COSMOSDB_ENABLE_FEEDBACK and AZURE_COSMOSDB_DATABASE not in [None, ""],
-}.
+}
 
 message_uuid = ""
 
