@@ -7,6 +7,11 @@ import copy
 from dotenv import load_dotenv
 
 class Orchestrator(ABC):
+    load_dotenv()
+
+    DEBUG = os.environ.get("DEBUG", "false")
+    DEBUG_LOGGING = DEBUG.lower() == "true"
+
     @abstractmethod
     def conversation_with_data(self, request_body, message_uuid):
         pass
@@ -14,11 +19,6 @@ class Orchestrator(ABC):
     @abstractmethod
     def conversation_without_data(self, request_body, message_uuid):
         pass
-
-    load_dotenv()
-
-    DEBUG = os.environ.get("DEBUG", "false")
-    DEBUG_LOGGING = DEBUG.lower() == "true"
 
     # Initialize search variables
     DATASOURCE_TYPE = os.environ.get("DATASOURCE_TYPE", "AzureCognitiveSearch")
