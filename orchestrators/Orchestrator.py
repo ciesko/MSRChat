@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 
 class Orchestrator(ABC):
     @abstractmethod
-    def conversation_with_data(self, request_body, message_uuidy):
+    def conversation_with_data(self, request_body, message_uuid):
         pass
 
     @abstractmethod
