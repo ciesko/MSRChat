@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 
 class Orchestrator(ABC):
     @abstractmethod
-    def conversation_with_data(self, request_bod, message_uuidy):
+    def conversation_with_data(self, request_body, message_uuidy):
         pass
 
     @abstractmethod
@@ -147,13 +147,13 @@ class Orchestrator(ABC):
         request_messages = request.json["messages"]
 
         body = {
-        "messages": request_messages,
-        "temperature": float(self.AZURE_OPENAI_TEMPERATURE),
-        "max_tokens": int(self.AZURE_OPENAI_MAX_TOKENS),
-        "top_p": float(self.AZURE_OPENAI_TOP_P),
-        "stop": self.AZURE_OPENAI_STOP_SEQUENCE.split("|") if self.AZURE_OPENAI_STOP_SEQUENCE else None,
-        "stream": self.SHOULD_STREAM,
-        "dataSources": []
+            "messages": request_messages,
+            "temperature": float(self.AZURE_OPENAI_TEMPERATURE),
+            "max_tokens": int(self.AZURE_OPENAI_MAX_TOKENS),
+            "top_p": float(self.AZURE_OPENAI_TOP_P),
+            "stop": self.AZURE_OPENAI_STOP_SEQUENCE.split("|") if self.AZURE_OPENAI_STOP_SEQUENCE else None,
+            "stream": self.SHOULD_STREAM,
+            "dataSources": []
         }
 
         if self.DATASOURCE_TYPE == "AzureCognitiveSearch":
@@ -233,7 +233,7 @@ class Orchestrator(ABC):
                 {
                     "messages": request_messages,
                     "temperature": float(self.AZURE_OPENAI_TEMPERATURE),
-                    "max_tokens": int(self.ZURE_OPENAI_MAX_TOKENS),
+                    "max_tokens": int(self.AZURE_OPENAI_MAX_TOKENS),
                     "top_p": float(self.AZURE_OPENAI_TOP_P),
                     "stop": self.AZURE_OPENAI_STOP_SEQUENCE.split("|") if self.AZURE_OPENAI_STOP_SEQUENCE else None,
                     "stream": self.SHOULD_STREAM,
