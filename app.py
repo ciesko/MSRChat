@@ -4,6 +4,7 @@ import logging
 import requests
 import openai
 import copy
+import uuid
 from azure.identity import DefaultAzureCredential
 from base64 import b64encode
 from flask import Flask, Response, request, jsonify, send_from_directory
@@ -97,6 +98,7 @@ AZURE_COSMOSDB_DATABASE = os.environ.get("AZURE_COSMOSDB_DATABASE")
 AZURE_COSMOSDB_ACCOUNT = os.environ.get("AZURE_COSMOSDB_ACCOUNT")
 AZURE_COSMOSDB_CONVERSATIONS_CONTAINER = os.environ.get("AZURE_COSMOSDB_CONVERSATIONS_CONTAINER")
 AZURE_COSMOSDB_ACCOUNT_KEY = os.environ.get("AZURE_COSMOSDB_ACCOUNT_KEY")
+AZURE_COSMOSDB_ENABLE_FEEDBACK = os.environ.get("AZURE_COSMOSDB_ENABLE_FEEDBACK", "false").lower() == "true"
 
 # Elasticsearch Integration Settings
 ELASTICSEARCH_ENDPOINT = os.environ.get("ELASTICSEARCH_ENDPOINT")
@@ -114,9 +116,13 @@ ELASTICSEARCH_STRICTNESS = os.environ.get("ELASTICSEARCH_STRICTNESS", SEARCH_STR
 ELASTICSEARCH_EMBEDDING_MODEL_ID = os.environ.get("ELASTICSEARCH_EMBEDDING_MODEL_ID")
 
 # Frontend Settings via Environment Variables
-AUTH_ENABLED = os.environ.get("AUTH_ENABLED", "true").lower()
-frontend_settings = { "auth_enabled": AUTH_ENABLED }
+AUTH_ENABLED = os.environ.get("AUTH_ENABLED", "true").lower() == "true"
+frontend_settings = { 
+    "auth_enabled": AUTH_ENABLED, 
+    "feedback_enabled": AZURE_COSMOSDB_ENABLE_FEEDBACK and AZURE_COSMOSDB_DATABASE not in [None, ""],
+}
 
+message_uuid = ""
 
 # Initialize a CosmosDB client with AAD auth and containers for Chat History
 cosmos_conversation_client = None
@@ -133,7 +139,8 @@ if AZURE_COSMOSDB_DATABASE and AZURE_COSMOSDB_ACCOUNT and AZURE_COSMOSDB_CONVERS
             cosmosdb_endpoint=cosmos_endpoint, 
             credential=credential, 
             database_name=AZURE_COSMOSDB_DATABASE,
-            container_name=AZURE_COSMOSDB_CONVERSATIONS_CONTAINER
+            container_name=AZURE_COSMOSDB_CONVERSATIONS_CONTAINER,
+            enable_message_feedback = AZURE_COSMOSDB_ENABLE_FEEDBACK
         )
     except Exception as e:
         logging.exception("Exception in CosmosDB initialization", e)
@@ -161,6 +168,12 @@ def should_use_data():
 
 def format_as_ndjson(obj: dict) -> str:
     return json.dumps(obj, ensure_ascii=False) + "\n"
+
+def parse_multi_columns(columns: str) -> list:
+    if "|" in columns:
+        return columns.split("|")
+    else:
+        return columns.split(",")
 
 def fetchUserGroups(userToken, nextLink=None):
     # Recursively fetch group membership
@@ -244,14 +257,14 @@ def prepare_body_headers_with_data(request):
                     "key": AZURE_SEARCH_KEY,
                     "indexName": AZURE_SEARCH_INDEX,
                     "fieldsMapping": {
-                        "contentFields": AZURE_SEARCH_CONTENT_COLUMNS.split("|") if AZURE_SEARCH_CONTENT_COLUMNS else [],
+                        "contentFields": parse_multi_columns(AZURE_SEARCH_CONTENT_COLUMNS) if AZURE_SEARCH_CONTENT_COLUMNS else [],
                         "titleField": AZURE_SEARCH_TITLE_COLUMN if AZURE_SEARCH_TITLE_COLUMN else None,
                         "urlField": AZURE_SEARCH_URL_COLUMN if AZURE_SEARCH_URL_COLUMN else None,
                         "filepathField": AZURE_SEARCH_FILENAME_COLUMN if AZURE_SEARCH_FILENAME_COLUMN else None,
-                        "vectorFields": AZURE_SEARCH_VECTOR_COLUMNS.split("|") if AZURE_SEARCH_VECTOR_COLUMNS else []
+                        "vectorFields": parse_multi_columns(AZURE_SEARCH_VECTOR_COLUMNS) if AZURE_SEARCH_VECTOR_COLUMNS else []
                     },
                     "inScope": True if AZURE_SEARCH_ENABLE_IN_DOMAIN.lower() == "true" else False,
-                    "topNDocuments": AZURE_SEARCH_TOP_K,
+                    "topNDocuments": int(AZURE_SEARCH_TOP_K),
                     "queryType": query_type,
                     "semanticConfiguration": AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG if AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG else "",
                     "roleInformation": AZURE_OPENAI_SYSTEM_MESSAGE,
@@ -272,14 +285,14 @@ def prepare_body_headers_with_data(request):
                     "databaseName": AZURE_COSMOSDB_MONGO_VCORE_DATABASE,
                     "containerName": AZURE_COSMOSDB_MONGO_VCORE_CONTAINER,                    
                     "fieldsMapping": {
-                        "contentFields": AZURE_COSMOSDB_MONGO_VCORE_CONTENT_COLUMNS.split("|") if AZURE_COSMOSDB_MONGO_VCORE_CONTENT_COLUMNS else [],
+                        "contentFields": parse_multi_columns(AZURE_COSMOSDB_MONGO_VCORE_CONTENT_COLUMNS) if AZURE_COSMOSDB_MONGO_VCORE_CONTENT_COLUMNS else [],
                         "titleField": AZURE_COSMOSDB_MONGO_VCORE_TITLE_COLUMN if AZURE_COSMOSDB_MONGO_VCORE_TITLE_COLUMN else None,
                         "urlField": AZURE_COSMOSDB_MONGO_VCORE_URL_COLUMN if AZURE_COSMOSDB_MONGO_VCORE_URL_COLUMN else None,
                         "filepathField": AZURE_COSMOSDB_MONGO_VCORE_FILENAME_COLUMN if AZURE_COSMOSDB_MONGO_VCORE_FILENAME_COLUMN else None,
-                        "vectorFields": AZURE_COSMOSDB_MONGO_VCORE_VECTOR_COLUMNS.split("|") if AZURE_COSMOSDB_MONGO_VCORE_VECTOR_COLUMNS else []
+                        "vectorFields": parse_multi_columns(AZURE_COSMOSDB_MONGO_VCORE_VECTOR_COLUMNS) if AZURE_COSMOSDB_MONGO_VCORE_VECTOR_COLUMNS else []
                     },
                     "inScope": True if AZURE_COSMOSDB_MONGO_VCORE_ENABLE_IN_DOMAIN.lower() == "true" else False,
-                    "topNDocuments": AZURE_COSMOSDB_MONGO_VCORE_TOP_K,
+                    "topNDocuments": int(AZURE_COSMOSDB_MONGO_VCORE_TOP_K),
                     "strictness": int(AZURE_COSMOSDB_MONGO_VCORE_STRICTNESS),
                     "queryType": query_type,
                     "roleInformation": AZURE_OPENAI_SYSTEM_MESSAGE
@@ -304,11 +317,11 @@ def prepare_body_headers_with_data(request):
                             "encodedApiKey": ELASTICSEARCH_ENCODED_API_KEY,
                             "indexName": ELASTICSEARCH_INDEX,
                             "fieldsMapping": {
-                                "contentFields": ELASTICSEARCH_CONTENT_COLUMNS.split("|") if ELASTICSEARCH_CONTENT_COLUMNS else [],
+                                "contentFields": parse_multi_columns(ELASTICSEARCH_CONTENT_COLUMNS) if ELASTICSEARCH_CONTENT_COLUMNS else [],
                                 "titleField": ELASTICSEARCH_TITLE_COLUMN if ELASTICSEARCH_TITLE_COLUMN else None,
                                 "urlField": ELASTICSEARCH_URL_COLUMN if ELASTICSEARCH_URL_COLUMN else None,
                                 "filepathField": ELASTICSEARCH_FILENAME_COLUMN if ELASTICSEARCH_FILENAME_COLUMN else None,
-                                "vectorFields": ELASTICSEARCH_VECTOR_COLUMNS.split("|") if ELASTICSEARCH_VECTOR_COLUMNS else []
+                                "vectorFields": parse_multi_columns(ELASTICSEARCH_VECTOR_COLUMNS) if ELASTICSEARCH_VECTOR_COLUMNS else []
                             },
                             "inScope": True if ELASTICSEARCH_ENABLE_IN_DOMAIN.lower() == "true" else False,
                             "topNDocuments": int(ELASTICSEARCH_TOP_K),
@@ -381,7 +394,7 @@ def stream_with_data(body, headers, endpoint, history_metadata={}):
 
                     if 'error' in lineJson:
                         yield format_as_ndjson(lineJson)
-                    response["id"] = lineJson["id"]
+                    response["id"] = message_uuid
                     response["model"] = lineJson["model"]
                     response["created"] = lineJson["created"]
                     response["object"] = lineJson["object"]
@@ -514,7 +527,7 @@ def stream_without_data(response, history_metadata={}):
             responseText = deltaText
 
         response_obj = {
-            "id": line["id"],
+            "id": message_uuid,
             "model": line["model"],
             "created": line["created"],
             "object": line["object"],
@@ -564,7 +577,7 @@ def conversation_without_data(request_body):
 
     if not SHOULD_STREAM:
         response_obj = {
-            "id": response,
+            "id": message_uuid,
             "model": response.model,
             "created": response.created,
             "object": response.object,
@@ -601,6 +614,8 @@ def conversation_internal(request_body):
 ## Conversation History API ## 
 @app.route("/history/generate", methods=["POST"])
 def add_conversation():
+    global message_uuid
+    message_uuid = str(uuid.uuid4())
     authenticated_user = get_authenticated_user_details(request_headers=request.headers)
     user_id = authenticated_user['user_principal_id']
 
@@ -626,6 +641,7 @@ def add_conversation():
         messages = request.json["messages"]
         if len(messages) > 0 and messages[-1]['role'] == "user":
             cosmos_conversation_client.create_message(
+                uuid=str(uuid.uuid4()),
                 conversation_id=conversation_id,
                 user_id=user_id,
                 input_message=messages[-1]
@@ -668,12 +684,14 @@ def update_conversation():
             if len(messages) > 1 and messages[-2].get('role', None) == "tool":
                 # write the tool message first
                 cosmos_conversation_client.create_message(
+                    uuid=str(uuid.uuid4()),
                     conversation_id=conversation_id,
                     user_id=user_id,
                     input_message=messages[-2]
                 )
             # write the assistant message
             cosmos_conversation_client.create_message(
+                uuid=message_uuid,
                 conversation_id=conversation_id,
                 user_id=user_id,
                 input_message=messages[-1]
@@ -688,6 +706,33 @@ def update_conversation():
     except Exception as e:
         logging.exception("Exception in /history/update")
         return jsonify({"error": str(e)}), 500
+
+@app.route("/history/message_feedback", methods=["POST"])
+def update_message():
+    authenticated_user = get_authenticated_user_details(request_headers=request.headers)
+    user_id = authenticated_user['user_principal_id']
+
+    ## check request for message_id
+    message_id = request.json.get("message_id", None)
+    message_feedback = request.json.get("message_feedback", None)
+    try:
+        if not message_id:
+            return jsonify({"error": "message_id is required"}), 400
+        
+        if not message_feedback:
+            return jsonify({"error": "message_feedback is required"}), 400
+        
+        ## update the message in cosmos
+        updated_message = cosmos_conversation_client.update_message_feedback(user_id, message_id, message_feedback)
+        if updated_message:
+            return jsonify({"message": f"Successfully updated message with feedback {message_feedback}", "message_id": message_id}), 200
+        else:
+            return jsonify({"error": f"Unable to update message {message_id}. It either does not exist or the user does not have access to it."}), 404
+        
+    except Exception as e:
+        logging.exception("Exception in /history/message_feedback")
+        return jsonify({"error": str(e)}), 500
+
 
 @app.route("/history/delete", methods=["DELETE"])
 def delete_conversation():
@@ -748,7 +793,7 @@ def get_conversation():
     conversation_messages = cosmos_conversation_client.get_messages(user_id, conversation_id)
 
     ## format the messages in the bot frontend format
-    messages = [{'id': msg['id'], 'role': msg['role'], 'content': msg['content'], 'createdAt': msg['createdAt']} for msg in conversation_messages]
+    messages = [{'id': msg['id'], 'role': msg['role'], 'content': msg['content'], 'createdAt': msg['createdAt'], 'feedback': msg.get('feedback')} for msg in conversation_messages]
 
     return jsonify({"conversation_id": conversation_id, "messages": messages}), 200
 

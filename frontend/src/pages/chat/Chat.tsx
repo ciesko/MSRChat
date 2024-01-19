@@ -41,7 +41,7 @@ const enum messageStatus {
 const Chat = () => {
     const Newstyles = ChatStyles();
     const appStateContext = useContext(AppStateContext)
-    const AUTH_ENABLED = appStateContext?.state.frontendSettings?.auth_enabled === "true";
+    const AUTH_ENABLED = appStateContext?.state.frontendSettings?.auth_enabled;
     const chatMessageStreamEnd = useRef<HTMLDivElement | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [showLoadingMessage, setShowLoadingMessage] = useState<boolean>(false);
@@ -185,7 +185,7 @@ const Chat = () => {
                             runningText += obj;
                             result = JSON.parse(runningText);
                             result.choices[0].messages.forEach((obj) => {
-                                obj.id = uuid();
+                                obj.id = result.id;
                                 obj.date = new Date().toISOString();
                             })
                             setShowLoadingMessage(false);
@@ -317,7 +317,7 @@ const Chat = () => {
                             runningText += obj;
                             result = JSON.parse(runningText);
                             result.choices[0].messages.forEach((obj) => {
-                                obj.id = uuid();
+                                obj.id = result.id;
                                 obj.date = new Date().toISOString();
                             })
                             setShowLoadingMessage(false);
