@@ -37,7 +37,7 @@ const Layout = () => {
                 appStateContext={appStateContext}
             />
             <Outlet />
-        </div >
+        </div>
     );
 };
 

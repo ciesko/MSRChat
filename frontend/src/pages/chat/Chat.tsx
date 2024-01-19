@@ -39,7 +39,7 @@ const enum messageStatus {
 }
 
 const Chat = () => {
-    const Newstyles = ChatStyles();
+    const styles = ChatStyles();
     const appStateContext = useContext(AppStateContext)
     const AUTH_ENABLED = appStateContext?.state.frontendSettings?.auth_enabled === "true";
     const chatMessageStreamEnd = useRef<HTMLDivElement | null>(null);
@@ -560,9 +560,9 @@ const Chat = () => {
     }
 
     return (
-        <div className={Newstyles.container} role="main">
+        <div className={styles.container} role="main">
             {showAuthMessage ? (
-                <div className={Newstyles.chatEmptyState}>
+                <div className={styles.chatEmptyState}>
                     <ShieldLockRegular />
                     <h1>Authentication Not Configured</h1>
                     <h2>
@@ -575,10 +575,10 @@ const Chat = () => {
                     <Title2><strong>If you deployed in the last 10 minutes, please wait and reload the page after 10 minutes.</strong></Title2>
                 </div>
             ) : (
-                <div className={Newstyles.container}>
-                    <div className={Newstyles.chatContainer}>
+                <div className={styles.container}>
+                    <div className={styles.chatContainer}>
                         {!messages || messages.length < 1 ? (
-                            <div className={Newstyles.chatEmptyState}>
+                            <div className={styles.chatEmptyState}>
                                 <Image
                                     src={Azure}
                                     height={62}
@@ -589,12 +589,12 @@ const Chat = () => {
                                 <Subtitle2>This chatbot is configured to answer your questions</Subtitle2>
                             </div>
                         ) : (
-                            <div className={Newstyles.chatMessageStream} role="log">
+                            <div className={styles.chatMessageStream} role="log">
                                 {messages.map((answer, index) => (
                                     <>
                                         {
                                             answer.role === "user" ? (
-                                                <div className={Newstyles.questionDisplayRow}>
+                                                <div className={styles.questionDisplayRow}>
                                                     <QuestionDisplay
                                                         content={answer.content}
                                                     />
@@ -613,12 +613,12 @@ const Chat = () => {
                                                         }}
                                                         onCitationClicked={c => onShowCitation(c)}
                                                     />
-                                                </div> : answer.role === ERROR ? <div className={Newstyles.chatMessageError}>
-                                                    <div className={Newstyles.chatMessageErrorContent}>
+                                                </div> : answer.role === ERROR ? <div className={styles.chatMessageError}>
+                                                    <div className={styles.chatMessageErrorContent}>
                                                         <ErrorCircleRegular />
                                                         <span>Error</span>
                                                     </div>
-                                                    <span className={Newstyles.chatMessageErrorContent}>{answer.content}</span>
+                                                    <span className={styles.chatMessageErrorContent}>{answer.content}</span>
                                                 </div> : null
                                             )
                                         }
@@ -640,9 +640,9 @@ const Chat = () => {
                                 <div ref={chatMessageStreamEnd} />
                             </div>
                         )}
-                        <div className={Newstyles.chatInputContainer}>
-                            <div className={Newstyles.chatInput}>
-                                <div className={Newstyles.chatButtonsLeftContainer}>
+                        <div className={styles.chatInputContainer}>
+                            <div className={styles.chatInput}>
+                                <div className={styles.chatButtonsLeftContainer}>
                                     {
                                         appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured && (
                                             <Button
@@ -675,7 +675,7 @@ const Chat = () => {
                             {
                                 // isLoading show Stop Generating button
                                 isLoading && (
-                                    <div className={Newstyles.stopGeneratingContainer}>
+                                    <div className={styles.stopGeneratingContainer}>
                                         <Button
                                             icon={<Stop24Regular />}
                                             aria-label="Stop generating"

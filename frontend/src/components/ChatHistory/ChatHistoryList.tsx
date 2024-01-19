@@ -70,7 +70,7 @@ const ChatHistoryList: React.FC<ChatHistoryListProps> = () => {
     }else{
         return <div style={{ width: "100%", marginTop: 10 }}>
             <div>
-                <Text style={{ alignSelf: 'center', fontWeight: '400', fontSize: 14 }}>
+                <Text>
                     <span>No chat history.</span>
                 </Text>
             </div>

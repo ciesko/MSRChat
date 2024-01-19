@@ -1,4 +1,4 @@
-import { makeStyles, shorthands } from "@fluentui/react-components";
+import { makeStyles, shorthands, tokens } from "@fluentui/react-components";
 
 export const ChatStyles = makeStyles({
     container: {
@@ -16,8 +16,8 @@ export const ChatStyles = makeStyles({
         alignItems: 'center',
         justifyContent: 'space-between',
         //background: 'radial-gradient(108.78% 108.78% at 50.02% 19.78%, #FFFFFF 57.29%, #EEF6FE 100%)',
-        boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.14), 0px 0px 2px rgba(0, 0, 0, 0.12)',
-        ...shorthands.borderRadius('8px'),
+        boxShadow: tokens.shadow4,
+        ...shorthands.borderRadius(tokens.borderRadiusXLarge),
         overflowY: 'auto',
         height: 'calc(100vh - 130px)',
         ...shorthands.padding('30px'),
@@ -96,8 +96,7 @@ export const ChatStyles = makeStyles({
 
     chatMessageError: {
         ...shorthands.padding('20px'),
-        ...shorthands.borderRadius('8px'),
-        boxShadow: 'rgba(182, 52, 67, 1) 1px 1px 2px, rgba(182, 52, 67, 1) 0px 0px 1px',
+        ...shorthands.borderRadius(tokens.borderRadiusLarge),
         ...shorthands.flex('none'),
         order: 0,
         flexGrow: 0,

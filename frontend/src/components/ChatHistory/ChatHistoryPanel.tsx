@@ -19,7 +19,7 @@ export enum ChatHistoryPanelTabs {
 }
 
 export function ChatHistoryPanel(props: ChatHistoryPanelProps) {
-    const NewStyles = ChatHistoryStyles();
+    const styles = ChatHistoryStyles();
     const appStateContext = useContext(AppStateContext);
     const [showDrawer, setShowDrawer] = React.useState(false);
     const [hideClearAllDialog, { toggle: toggleClearAllDialog }] = useBoolean(true);
@@ -64,7 +64,7 @@ export function ChatHistoryPanel(props: ChatHistoryPanelProps) {
                 position='end'
                 type='overlay'
             >
-                <DrawerHeader className={NewStyles.panelHeader}>
+                <DrawerHeader className={styles.panelHeader}>
                     <Title3>Chat History</Title3>
                     <DrawerHeaderNavigation>
                         <Toolbar>
@@ -94,14 +94,8 @@ export function ChatHistoryPanel(props: ChatHistoryPanelProps) {
                     </DrawerHeaderNavigation>
                 </DrawerHeader>
                 <DrawerBody>
-                    <div aria-label="chat history panel content"
-                        style={{
-                            display: "flex",
-                            flexGrow: 1,
-                            flexDirection: "column",
-                            flexWrap: "wrap",
-                            padding: "1px"
-                        }}>
+                    <div className={styles.drawerBody} aria-label="chat history panel content">
+                       
                         <div>
                             {
                                 (appStateContext?.state?.chatHistoryLoadingState === ChatHistoryLoadingState.Success && appStateContext?.state?.isCosmosDBAvailable?.cosmosDB) && <ChatHistoryList />

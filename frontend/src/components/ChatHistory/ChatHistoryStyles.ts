@@ -28,22 +28,6 @@ export const ChatHistoryStyles = makeStyles({
         ...shorthands.borderRadius('5px'),
         display: 'flex',
     },
-
-    itemButton: {
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        width: '28px',
-        height: '28px',
-        ...shorthands.border('1px', 'solid', '#d1d1d1'),
-        ...shorthands.borderRadius('5px'),
-        backgroundColor: 'white',
-        ...shorthands.margin('auto', '2.5px'),
-        cursor: 'pointer',
-    },
-    itemButtonHover: {
-        backgroundColor: '#E6E6E6',
-    },
     chatGroup: {
         ...shorthands.margin('auto 5px'),
         width: '100%',
@@ -80,6 +64,13 @@ export const ChatHistoryStyles = makeStyles({
         flexDirection: 'row',
         marginTop: '5px',
         ...shorthands.gap('5px'),
+    },
+    drawerBody: {   
+        display: 'flex',
+        flexGrow: 1,
+        flexDirection: 'column',
+        flexWrap: 'wrap',
+        ...shorthands.padding('1px')
     },
 
 });
