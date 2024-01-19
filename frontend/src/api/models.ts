@@ -2,8 +2,6 @@ export type AskResponse = {
     answer: string;
     citations: Citation[];
     error?: string;
-    message_id?: string;
-    feedback?: Feedback;
 };
 
 export type Citation = {
@@ -28,7 +26,6 @@ export type ChatMessage = {
     content: string;
     end_turn?: boolean;
     date: string;
-    feedback?: Feedback;
 };
 
 export type Conversation = {
@@ -99,21 +96,4 @@ export type ErrorMessage = {
 
 export type FrontendSettings = {
     auth_enabled?: string | null;
-    feedback_enabled?: string | null;
-}
-
-export enum Feedback {
-    Neutral = "neutral",
-    Positive = "positive",
-    Negative = "negative",
-    MissingCitation = "missing_citation",
-    WrongCitation = "wrong_citation",
-    OutOfScope = "out_of_scope",
-    InaccurateOrIrrelevant = "inaccurate_or_irrelevant",
-    OtherUnhelpful = "other_unhelpful",
-    HateSpeech = "hate_speech",
-    Violent = "violent",
-    Sexual = "sexual",
-    Manipulative = "manipulative",
-    OtherHarmful = "other_harmlful"
 }
