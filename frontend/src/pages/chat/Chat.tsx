@@ -626,7 +626,11 @@ const Chat = () => {
                                 ))}
                                 {showLoadingMessage && (
                                     <>
-                                        <div>
+                                        <div style={{
+                                                        marginBottom: '12px',
+                                                        maxWidth: '80%',
+                                                        display: 'flex'
+                                                    }}>
                                             <Answer
                                                 answer={{
                                                     answer: "Generating answer...",

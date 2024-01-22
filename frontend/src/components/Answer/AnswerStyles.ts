@@ -2,8 +2,7 @@ import { makeStyles, shorthands, tokens } from "@fluentui/react-components";
 
 export const AnswerStyles = makeStyles({
     card: {
-        backgroundColor: tokens.colorBrandBackground,
-        color: tokens.colorNeutralStrokeOnBrand2
+        backgroundColor: tokens.colorBrandBackground2,
     },
     answerText: {
         ...shorthands.flex('none'),
