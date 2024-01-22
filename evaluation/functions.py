@@ -67,7 +67,6 @@ def evaluate_response(prompt: str):
     Rate the quality of an AI-generated response based on the provided response and original user question.
 
     Parameters:
-    - response (dict): The JSON response obtained from the conversation API, containing AI-generated response.
     - prompt (str): The original user question.
     """
     answer, response_time, response = process_prompt(prompt)
