@@ -2,8 +2,8 @@
 
 import { Theme, teamsDarkTheme, teamsLightTheme } from "@fluentui/react-components";
 
-export default class ThemeService {    
-  public getTheme(): Theme {
-    return teamsDarkTheme;
-    }   
+export default class ThemeService {
+    public getTheme(): Theme {
+        return teamsLightTheme;
+    }
 };
