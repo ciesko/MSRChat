@@ -645,7 +645,6 @@ const Chat = () => {
                             </div>
                         )}
                         <div className={styles.bottomSection}>
-
                             <div className={styles.stopGeneratingContainer}>
                                 {
                                     // isLoading show Stop Generating button

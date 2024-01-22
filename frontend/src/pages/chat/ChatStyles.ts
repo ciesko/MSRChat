@@ -85,7 +85,6 @@ export const ChatStyles = makeStyles({
         ...shorthands.gap('10px'),
         width: '100%',
         maxWidth: '1080px',
-        maxHeight: '70%',
         overflowY: 'auto',
         ...shorthands.padding('10px'),
         boxSizing: 'border-box',
@@ -96,8 +95,7 @@ export const ChatStyles = makeStyles({
         flexDirection: 'column',
         alignItems: 'center',
         width: '100%',
-        maxWidth: '1080px',
-        height: '165px',
+        maxWidth: '1080px'
     },
     bottomSection: {
         // display vertically and centered  
