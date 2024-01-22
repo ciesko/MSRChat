@@ -627,10 +627,10 @@ const Chat = () => {
                                 {showLoadingMessage && (
                                     <>
                                         <div style={{
-                                                        marginBottom: '12px',
-                                                        maxWidth: '80%',
-                                                        display: 'flex'
-                                                    }}>
+                                            marginBottom: '12px',
+                                            maxWidth: '80%',
+                                            display: 'flex'
+                                        }}>
                                             <Answer
                                                 answer={{
                                                     answer: "Generating answer...",
@@ -644,54 +644,56 @@ const Chat = () => {
                                 <div ref={chatMessageStreamEnd} />
                             </div>
                         )}
-                        <div className={styles.chatInputContainer}>
-                            <div className={styles.chatInput}>
-                                <div className={styles.chatButtonsLeftContainer}>
-                                    {
-                                        appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured && (
+                        <div className={styles.bottomSection}>
+
+                            <div className={styles.stopGeneratingContainer}>
+                                {
+                                    // isLoading show Stop Generating button
+                                    isLoading && (
                                             <Button
-                                                icon={<Add16Regular />}
-                                                onClick={newChat}
-                                                disabled={disabledButton()}
-                                                aria-label="start a new chat button"
-                                            />
-                                        )
-                                    }
-                                    <Button
-                                        icon={<Broom16Regular />}
-                                        onClick={appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured ? clearChat : newChat}
-                                        disabled={disabledButton()}
-                                        aria-label="clear chat button"
-                                    />
-
-                                </div>
-                                <QuestionInput
-                                    clearOnSend
-                                    placeholder="Type a new question..."
-                                    disabled={isLoading}
-                                    onSend={(question, id) => {
-                                        appStateContext?.state.isCosmosDBAvailable?.cosmosDB ? makeApiRequestWithCosmosDB(question, id) : makeApiRequestWithoutCosmosDB(question, id)
-                                    }}
-                                    conversationId={appStateContext?.state.currentChat?.id ? appStateContext?.state.currentChat?.id : undefined}
-                                />
-
+                                                icon={<Stop24Regular />}
+                                                aria-label="Stop generating"
+                                                tabIndex={0}
+                                                onClick={stopGenerating}
+                                                onKeyDown={e => e.key === "Enter" || e.key === " " ? stopGenerating() : null}
+                                            >
+                                                Stop generating
+                                            </Button>
+                                    )
+                                }
                             </div>
-                            {
-                                // isLoading show Stop Generating button
-                                isLoading && (
-                                    <div className={styles.stopGeneratingContainer}>
+                            <div className={styles.chatInputContainer}>
+                                <div className={styles.chatInput}>
+                                    <div className={styles.chatButtonsLeftContainer}>
+                                        {
+                                            appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured && (
+                                                <Button
+                                                    icon={<Add16Regular />}
+                                                    onClick={newChat}
+                                                    disabled={disabledButton()}
+                                                    aria-label="start a new chat button"
+                                                />
+                                            )
+                                        }
                                         <Button
-                                            icon={<Stop24Regular />}
-                                            aria-label="Stop generating"
-                                            tabIndex={0}
-                                            onClick={stopGenerating}
-                                            onKeyDown={e => e.key === "Enter" || e.key === " " ? stopGenerating() : null}
-                                        >
-                                            Stop generating
-                                        </Button>
+                                            icon={<Broom16Regular />}
+                                            onClick={appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured ? clearChat : newChat}
+                                            disabled={disabledButton()}
+                                            aria-label="clear chat button"
+                                        />
+
                                     </div>
-                                )
-                            }
+                                    <QuestionInput
+                                        clearOnSend
+                                        placeholder="Type a new question..."
+                                        disabled={isLoading}
+                                        onSend={(question, id) => {
+                                            appStateContext?.state.isCosmosDBAvailable?.cosmosDB ? makeApiRequestWithCosmosDB(question, id) : makeApiRequestWithoutCosmosDB(question, id)
+                                        }}
+                                        conversationId={appStateContext?.state.currentChat?.id ? appStateContext?.state.currentChat?.id : undefined}
+                                    />
+                                </div>
+                            </div>
                         </div>
                     </div>
                     {/* Citation Panel */}

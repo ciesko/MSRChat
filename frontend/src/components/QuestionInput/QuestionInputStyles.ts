@@ -8,12 +8,13 @@ export const QuestionInputStyles = makeStyles({
 
     textInput: {
         width: '100%',
+        boxShadow: tokens.shadow8,
     },
 
     sendButton: {
         position: 'relative',
-        right: '40px',
-        bottom: '0px',
+        right: '50px',
+        top: '30px',
         color: tokens.colorBrandForeground1
     },
 });

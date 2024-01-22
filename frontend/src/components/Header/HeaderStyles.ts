@@ -5,7 +5,8 @@ export const HeaderStyles = makeStyles({
         width: '100%',
         display: 'flex',
         flexDirection: 'row',
-        justifyContent: 'space-between'
+        justifyContent: 'space-between',
+        marginBottom: '20px',
     },
 
     titleContainer: {

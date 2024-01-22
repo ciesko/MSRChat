@@ -17,17 +17,16 @@ export const ChatHistoryStyles = makeStyles({
         maxHeight: 'calc(90vh - 105px)',
     },
     itemCell: {
-        maxWidth: '270px',
-        minHeight: '32px',
+        width: '280px',
         cursor: 'pointer',
-        paddingLeft: '15px',
-        paddingRight: '5px',
-        paddingTop: '5px',
-        paddingBottom: '5px',
         boxSizing: 'border-box',
-        ...shorthands.borderRadius('5px'),
         display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        verticalAlign: 'middle',
     },
+
     chatGroup: {
         ...shorthands.margin('auto 5px'),
         width: '100%',
@@ -45,7 +44,6 @@ export const ChatHistoryStyles = makeStyles({
         fontSize: '14px',
         fontWeight: '600',
         marginBottom: '5px',
-        paddingLeft: '15px',
     },
     chatTitle: {
         width: '80%',
@@ -56,13 +54,14 @@ export const ChatHistoryStyles = makeStyles({
     historyItem: {
         width: '100%',
         display: 'flex',
-        flexDirection: 'column',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
         ...shorthands.gap('5px'),
     },
     historyItemEditButtons: {
         display: 'flex',
         flexDirection: 'row',
-        marginTop: '5px',
         ...shorthands.gap('5px'),
     },
     drawerBody: {   
@@ -72,5 +71,9 @@ export const ChatHistoryStyles = makeStyles({
         flexWrap: 'wrap',
         ...shorthands.padding('1px')
     },
+    listItemCell: {
+        height: '32px',
+        width: '100%'
+    },  
 
 });

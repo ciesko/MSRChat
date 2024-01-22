@@ -157,22 +157,20 @@ export const ChatHistoryListItemCell: React.FC<ChatHistoryListItemCellProps> = (
             onMouseLeave={() => setIsHovered(false)}
         >
             {
-                edit ? <>
-                    <div
-                        style={{ width: '100%' }}
-                    >
+                edit ?
+                    <div>
 
-                        <div>
+                        <div className={styles.historyItem}>
                             <div>
-                                
-                                    <Input
-                                        
-                                        value={editTitle}
-                                        placeholder={item.title}
-                                        onChange={chatHistoryTitleOnChange}
-                                        onKeyDown={handleKeyPressEdit}
-                                        disabled={errorRename ? true : false}
-                                    />
+
+                                <Input
+
+                                    value={editTitle}
+                                    placeholder={item.title}
+                                    onChange={chatHistoryTitleOnChange}
+                                    onKeyDown={handleKeyPressEdit}
+                                    disabled={errorRename ? true : false}
+                                />
                             </div>
                             {
                                 editTitle && (<div>
@@ -189,16 +187,14 @@ export const ChatHistoryListItemCell: React.FC<ChatHistoryListItemCellProps> = (
                             )
                         }
 
-                    </div>
-                </> : <>
+                    </div> :
                     <div className={styles.historyItem}>
                         <div>{truncatedTitle}</div>
-                        {(isSelected || isHovered) && <div>
-                            <Button appearance='transparent' icon={<Delete20Regular />} title="Delete" onClick={toggleDeleteDialog} onKeyDown={e => e.key === " " ? toggleDeleteDialog() : null} />
-                            <Button appearance='transparent' icon={<Edit20Regular />} title="Edit" onClick={onEdit} onKeyDown={e => e.key === " " ? onEdit() : null} />
+                        {(isSelected || isHovered) && <div className={styles.historyItemEditButtons}>
+                            <Button icon={<Delete20Regular />} title="Delete" onClick={toggleDeleteDialog} onKeyDown={e => e.key === " " ? toggleDeleteDialog() : null} />
+                            <Button icon={<Edit20Regular />} title="Edit" onClick={onEdit} onKeyDown={e => e.key === " " ? onEdit() : null} />
                         </div>}
                     </div>
-                </>
             }
             {
                 errorDelete && (
@@ -289,11 +285,18 @@ export const ChatHistoryListItemGroups: React.FC<ChatHistoryListItemGroupsProps>
                 groupedChatHistory.map((group) => (
                     group.entries.length > 0 && <div key={group.month} className={styles.chatGroup} aria-label={`chat history group: ${group.month}`}>
                         <div aria-label={group.month} className={styles.chatMonth}>{formatMonth(group.month)}</div>
-                        <List aria-label={`chat history list`} className={styles.chatList}>
+                        <List
+                            aria-label={`chat history list`}
+                            className={styles.chatList}
+
+                        >
                             {
                                 group.entries.map((item, index) => {
-                                    return <ListItem key={index} >
-                                        <ChatHistoryListItemCell item={item} onSelect={() => handleSelectHistory(item)} />
+                                    return <ListItem key={index} className={styles.listItemCell}>
+                                        <ChatHistoryListItemCell
+                                            item={item}
+                                            onSelect={() => handleSelectHistory(item)}
+                                        />
                                     </ListItem>
                                 })
                             }

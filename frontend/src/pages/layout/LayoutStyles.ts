@@ -6,9 +6,7 @@ export const LayoutStyles = makeStyles({
         flexDirection: 'column',
         width: '100%',
         height: '100%',
-        paddingTop: '20px',
-        paddingLeft: '20px',
-        paddingRight: '20px',
+        ...shorthands.padding('20px'),
         boxSizing: 'border-box',
     },
 });

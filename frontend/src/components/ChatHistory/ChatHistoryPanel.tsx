@@ -60,9 +60,9 @@ export function ChatHistoryPanel(props: ChatHistoryPanelProps) {
             <Drawer
                 open={showDrawer}
                 aria-label={"chat history panel"}
-                size='small'
                 position='end'
                 type='overlay'
+                style={{ width: '380px' }}
             >
                 <DrawerHeader className={styles.panelHeader}>
                     <Title3>Chat History</Title3>
@@ -95,7 +95,7 @@ export function ChatHistoryPanel(props: ChatHistoryPanelProps) {
                 </DrawerHeader>
                 <DrawerBody>
                     <div className={styles.drawerBody} aria-label="chat history panel content">
-                       
+
                         <div>
                             {
                                 (appStateContext?.state?.chatHistoryLoadingState === ChatHistoryLoadingState.Success && appStateContext?.state?.isCosmosDBAvailable?.cosmosDB) && <ChatHistoryList />

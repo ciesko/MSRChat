@@ -6,7 +6,7 @@ import Layout from "./pages/layout/Layout";
 import NoPage from "./pages/NoPage";
 import Chat from "./pages/chat/Chat";
 import { AppStateProvider } from "./state/AppProvider";
-import { FluentProvider } from "@fluentui/react-components";
+import { FluentProvider, tokens } from "@fluentui/react-components";
 import ThemeService from "./services/themeService";
 
 export default function App() {
@@ -17,7 +17,7 @@ export default function App() {
         <AppStateProvider>
             <FluentProvider
                 theme={currentTheme}
-                style={{ minHeight: "100vh" }}
+                style={{ minHeight: "100vh", backgroundColor: tokens.colorNeutralBackground3 }}
             >
                 <HashRouter>
                     <Routes>
