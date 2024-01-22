@@ -702,17 +702,14 @@ const Chat = () => {
                 </div>
             )}
             <Dialog
-                open={false}
+                open={!hideErrorDialog}
                 onOpenChange={handleErrorDialogClose}
             >
                 <DialogSurface>
                     <DialogBody>
-                        <DialogTitle>{errorDialogContentProps.title}ERROR DIALOG TO BE DONE</DialogTitle>
+                        <DialogTitle>{errorMsg?.title}</DialogTitle>
                         <DialogContent>
-                            Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam
-                            exercitationem cumque repellendus eaque est dolor eius expedita
-                            nulla ullam? Tenetur reprehenderit aut voluptatum impedit voluptates
-                            in natus iure cumque eaque?
+                            {errorMsg?.subtitle}
                         </DialogContent>
                         <DialogActions>
                             <DialogTrigger disableButtonEnhancement>

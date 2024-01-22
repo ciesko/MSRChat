@@ -82,6 +82,10 @@ export const ChatStyles = makeStyles({
         ...shorthands.gap('10px'),
         width: '100%',
         maxWidth: '1080px',
+        maxHeight: '70%',
+        overflowY: 'auto',
+        ...shorthands.padding('10px'),
+        boxSizing: 'border-box',
     },
 
     chatInputContainer: {
@@ -92,6 +96,7 @@ export const ChatStyles = makeStyles({
         width: '100%',
         maxWidth: '1080px',
         height: '165px',
+        marginTop: '15px',
     },
 
     chatMessageError: {

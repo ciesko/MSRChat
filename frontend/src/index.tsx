@@ -6,13 +6,17 @@ import Layout from "./pages/layout/Layout";
 import NoPage from "./pages/NoPage";
 import Chat from "./pages/chat/Chat";
 import { AppStateProvider } from "./state/AppProvider";
-import { FluentProvider, teamsDarkTheme, teamsLightTheme } from "@fluentui/react-components";
+import { FluentProvider } from "@fluentui/react-components";
+import ThemeService from "./services/themeService";
 
 export default function App() {
+    // Create instance of themeservice 
+    const themeService = new ThemeService();
+    const currentTheme = themeService.getTheme();
     return (
         <AppStateProvider>
             <FluentProvider
-                theme={teamsDarkTheme}
+                theme={currentTheme}
                 style={{ minHeight: "100vh" }}
             >
                 <HashRouter>

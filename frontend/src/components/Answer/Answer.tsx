@@ -7,7 +7,7 @@ import { parseAnswer } from "./AnswerParser";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import supersub from 'remark-supersub'
-import { Button, Card, Text } from "@fluentui/react-components";
+import { Button, Caption1, Card, CardFooter, Text } from "@fluentui/react-components";
 import { AnswerStyles } from "./AnswerStyles";
 import { ChevronDown24Regular, ChevronRight24Regular } from "@fluentui/react-icons";
 
@@ -59,7 +59,9 @@ export const Answer = ({
 
     return (
         <>
-            <Card tabIndex={0}>
+            <Card
+                tabIndex={0}
+                className={styles.card}            >
                 <div>
                     <ReactMarkdown
                         linkTarget="_blank"
@@ -73,8 +75,8 @@ export const Answer = ({
                         <div
                             onKeyDown={e => e.key === "Enter" || e.key === " " ? toggleIsRefAccordionOpen() : null}
                         >
-                            <div style={{ width: "100%" }} >
-                                <div>
+                            <div>
+                                <div className={styles.citationHeader}>
                                     <Text
                                         className={styles.accordionTitle}
                                         onClick={toggleIsRefAccordionOpen}
@@ -84,40 +86,41 @@ export const Answer = ({
                                     >
                                         <span>{parsedAnswer.citations.length > 1 ? parsedAnswer.citations.length + " references" : "1 reference"}</span>
                                     </Text>
-                                    <Button 
-                                    className={styles.accordionIcon}
-                                        onClick={handleChevronClick} 
+                                    <Button
+                                        appearance="transparent"
+                                        onClick={handleChevronClick}
                                         icon={chevronIsExpanded ? <ChevronDown24Regular /> : <ChevronRight24Regular />}
                                     />
                                 </div>
-
                             </div>
                         </div>
                     )}
-                    <div className={styles.answerDisclaimerContainer}>
-                        <span className={styles.answerDisclaimer}>AI-generated content may be incorrect</span>
-                    </div>
                 </div>
                 {chevronIsExpanded &&
-                    <div style={{ marginTop: 8, display: "flex", flexFlow: "wrap column", maxHeight: "150px", gap: "4px" }}>
+                    <div className={styles.citationListContainer}>
                         {parsedAnswer.citations.map((citation, idx) => {
                             return (
-                                <span
+                                <Card
+                                    appearance="outline"
                                     title={createCitationFilepath(citation, ++idx)}
                                     tabIndex={0}
                                     role="link"
                                     key={idx}
                                     onClick={() => onCitationClicked(citation)}
                                     onKeyDown={e => e.key === "Enter" || e.key === " " ? onCitationClicked(citation) : null}
-                                    className={styles.citationContainer}
                                     aria-label={createCitationFilepath(citation, idx)}
                                 >
-                                    <div className={styles.citation}>{idx}</div>
-                                    {createCitationFilepath(citation, idx, true)}
-                                </span>);
+                                    <div className={styles.citationCardContent}>
+                                        <div>{`${idx} - `}</div>
+                                        {createCitationFilepath(citation, idx, true)}
+                                    </div>
+                                </Card>);
                         })}
                     </div>
                 }
+                <CardFooter>
+                    <Caption1>AI-generated content may be incorrect</Caption1>
+                </CardFooter>
             </Card>
         </>
     );

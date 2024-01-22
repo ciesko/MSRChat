@@ -1,9 +1,12 @@
-import { makeStyles, shorthands } from "@fluentui/react-components";
+import { makeStyles, shorthands, tokens } from "@fluentui/react-components";
 
 export const AnswerStyles = makeStyles({
- 
+    card: {
+        backgroundColor: tokens.colorBrandBackground,
+        color: tokens.colorNeutralStrokeOnBrand2
+    },
     answerText: {
-                ...shorthands.flex('none'),
+        ...shorthands.flex('none'),
         order: 1,
         alignSelf: 'stretch',
         flexGrow: 0,
@@ -32,59 +35,6 @@ export const AnswerStyles = makeStyles({
         order: 1,
         flexGrow: 0,
     },
-    citationContainer: {
-        marginLeft: '10px',
-        fontStyle: 'normal',
-        lineHeight: '16px',
-        display: 'flex',
-        flexDirection: 'row',
-        alignItems: 'center',
-        ...shorthands.padding('4px', '6px'),
-        ...shorthands.gap('4px'),
-        ...shorthands.border('1px solid #D1D1D1'),
-        ...shorthands.borderRadius('4px'),
-        '&:hover': {
-            ...shorthands.textDecoration('underline'),
-            cursor: 'pointer',
-        },
-    },
-    citation: {
-        boxSizing: 'border-box',
-        display: 'inline-flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        alignItems: 'center',
-        ...shorthands.padding('0px'),
-        width: '14px',
-        height: '14px',
-        ...shorthands.border('1px solid #E0E0E0'),
-        ...shorthands.borderRadius('4px'),
-        ...shorthands.flex('none'),
-        flexGrow: 0,
-        zIndex: 2,
-        fontStyle: 'normal',
-        fontWeight: 600,
-        fontSize: '10px',
-        lineHeight: '14px',
-        textAlign: 'center',
-        cursor: 'pointer',
-        '&:hover': {
-            ...shorthands.textDecoration('underline'),
-            cursor: 'pointer',
-        },
-    },
-    accordionIcon: {
-        display: 'inline-flex',
-        flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'center',
-        ...shorthands.padding('0px'),
-        marginTop: '4px',
-        fontSize: '10px',
-        '&:hover': {
-            cursor: 'pointer',
-        },
-    },
     accordionTitle: {
         marginRight: '5px',
         marginLeft: '10px',
@@ -95,5 +45,21 @@ export const AnswerStyles = makeStyles({
         '&:hover': {
             cursor: 'pointer',
         },
+    },
+    citationHeader: {
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'row',
+        ...shorthands.gap('5px'),
+    },
+    citationListContainer: {
+        marginTop: '8px', 
+        display: "flex", 
+        flexDirection: "column",
+        ...shorthands.gap("4px"),
+    },
+    citationCardContent: {
+        display: 'flex',
+        flexDirection: 'row',
     },
 });
