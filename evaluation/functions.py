@@ -33,11 +33,11 @@ def get_response(data):
 
         return response_json
 
-    except requests.exceptions.RequestException as req_exc:
-        raise Exception("Error in making the API request.")
+    except requests.exceptions.RequestException as e:
+        raise Exception(f"Error in making the API request.\n{e}")
 
-    except (KeyError, IndexError) as json_exc:
-        raise Exception("Error in parsing the API response.")
+    except (KeyError, IndexError) as e:
+        raise Exception(f"Error in parsing the API response.\n{e}")
 
 
 def process_prompt(prompt: str):
@@ -57,8 +57,8 @@ def process_prompt(prompt: str):
         response_time = end_time - start_time
         return answer, response_time, response
 
-    except (KeyError, IndexError):
-        raise Exception("Error in parsing the API response.")
+    except (KeyError, IndexError) as e:
+        raise Exception(f"Error in parsing the API response.\n{e}")
 
 
 # Function to rate the answer
@@ -95,8 +95,8 @@ def evaluate_response(prompt: str):
         evaluation = response["choices"][0]["messages"][1]["content"]
         return prompt, answer, response_time, evaluation
 
-    except (KeyError, IndexError):
-        raise Exception("Error in parsing the API response.")
+    except (KeyError, IndexError) as e:
+        raise Exception(f"Error in parsing the API response.\n{e}")
 
 
 def evaluate_and_compare_prompt_responses(prompt: str):
@@ -121,5 +121,5 @@ def evaluate_and_compare_prompt_responses(prompt: str):
         response = get_response(prompt_data)
         evaluation = response["choices"][0]["messages"][1]["content"]
         return prompt, answer_1, answer_2, response_time_1, response_time_2, evaluation
-    except (KeyError, IndexError):
-        raise Exception("Error in parsing the API response.")
+    except (KeyError, IndexError) as e:
+        raise Exception(f"Error in parsing the API response.\n{e}")
