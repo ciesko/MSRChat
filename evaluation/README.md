@@ -20,5 +20,7 @@ To run the Jupyter Notebook file, follow these steps:
 
     - BASE_URL: Base url of the backend. Defaults to http://127.0.0.1:5000
     - PROMPT_EVAL_STRING(OPTIONAL)
+    - AZURE_OPENAI_STREAM: Already in the projects env file, should be set to False
+
 
 5. Run the Jupyter Notebook.
