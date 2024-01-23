@@ -4,10 +4,10 @@ import { HashRouter, Routes, Route } from "react-router-dom";
 import "./index.css";
 import Layout from "./pages/layout/Layout";
 import NoPage from "./pages/NoPage";
-import Chat from "./pages/chat/Chat";
 import { AppStateProvider } from "./state/AppProvider";
 import { FluentProvider, tokens } from "@fluentui/react-components";
 import ThemeService from "./services/themeService";
+import Chat from "./pages/chat/Chat";
 
 export default function App() {
     // Create instance of themeservice 

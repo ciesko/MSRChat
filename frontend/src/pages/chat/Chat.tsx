@@ -55,14 +55,6 @@ const Chat = () => {
     const [hideErrorDialog, { toggle: toggleErrorDialog }] = useBoolean(true);
     const [errorMsg, setErrorMsg] = useState<ErrorMessage | null>()
 
-    const errorDialogContentProps = {
-        title: errorMsg?.title,
-        closeButtonAriaLabel: 'Close',
-        subText: errorMsg?.subtitle,
-    };
-
-
-
     const [ASSISTANT, TOOL, ERROR] = ["assistant", "tool", "error"]
 
     useEffect(() => {

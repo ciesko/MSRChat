@@ -61,4 +61,23 @@ export const AnswerStyles = makeStyles({
         display: 'flex',
         flexDirection: 'row',
     },
+    feedbackCheckboxContainer: {
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        ...shorthands.gap('4px'),
+    },
+    feedbackButtonContainer: {
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    feedbackDialogBody: {
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        ...shorthands.gap('4px'),
+    },
 });

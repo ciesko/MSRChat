@@ -4,6 +4,6 @@ import { Theme, teamsDarkTheme, teamsLightTheme } from "@fluentui/react-componen
 
 export default class ThemeService {
     public getTheme(): Theme {
-        return teamsLightTheme;
+        return teamsDarkTheme;
     }
 };
