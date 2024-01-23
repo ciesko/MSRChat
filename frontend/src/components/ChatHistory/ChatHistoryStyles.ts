@@ -72,7 +72,6 @@ export const ChatHistoryStyles = makeStyles({
         ...shorthands.padding('1px')
     },
     listItemCell: {
-        height: '32px',
         width: '100%'
     },  
 

@@ -8,7 +8,7 @@ import { Conversation } from '../../api/models';
 import { historyDelete, historyRename, historyList } from '../../api';
 import { useEffect, useRef, useState, useContext } from 'react';
 import { ChatHistoryStyles } from './ChatHistoryStyles';
-import { Button, Dialog, DialogActions, DialogBody, DialogSurface, DialogTitle, Divider, Input, Spinner, Text } from '@fluentui/react-components';
+import { Body2, Button, Dialog, DialogActions, DialogBody, DialogSurface, DialogTitle, Divider, Input, Spinner, Text } from '@fluentui/react-components';
 import { Checkmark20Regular, Delete20Regular, Dismiss20Regular, Edit20Regular } from '@fluentui/react-icons';
 import { List, ListItem } from "@fluentui/react-migration-v0-v9";
 
@@ -101,9 +101,6 @@ export const ChatHistoryListItemCell: React.FC<ChatHistoryListItemCellProps> = (
             setTimeout(() => {
                 setErrorRename(undefined);
                 setTextFieldFocused(true);
-                // if (textFieldRef.current) {
-                //     textFieldRef.current.focus();
-                // }
             }, 5000);
             return
         }
@@ -189,7 +186,7 @@ export const ChatHistoryListItemCell: React.FC<ChatHistoryListItemCellProps> = (
 
                     </div> :
                     <div className={styles.historyItem}>
-                        <div>{truncatedTitle}</div>
+                        <Body2>{truncatedTitle}</Body2>
                         {(isSelected || isHovered) && <div className={styles.historyItemEditButtons}>
                             <Button icon={<Delete20Regular />} title="Delete" onClick={toggleDeleteDialog} onKeyDown={e => e.key === " " ? toggleDeleteDialog() : null} />
                             <Button icon={<Edit20Regular />} title="Edit" onClick={onEdit} onKeyDown={e => e.key === " " ? onEdit() : null} />
@@ -288,6 +285,7 @@ export const ChatHistoryListItemGroups: React.FC<ChatHistoryListItemGroupsProps>
                         <List
                             aria-label={`chat history list`}
                             className={styles.chatList}
+                            selectable
 
                         >
                             {
