@@ -2,9 +2,18 @@ import requests
 import os
 import time
 from dotenv import load_dotenv
+from enum import Enum
 
 
 load_dotenv()
+
+
+class EvaluationType(Enum):
+    RELEVANCE = "relevance"
+    ACCURACY = "accuracy"
+    COHERENCE = "coherence"
+    FLUENCY = "fluency"
+    GROUNDEDNESS = "groundedness"
 
 
 def get_response(data):
@@ -55,61 +64,73 @@ def process_prompt(prompt: str):
         end_time = time.time()
         answer = response["choices"][0]["messages"][1]["content"]
         response_time = end_time - start_time
-        return answer, response_time, response
+        return answer, response_time
 
     except (KeyError, IndexError) as e:
         raise Exception(f"Error in parsing the API response.\n{e}")
 
 
-# Function to rate the answer
-def evaluate_response(prompt: str):
+def evaluate_response(prompt: str, answer: str, evaluation_type: EvaluationType):
     """
     Rate the quality of an AI-generated response based on the provided response and original user question.
 
     Parameters:
     - prompt (str): The original user question.
+    - answer (str): The AI-generated response to be evaluated.
+    - evaluation_type (EvaluationType): The type of evaluation to be performed.
     """
-    answer, response_time, response = process_prompt(prompt)
-    evaluation_string = os.environ.get(
-        "PROMPT_EVAL_STRING", "Evaluate the above response quality"
-    )
+    eval_prompts = {
+        EvaluationType.RELEVANCE: "judge the relevance of the output above to the given question and context and score the output on a scale of 1-5.",
+        EvaluationType.ACCURACY: "judge the accuracy of the output above to the given question and context and score the output on a scale of 1-5.",
+        EvaluationType.COHERENCE: "judge the coherence of the output above to the given question and context and score the output on a scale of 1-5.",
+        EvaluationType.FLUENCY: "judge the fluency of the output above to the given question and context and score the output on a scale of 1-5.",
+        EvaluationType.GROUNDEDNESS: "judge the groundedness of the output above to the given question and context and score the output on a scale of 1-5.",
+    }
+
     try:
         prompt_data = {
             "messages": [
                 {
                     "role": "user",
-                    "content": prompt,
-                },
-                {
-                    "role": "tool",
-                    "content": response["choices"][0]["messages"][0]["content"],
-                },
-                {
-                    "role": "assistant",
-                    "content": response["choices"][0]["messages"][1]["content"],
-                },
-                {"role": "user", "content": evaluation_string},
+                    "content": f"Question: {prompt}?\nResponse: {answer}\n{eval_prompts[evaluation_type]}",
+                }
             ]
         }
         response = get_response(prompt_data)
         evaluation = response["choices"][0]["messages"][1]["content"]
-        return prompt, answer, response_time, evaluation
+        return evaluation
 
     except (KeyError, IndexError) as e:
         raise Exception(f"Error in parsing the API response.\n{e}")
 
 
-def evaluate_and_compare_prompt_responses(prompt: str):
+def paraphrase_question(prompt: str):
+    try:
+        prompt_data = {
+            "messages": [
+                {
+                    "role": "user",
+                    "content": f"{prompt} paraphrase this question",
+                }
+            ]
+        }
+        response = get_response(prompt_data)
+        paraphrased_question = response["choices"][0]["messages"][1]["content"]
+        return paraphrased_question
+    except (KeyError, IndexError) as e:
+        raise Exception(f"Error in parsing the API response.\n{e}")
+
+
+def evaluate_and_compare_prompt_responses(prompt: str, answer_1: str, answer_2: str):
     """
     Evaluate and compare responses for a given prompt.
 
     Parameters:
     - prompt (str): The user prompt to be processed and compared.
+    - answer_1 (str): The AI generated response.
+    - answer_2 (str): The AI generated response.
     """
     try:
-        answer_1, response_time_1, _ = process_prompt(prompt)
-        answer_2, response_time_2, _ = process_prompt(prompt)
-
         prompt_data = {
             "messages": [
                 {
@@ -120,6 +141,6 @@ def evaluate_and_compare_prompt_responses(prompt: str):
         }
         response = get_response(prompt_data)
         evaluation = response["choices"][0]["messages"][1]["content"]
-        return prompt, answer_1, answer_2, response_time_1, response_time_2, evaluation
+        return evaluation
     except (KeyError, IndexError) as e:
         raise Exception(f"Error in parsing the API response.\n{e}")
