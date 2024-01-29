@@ -2,6 +2,7 @@ import requests
 import os
 import time
 from dotenv import load_dotenv
+from prompt import generate_evaluation_prompt, EvaluationCateogry
 
 
 load_dotenv()
@@ -38,6 +39,28 @@ def get_response(data):
 
     except (KeyError, IndexError) as e:
         raise Exception(f"Error in parsing the API response.\n{e}")
+    
+def get_inference_with_context(prompt: str):
+    """
+    Process a row of data containing a user question and obtain the AI-generated response along with an evaluation response/rating.
+
+    Parameters:
+    - prompt (string): A string containig Prmopt data.
+
+    """
+    try:
+        # print("Generating AI response for evaluation ...")
+        prompt_data = {"messages": [{"role": "user", "content": prompt}]}
+        start_time = time.time()
+        response = get_response(prompt_data)
+        end_time = time.time()
+        context = response["choices"][0]["messages"][0]["content"]
+        answer = response["choices"][0]["messages"][1]["content"]
+        response_time = end_time - start_time
+        return answer, context, response_time, response
+
+    except (KeyError, IndexError) as e:
+        raise Exception(f"Error in parsing the API response.\n{e}")
 
 
 def process_prompt(prompt: str):
@@ -49,6 +72,7 @@ def process_prompt(prompt: str):
 
     """
     try:
+        # print("Generating AI response for evaluation ...")
         prompt_data = {"messages": [{"role": "user", "content": prompt}]}
         start_time = time.time()
         response = get_response(prompt_data)
@@ -70,9 +94,22 @@ def evaluate_response(prompt: str):
     - prompt (str): The original user question.
     """
     answer, response_time, response = process_prompt(prompt)
-    evaluation_string = os.environ.get(
-        "PROMPT_EVAL_STRING", "Evaluate the above response quality"
+    # evaluation_string = os.environ.get(
+    #     "PROMPT_EVAL_STRING", "Evaluate the above response quality"
+    # )
+    evaluation_string = generate_evaluation_prompt(
+        [
+            EvaluationCateogry.ACCURACY,
+            EvaluationCateogry.RELEVANCE,
+            EvaluationCateogry.COHERENCE,
+            EvaluationCateogry.FLUENCY,
+            EvaluationCateogry.DEPTH,
+            EvaluationCateogry.INSIGHTFULNESS,
+            EvaluationCateogry.OBJECTIVITY,
+            EvaluationCateogry.CONTEXTUAL_APPROPRIATENESS,
+        ]
     )
+    
     try:
         prompt_data = {
             "messages": [
@@ -91,8 +128,11 @@ def evaluate_response(prompt: str):
                 {"role": "user", "content": evaluation_string},
             ]
         }
+
+        # print(f"Evaluating AI response ...")
         response = get_response(prompt_data)
         evaluation = response["choices"][0]["messages"][1]["content"]
+
         return prompt, answer, response_time, evaluation
 
     except (KeyError, IndexError) as e:

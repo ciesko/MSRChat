@@ -7,7 +7,7 @@ To run the Jupyter Notebook file, follow these steps:
 2. Create a virtual environment:
 
     ```bash
-    python -m venv venv
+    python -m venv .venv
     ```
 
 3. Install packages from `requirements-dev.txt`:
