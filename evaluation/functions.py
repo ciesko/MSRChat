@@ -110,7 +110,7 @@ def paraphrase_question(prompt: str):
             "messages": [
                 {
                     "role": "user",
-                    "content": f"{prompt} paraphrase this question",
+                    "content": f"Paraphrase this question:\n{prompt}"
                 }
             ]
         }
