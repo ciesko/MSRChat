@@ -19,7 +19,7 @@ def get_container_client():
 
     return container
 
-def got_conversations(start_date = None, end_date = None):
+def get_conversations(start_date = None, end_date = None):
     """Get the chat history from Cosmos DB."""
 
     container = get_container_client()
@@ -52,7 +52,15 @@ def got_conversations(start_date = None, end_date = None):
 def extend_dataframe(df):
     # "Promote" the content form the user_query and chat_response columns to the top level of the dataframe
     df['user_input'] = df['user_query'].apply(lambda x: x['content'] if pd.notnull(x) and 'content' in x else None)
-    df['answer'] = df['chat_response'].apply(lambda x: x['choices'][0]['messages'][0]['content'] if pd.notnull(x) and 'choices' in x and len(x['choices']) > 0 and 'messages' in x['choices'][0] and len(x['choices'][0]['messages']) > 0 and 'content' in x['choices'][0]['messages'][0] else None)
+    df['answer'] = df['chat_response'].apply(
+        lambda x: x['choices'][0]['messages'][0]['content'] 
+        if pd.notnull(x) 
+        and 'choices' in x 
+        and len(x['choices']) > 0 
+        and 'messages' in x['choices'][0] 
+        and len(x['choices'][0]['messages']) > 0 
+        and 'content' in x['choices'][0]['messages'][0] 
+        else None)
 
     # Calculate the response time
     df['response_timestamp'] = pd.to_datetime(df['response_timestamp'], errors='coerce')
