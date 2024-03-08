@@ -58,6 +58,8 @@ const Chat = () => {
     const [hideErrorDialog, { toggle: toggleErrorDialog }] = useBoolean(true);
     const [errorMsg, setErrorMsg] = useState<ErrorMessage | null>()
 
+    const SPEECH_ENABLED = appStateContext?.state.frontendSettings?.speech_enabled;
+
     const errorDialogContentProps = {
         type: DialogType.close,
         title: errorMsg?.title,
@@ -772,6 +774,7 @@ const Chat = () => {
                                     appStateContext?.state.isCosmosDBAvailable?.cosmosDB ? makeApiRequestWithCosmosDB(question, id) : makeApiRequestWithoutCosmosDB(question, id)
                                 }}
                                 conversationId={appStateContext?.state.currentChat?.id ? appStateContext?.state.currentChat?.id : undefined}
+                                speechEnabled={SPEECH_ENABLED ? true : false}
                             />
                         </Stack>
                     </div>

@@ -4,6 +4,7 @@ import os
 import logging
 import uuid
 from dotenv import load_dotenv
+import aiohttp
 
 from quart import (
     Blueprint,
@@ -168,11 +169,18 @@ AZURE_MLINDEX_QUERY_TYPE = os.environ.get("AZURE_MLINDEX_QUERY_TYPE")
 
 
 # Frontend Settings via Environment Variables
-AUTH_ENABLED = os.environ.get("AUTH_ENABLED", "true").lower() == "true"
+AUTH_ENABLED = os.environ.get("AUTH_ENABLED", "false").lower() == "true"
 CHAT_HISTORY_ENABLED = AZURE_COSMOSDB_ACCOUNT and AZURE_COSMOSDB_DATABASE and AZURE_COSMOSDB_CONVERSATIONS_CONTAINER
+
+# Speech
+AZURE_SPEECH_REGION = os.environ.get("AZURE_SPEECH_REGION")
+AZURE_SPEECH_KEY = os.environ.get("AZURE_SPEECH_KEY")
+SPEECH_ENABLED = os.environ.get("AZURE_SPEECH_ENABLED", "true").lower() == "true"
+
 frontend_settings = { 
     "auth_enabled": AUTH_ENABLED, 
     "feedback_enabled": AZURE_COSMOSDB_ENABLE_FEEDBACK and CHAT_HISTORY_ENABLED,
+    "speech_enabled": SPEECH_ENABLED,
     "ui": {
         "title": UI_TITLE,
         "logo": UI_LOGO,
@@ -602,6 +610,25 @@ def get_frontend_settings():
     except Exception as e:
         logging.exception("Exception in /frontend_settings")
         return jsonify({"error": str(e)}), 500  
+
+@bp.route("/speech/issueToken", methods=["GET"])
+async def speech_issue_token():
+    """Generate short-lived (10 minutes) access token (JWT) for Azure Speech service."""
+    if not AZURE_SPEECH_KEY:
+        return jsonify({"error": "Azure Speech key is not configured"}), 404
+    if not AZURE_SPEECH_REGION:
+        return jsonify({"error": "Azure Speech region is not configured"}), 404
+
+    url = f"https://{AZURE_SPEECH_REGION}.api.cognitive.microsoft.com/sts/v1.0/issueToken"
+
+    try:
+        async with aiohttp.ClientSession() as session: 
+            async with session.post(url, headers={"Ocp-Apim-Subscription-Key": AZURE_SPEECH_KEY}) as response: 
+                access_token = await response.text()
+                return jsonify({"access_token": access_token, "region": AZURE_SPEECH_REGION}), 200
+    except Exception:
+        logging.exception("Exception in /speech/issueToken")
+        return jsonify({"error": "Azure Speech is not working."}), 500
 
 ## Conversation History API ## 
 @bp.route("/history/generate", methods=["POST"])

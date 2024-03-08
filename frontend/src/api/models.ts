@@ -115,6 +115,7 @@ export type FrontendSettings = {
     auth_enabled?: string | null;
     feedback_enabled?: string | null;
     ui?: UI;
+    speech_enabled?: boolean;
 }
 
 export enum Feedback {
@@ -132,3 +133,9 @@ export enum Feedback {
     Manipulative = "manipulative",
     OtherHarmful = "other_harmlful"
 }
+
+export type SpeechAuth = {
+    access_token: string;
+    region: string;
+    expiresTime: Date;
+};

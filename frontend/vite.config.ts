@@ -12,7 +12,9 @@ export default defineConfig({
     server: {
         proxy: {
             "/ask": "http://localhost:5000",
-            "/chat": "http://localhost:5000"
+            "/chat": "http://localhost:5000",
+            "/conversation": "http://127.0.0.1:5000",
+            "/speech": "http://127.0.0.1:5000",
         }
     }
 });
