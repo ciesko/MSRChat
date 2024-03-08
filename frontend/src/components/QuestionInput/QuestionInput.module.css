@@ -25,6 +25,13 @@
     bottom: 20px;
 }
 
+.questionInputSendContainerWithMic {
+    position: absolute;
+    top: 40px;
+    right: 24px;
+    bottom: 20px;
+}
+
 .questionInputSendButton {
     width: 24px;
     height: 23px;

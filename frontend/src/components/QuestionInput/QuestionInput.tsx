@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Stack, TextField } from "@fluentui/react";
-import { Send32Regular, SendRegular } from "@fluentui/react-icons";
+import { SendRegular } from "@fluentui/react-icons";
 import Send from "../../assets/Send.svg";
 import styles from "./QuestionInput.module.css";
 import { Microphone } from "../Microphone/Microphone";
@@ -58,7 +58,7 @@ export const QuestionInput = ({ onSend, disabled, placeholder, clearOnSend, conv
         setQuestion(newValue || "");
     };
 
-    const sendQuestionDisabled = disabled || !question.trim();
+    const sendQuestionDisabled = disabled || microphoneActive || !question.trim();
     console.log('send question disabled ', sendQuestionDisabled)
 
     return (
@@ -74,8 +74,7 @@ export const QuestionInput = ({ onSend, disabled, placeholder, clearOnSend, conv
                 onKeyDown={onEnterPress}
                 disabled={disabled || microphoneActive}
             />
-            <div className={speechEnabled ? styles.twoButtonContainer :  styles.questionInputSendButtonContainer} >
-                <div>
+            <div className={speechEnabled ? styles.questionInputSendContainerWithMic :  styles.questionInputSendButtonContainer  } >
                 {speechEnabled &&
                     <Microphone
                         onSpeech={sendQuestionFromMicrophone}
@@ -84,20 +83,19 @@ export const QuestionInput = ({ onSend, disabled, placeholder, clearOnSend, conv
                         disabled={disabled || microphoneActive}
                     />
                 }
-                <Send32Regular
+                < div
                     role="button" 
                     tabIndex={0}
                     aria-label="Ask question button"
                     onClick={sendQuestion}
                     onKeyDown={(e: any) => e.key === "Enter" || e.key === " " ? sendQuestion() : null}
-                    
-                />
+                >
+                    { sendQuestionDisabled ? 
+                        <SendRegular className={styles.questionInputSendButtonDisabled}/>
+                        :
+                        <img src={Send} className={styles.questionInputSendButton}/>
+                    }
                 </div>
-                { sendQuestionDisabled ? 
-                    <img src={Send} className={styles.questionInputSendButtonDisabled}/>
-                    :
-                    <img src={Send} className={styles.questionInputSendButton}/>
-                }
             </div>
             <div className={styles.questionInputBottomBorder} />
         </Stack>

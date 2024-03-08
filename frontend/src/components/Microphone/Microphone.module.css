@@ -1,7 +1,11 @@
 .microphone {
-  color:blue;
+  width: 24px;
+  height: 23px;
+  color: #0f6cbd;
 }
 
 .micIconRecording {
-  color:red;
+  width: 24px;
+  height: 23px;
+  color: #bc2f32;
 }
