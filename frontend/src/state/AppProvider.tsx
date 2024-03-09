@@ -1,7 +1,8 @@
 import React, { createContext, useReducer, ReactNode, useEffect } from 'react';
 import { appStateReducer } from './AppReducer';
 import { Conversation, ChatHistoryLoadingState, CosmosDBHealth, historyList, historyEnsure, CosmosDBStatus, frontendSettings, FrontendSettings, Feedback } from '../api';
-  
+import { AudioService } from '../api/AudioService';
+
 export interface AppState {
     isChatHistoryOpen: boolean;
     chatHistoryLoadingState: ChatHistoryLoadingState;
@@ -11,6 +12,8 @@ export interface AppState {
     currentChat: Conversation | null;
     frontendSettings: FrontendSettings | null;
     feedbackState: { [answerId: string]: Feedback.Neutral | Feedback.Positive | Feedback.Negative; };
+    speech_enabled: boolean | undefined;
+    audioService: AudioService | null;
 }
 
 export type Action =
@@ -40,7 +43,9 @@ const initialState: AppState = {
         status: CosmosDBStatus.NotConfigured,
     },
     frontendSettings: null,
-    feedbackState: {}
+    feedbackState: {},
+    speech_enabled: undefined,
+    audioService: new AudioService(),
 };
 
 export const AppStateContext = createContext<{

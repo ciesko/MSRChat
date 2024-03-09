@@ -14,15 +14,18 @@ import remarkGfm from "remark-gfm";
 import supersub from 'remark-supersub'
 import { ThumbDislike20Filled, ThumbLike20Filled } from "@fluentui/react-icons";
 import { XSSAllowTags } from "../../constants/xssAllowTags";
+import { SpeakText } from "../SpeakText/SpeakText";
 
 interface Props {
     answer: AskResponse;
     onCitationClicked: (citedDocument: Citation) => void;
+    isLastAnswer: boolean;
 }
 
 export const Answer = ({
     answer,
-    onCitationClicked
+    onCitationClicked,
+    isLastAnswer
 }: Props) => {
     const initializeAnswerFeedback = (answer: AskResponse) => {
         if (answer.message_id == undefined) return undefined;
@@ -43,7 +46,8 @@ export const Answer = ({
     const [negativeFeedbackList, setNegativeFeedbackList] = useState<Feedback[]>([]);
     const appStateContext = useContext(AppStateContext)
     const FEEDBACK_ENABLED = appStateContext?.state.frontendSettings?.feedback_enabled && appStateContext?.state.isCosmosDBAvailable?.cosmosDB; 
-    
+    const SPEECH_ENABLED = appStateContext?.state.frontendSettings?.speech_enabled;
+
     const handleChevronClick = () => {
         setChevronIsExpanded(!chevronIsExpanded);
         toggleIsRefAccordionOpen();
@@ -212,7 +216,9 @@ export const Answer = ({
                             </Stack>}
                         </Stack.Item>
                     </Stack>
-                    
+                                        {
+                        SPEECH_ENABLED && isLastAnswer &&  <SpeakText answer={answer} /> 
+                    }
                 </Stack.Item>
                 <Stack horizontal className={styles.answerFooter}>
                 {!!parsedAnswer.citations.length && (

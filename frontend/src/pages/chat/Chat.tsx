@@ -528,6 +528,8 @@ const Chat = () => {
         abortFuncs.current.forEach(a => a.abort());
         setShowLoadingMessage(false);
         setIsLoading(false);
+        // stop audio playback
+        appStateContext?.state.audioService?.stopAudioPlayback();
     }
 
     useEffect(() => {
@@ -654,6 +656,7 @@ const Chat = () => {
                             <div className={styles.chatMessageStream} style={{ marginBottom: isLoading ? "40px" : "0px" }} role="log">
                                 {messages.map((answer, index) => (
                                     <>
+                                     <div key={`answer-${index}`}>
                                         {answer.role === "user" ? (
                                             <div className={styles.chatMessageUser} tabIndex={0}>
                                                 <div className={styles.chatMessageUserMessage}>{answer.content}</div>
@@ -668,6 +671,7 @@ const Chat = () => {
                                                         feedback: answer.feedback
                                                     }}
                                                     onCitationClicked={c => onShowCitation(c)}
+                                                    isLastAnswer={index === messages.length - 1}
                                                 />
                                             </div> : answer.role === ERROR ? <div className={styles.chatMessageError}>
                                                 <Stack horizontal className={styles.chatMessageErrorContent}>
@@ -677,6 +681,7 @@ const Chat = () => {
                                                 <span className={styles.chatMessageErrorContent}>{answer.content}</span>
                                             </div> : null
                                         )}
+                                    </div>
                                     </>
                                 ))}
                                 {showLoadingMessage && (
@@ -684,10 +689,12 @@ const Chat = () => {
                                         <div className={styles.chatMessageGpt}>
                                             <Answer
                                                 answer={{
+                                                    message_id: "genenerating",
                                                     answer: "Generating answer...",
                                                     citations: []
                                                 }}
                                                 onCitationClicked={() => null}
+                                                isLastAnswer={true}
                                             />
                                         </div>
                                     </>

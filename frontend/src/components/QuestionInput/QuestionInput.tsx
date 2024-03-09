@@ -4,6 +4,8 @@ import { SendRegular } from "@fluentui/react-icons";
 import Send from "../../assets/Send.svg";
 import styles from "./QuestionInput.module.css";
 import { Microphone } from "../Microphone/Microphone";
+import React from "react";
+import { AppStateContext } from "../../state/AppProvider";
 
 interface Props {
     onSend: (question: string, id?: string) => void;
@@ -15,11 +17,13 @@ interface Props {
 }
 
 export const QuestionInput = ({ onSend, disabled, placeholder, clearOnSend, conversationId, speechEnabled }: Props) => {
+    const appStateContext = React.useContext(AppStateContext);
     const [question, setQuestion] = useState<string>("");
     const [microphoneActive, setMicrophoneActive] = useState<boolean>(false);
 
 
     const sendQuestion = () => {
+        appStateContext?.state.audioService?.stopAudioPlayback();
         if (disabled || !question.trim()) {
             return;
         }
@@ -36,15 +40,13 @@ export const QuestionInput = ({ onSend, disabled, placeholder, clearOnSend, conv
     };
 
     const sendQuestionFromMicrophone = (questionText: string) => {
-        if (disabled || !questionText.trim()) {
+        if (disabled || !questionText.trim() || microphoneActive) {
             return;
         }
         
-        if (microphoneActive) {
-            return;
-        }
-
-         setQuestion(questionText);
+        setQuestion(questionText);
+        const _questionText = question + " " + questionText.trim();
+        setQuestion(_questionText);
     };
 
     const onEnterPress = (ev: React.KeyboardEvent<Element>) => {
