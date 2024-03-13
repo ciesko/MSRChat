@@ -515,12 +515,12 @@ const Chat = () => {
         }
     }, [processMessages]);
 
-    useEffect(() => {
-        if (AUTH_ENABLED !== undefined) {
-            if (!AUTH_ENABLED) return;
-            getUserInfoList();
-        }
-    }, [AUTH_ENABLED]);
+    // useEffect(() => {
+    //     if (AUTH_ENABLED !== undefined) {
+    //         if (!AUTH_ENABLED) return;
+    //         getUserInfoList();
+    //     }
+    // }, [AUTH_ENABLED]);
 
     useLayoutEffect(() => {
         chatMessageStreamEnd.current?.scrollIntoView({ behavior: "smooth" })
