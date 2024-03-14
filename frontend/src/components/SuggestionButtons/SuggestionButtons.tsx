@@ -7,8 +7,8 @@ export interface ISuggestionButtonsProps {
 }
 
 const questions = [
-    `Can you summarize discussions about AI PLatform 3.0?`,
-    `What were some main takeaways from the AI & Society workshop?`,
+    `Can you summarize discussions about AI Platform 3.0?`,
+    `What were some main takeaways from the AI & Society workshops?`,
     `Which emerging technologogies were prominent across mutiple workshops?`,
 ]
 
@@ -16,12 +16,12 @@ export const SuggestionButtons: React.FunctionComponent<ISuggestionButtonsProps>
     const styles = SuggestionButtonStyles();
     return (
         <div className={styles.container}>
-            <span className={styles.prompt}><i>Get started with an example question below:</i></span>
+            <span className={styles.prompt}><i>Get started with an example question below or create your own.</i></span>
             <div className={styles.questionsContainer}>
                 {
                     questions.map((questionText, index) => {
                         return (
-                            <Button appearance='secondary' style={{ width: "250px", height: "120px" }} size='large' key={index} onClick={() => props.onButtonClick(questionText)}>{questionText}</Button>
+                            <Button appearance='secondary' style={{ width: "200px", height: "120px" }} size='large' key={index} onClick={() => props.onButtonClick(questionText)}>{questionText}</Button>
                         )
                     })
                 }
