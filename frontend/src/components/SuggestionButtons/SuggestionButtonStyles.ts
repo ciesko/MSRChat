@@ -8,11 +8,20 @@ export const SuggestionButtonStyles = makeStyles({
         alignItems: 'center',
         justifyContent: 'center',
         ...shorthands.gap('5px'),
-        marginTop: '25px',
         '@media (max-width: 400px)': {
             marginTop: '10px',
             ...shorthands.gap('2px'),
         },
+    },
+
+    questionsContainer: {
+        display: 'flex',
+        flexWrap: 'wrap',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '100%',
+        ...shorthands.gap('15px'),
     },
 
     prompt: {

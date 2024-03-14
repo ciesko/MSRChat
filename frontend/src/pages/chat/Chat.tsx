@@ -597,14 +597,18 @@ const Chat = () => {
                     <div className={styles.chatContainer}>
                         {!messages || messages.length < 1 ? (
                             <div className={styles.chatEmptyState}>
-                                <Image
-                                    src={LogoImage}
-                                    height={120}
-                                    width={120}
-                                    aria-hidden="true"
-                                />
-                                <span className={styles.title}>Questions about Microsoft Research Forum?</span>
-                                <span className={styles.subtitle}>The Research Forum series explores recent research advances, bold new ideas, and important discussions with the global research community.</span>
+                                {
+                                    // Hide the logo for project green build
+                                    false &&
+                                    <Image
+                                        src={LogoImage}
+                                        height={120}
+                                        width={120}
+                                        aria-hidden="true"
+                                    />
+                                }
+                                <span className={styles.title}>Questions about Project Green?</span>
+                                <span className={styles.subtitle}>Project Green facilitates a dynamic research community within Microsoft by highlighting key trends, encouraging team formation around common goals, and identifying investment opportunities for impactful results.</span>
                                 <SuggestionButtons
                                     onButtonClick={sendChatQuestion}
                                 />

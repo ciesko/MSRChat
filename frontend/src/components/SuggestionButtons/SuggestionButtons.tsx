@@ -7,23 +7,25 @@ export interface ISuggestionButtonsProps {
 }
 
 const questions = [
-    `Can you summarize the key challenges tackled by MSR in this year's Research Forum?`,
-    `Which emerging technologies did MSR highlight in their "lightning" research talks?`,
-    `What kind of problems is MSR's AI research trying to solve for everyday people?`,
+    `Can you summarize discussions about AI PLatform 3.0?`,
+    `What were some main takeaways from the AI & Society workshop?`,
+    `Which emerging technologogies were prominent across mutiple workshops?`,
 ]
 
 export const SuggestionButtons: React.FunctionComponent<ISuggestionButtonsProps> = (props: React.PropsWithChildren<ISuggestionButtonsProps>) => {
     const styles = SuggestionButtonStyles();
     return (
-    <div className={styles.container}>
-        <span className={styles.prompt}><i>Get started with an example question below:</i></span>
-        {
-            questions.map((questionText, index) => {
-                return (
-                    <Button appearance='subtle' size='small' key={index} onClick={() => props.onButtonClick(questionText)}>{questionText}</Button>
-                )
-            })
-        }
-    </div>
-  );
+        <div className={styles.container}>
+            <span className={styles.prompt}><i>Get started with an example question below:</i></span>
+            <div className={styles.questionsContainer}>
+                {
+                    questions.map((questionText, index) => {
+                        return (
+                            <Button appearance='secondary' style={{ width: "250px", height: "120px" }} size='large' key={index} onClick={() => props.onButtonClick(questionText)}>{questionText}</Button>
+                        )
+                    })
+                }
+            </div>
+        </div>
+    );
 };
