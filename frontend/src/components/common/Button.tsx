@@ -1,4 +1,4 @@
-import { Button, Dialog, DialogBody, DialogSurface, DialogTitle, DialogTrigger, Input, makeStyles, shorthands } from "@fluentui/react-components";
+import { Button, Dialog, DialogBody, DialogSurface, DialogTitle, DialogTrigger, Input, makeStyles, shorthands, tokens } from "@fluentui/react-components";
 import { Copy16Regular, History24Regular, Share24Regular } from "@fluentui/react-icons";
 import { useState } from "react";
 
@@ -17,6 +17,7 @@ const ShareDialogStyles = makeStyles({
     alignItems: "center",
     ...shorthands.gap("10px"),
     ...shorthands.margin("10px"),
+    color: tokens.colorNeutralBackground1,
   },
 });
 

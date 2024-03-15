@@ -26,7 +26,7 @@ export const SuggestionButtonStyles = makeStyles({
 
     prompt: {
         marginTop: '20px',
-        marginBottom: '10px',
+        marginBottom: '30px',
         fontSize: '16px',
         lineHeight: '22px',
         fontWeight: '600',
