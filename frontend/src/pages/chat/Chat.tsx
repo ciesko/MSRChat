@@ -60,16 +60,16 @@ const Chat = () => {
 
     const [ASSISTANT, TOOL, ERROR] = ["assistant", "tool", "error"]
 
-    useEffect(() => {
-        if (appStateContext?.state.isCosmosDBAvailable?.status === CosmosDBStatus.NotWorking && appStateContext.state.chatHistoryLoadingState === ChatHistoryLoadingState.Fail && hideErrorDialog) {
-            let subtitle = `${appStateContext.state.isCosmosDBAvailable.status}. Please contact the site administrator.`
-            setErrorMsg({
-                title: "Chat history is not enabled",
-                subtitle: subtitle
-            })
-            toggleErrorDialog();
-        }
-    }, [appStateContext?.state.isCosmosDBAvailable]);
+    // useEffect(() => {
+    //     if (appStateContext?.state.isCosmosDBAvailable?.status === CosmosDBStatus.NotWorking && appStateContext.state.chatHistoryLoadingState === ChatHistoryLoadingState.Fail && hideErrorDialog) {
+    //         let subtitle = `${appStateContext.state.isCosmosDBAvailable.status}. Please contact the site administrator.`
+    //         setErrorMsg({
+    //             title: "Chat history is not enabled",
+    //             subtitle: subtitle
+    //         })
+    //         toggleErrorDialog();
+    //     }
+    // }, [appStateContext?.state.isCosmosDBAvailable]);
 
     const handleErrorDialogClose = () => {
         toggleErrorDialog()

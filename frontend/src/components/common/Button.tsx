@@ -17,7 +17,6 @@ const ShareDialogStyles = makeStyles({
     alignItems: "center",
     ...shorthands.gap("10px"),
     ...shorthands.margin("10px"),
-    color: tokens.colorNeutralBackground1,
   },
 });
 
