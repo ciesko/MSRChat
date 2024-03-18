@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { SuggestionButtonStyles } from './SuggestionButtonStyles';
-import { Button, Subtitle2, tokens } from '@fluentui/react-components';
+import { Button, Subtitle2 } from '@fluentui/react-components';
 
 export interface ISuggestionButtonsProps {
     onButtonClick: (questionText: string) => void;
@@ -21,7 +21,7 @@ export const SuggestionButtons: React.FunctionComponent<ISuggestionButtonsProps>
                 {
                     questions.map((questionText, index) => {
                         return (
-                            <Button appearance='secondary' style={{ width: "200px", height: "120px", backgroundColor: tokens.colorNeutralBackground1 }} size='large' key={index} onClick={() => props.onButtonClick(questionText)}>{questionText}</Button>
+                            <Button appearance='secondary' className={styles.button} size='large' key={index} onClick={() => props.onButtonClick(questionText)}>{questionText}</Button>
                         )
                     })
                 }

@@ -60,6 +60,8 @@ const Chat = () => {
 
     const [ASSISTANT, TOOL, ERROR] = ["assistant", "tool", "error"]
 
+
+    // uncomment below for chat history
     // useEffect(() => {
     //     if (appStateContext?.state.isCosmosDBAvailable?.status === CosmosDBStatus.NotWorking && appStateContext.state.chatHistoryLoadingState === ChatHistoryLoadingState.Fail && hideErrorDialog) {
     //         let subtitle = `${appStateContext.state.isCosmosDBAvailable.status}. Please contact the site administrator.`

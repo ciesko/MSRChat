@@ -37,4 +37,10 @@ export const SuggestionButtonStyles = makeStyles({
             fontWeight: '600',
         },
     },
+
+    button: {
+        width: '200px',
+        height: '120px',
+        backgroundColor: tokens.colorNeutralBackground5,
+    },
 });
