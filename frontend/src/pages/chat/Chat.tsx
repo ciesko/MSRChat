@@ -711,23 +711,13 @@ const Chat = () => {
                             <div className={styles.chatInputContainer}>
                                 <div className={styles.chatInput}>
                                     <div className={styles.chatButtonsLeftContainer}>
-                                        {
-                                            appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured && (
-                                                <Button
-                                                    icon={<Add16Regular />}
-                                                    onClick={newChat}
-                                                    disabled={disabledButton()}
-                                                    aria-label="start a new chat button"
-                                                />
-                                            )
-                                        }
                                         <Button
                                             icon={<Broom16Regular />}
-                                            onClick={appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured ? clearChat : newChat}
+                                            title="New topic"
+                                            onClick={newChat}
                                             disabled={disabledButton()}
-                                            aria-label="clear chat button"
+                                            aria-label="start a new chat button"
                                         />
-
                                     </div>
                                     <QuestionInput
                                         clearOnSend

@@ -83,6 +83,7 @@ export const QuestionInput = ({ onSend, disabled, placeholder, clearOnSend, conv
                     }
                     <Button
                         appearance="transparent"
+                        title="Submit"
                         className={Newstyles.sendButton}
                         role="button"
                         tabIndex={0}
