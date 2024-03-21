@@ -9,7 +9,7 @@ export interface ISuggestionButtonsProps {
 const questions = [
     `Can you summarize discussions about AI Platform 3.0?`,
     `What were some main takeaways from the AI & Society workshops?`,
-    `Which emerging technologogies were prominent across mutiple workshops?`,
+    `Which emerging technologies were prominent across mutiple workshops?`,
 ]
 
 export const SuggestionButtons: React.FunctionComponent<ISuggestionButtonsProps> = (props: React.PropsWithChildren<ISuggestionButtonsProps>) => {
