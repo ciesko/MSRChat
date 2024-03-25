@@ -41,6 +41,7 @@ export const SuggestionButtonStyles = makeStyles({
     button: {
         width: '200px',
         height: '120px',
+        fontSize: '14px',
         backgroundColor: tokens.colorNeutralBackground5,
     },
 });
