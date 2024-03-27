@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { HeaderStyles } from './HeaderStyles';
-import { Image, Link, Title3 } from '@fluentui/react-components';
+import { Button, Image, Link, Title3 } from '@fluentui/react-components';
 import { CosmosDBStatus } from '../../api';
 import { HistoryButton, ShareButton } from '../common/Button';
 
@@ -27,6 +27,7 @@ export const Header: React.FunctionComponent<IHeaderProps> = (props: React.Props
                 </Link>
             </div>
             <div className={styles.rightCommandBar}>
+                <Button as="a" href="mailto:v-jacobwill@microsoft.com">Submit prototype feedback</Button>
                 <ShareButton className={styles.shareButton} onClick={props.onShareClick} />
             </div>
         </div>
