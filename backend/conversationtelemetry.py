@@ -20,7 +20,7 @@ class ConversationTelemetryClient():
     """
 
     def __init__(self, cosmosdb_endpoint: str, credential: any, database_name: str, container_name: str):
-        self.enabled = os.environ.get("ENABLE_CONVERSATION_TELEMETRY", "false").lower() == "true"
+        self.enabled = False
         if self.enabled:
             self.cosmosdb_endpoint = cosmosdb_endpoint
             self.credential = credential
