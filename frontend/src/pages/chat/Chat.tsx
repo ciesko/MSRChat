@@ -611,18 +611,9 @@ const Chat = () => {
                                 }
                                 <span className={styles.title}>Questions about Project Green?</span>
                                 <span className={styles.subtitle}>
-                                    Project Green facilitates a dynamic research community within Microsoft by highlighting key trends, encouraging team formation around common goals, and identifying investment opportunities for impactful results.
-                                    <br />
+                                <p>Each year, Project Green convenes the Microsoft research community for a week of rich discussions and workshops about the latest trends in research and technology.</p> 
+                                <p>Read more about the 26 workshops via the <a href="https://microsoft.sharepoint.com/sites/microsoft-research-internal/SitePages/Project-Green-2024.aspx">Project Green Briefing Book</a>, or explore them using this prototype AI chat experience. <a href="https://microsoft.sharepoint.com/sites/microsoft-research-internal/SitePages/MSR-copilot.aspx">About the MSR copilot project</a>.</p>                                 
                                 </span>
-                                <Button
-                                icon={<ArrowLeft16Filled />}
-                                    appearance="primary"
-                                    as="a"
-                                    title="Click to go to Project Green Briefing Book page"
-                                    href="https://microsoft.sharepoint.com/sites/microsoft-research-internal/SitePages/Project-Green-2024.aspx"
-                                >
-                                    Project Green Briefing Book
-                                </Button>
                                 <SuggestionButtons
                                     onButtonClick={sendChatQuestion}
                                 />
