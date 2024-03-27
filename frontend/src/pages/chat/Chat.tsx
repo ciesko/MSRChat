@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect, useContext, useLayoutEffect } from "react";
-import { ShieldLock48Regular, ErrorCircleRegular, Broom16Regular, Add16Regular, Stop24Regular, Speaker024Regular, SpeakerMuteRegular, Speaker224Regular } from "@fluentui/react-icons";
+import { ShieldLock48Regular, ErrorCircleRegular, Broom16Regular, Stop24Regular, SpeakerMuteRegular, Speaker224Regular, ArrowLeft16Filled } from "@fluentui/react-icons";
 
 import uuid from 'react-uuid';
 import { isEmpty } from "lodash-es";
@@ -610,7 +610,19 @@ const Chat = () => {
                                     />
                                 }
                                 <span className={styles.title}>Questions about Project Green?</span>
-                                <span className={styles.subtitle}>Project Green facilitates a dynamic research community within Microsoft by highlighting key trends, encouraging team formation around common goals, and identifying investment opportunities for impactful results.</span>
+                                <span className={styles.subtitle}>
+                                    Project Green facilitates a dynamic research community within Microsoft by highlighting key trends, encouraging team formation around common goals, and identifying investment opportunities for impactful results.
+                                    <br />
+                                </span>
+                                <Button
+                                icon={<ArrowLeft16Filled />}
+                                    appearance="primary"
+                                    as="a"
+                                    title="Click to go to Project Green Briefing Book page"
+                                    href="https://microsoft.sharepoint.com/sites/microsoft-research-internal/SitePages/Project-Green-2024.aspx"
+                                >
+                                    Project Green Briefing Book
+                                </Button>
                                 <SuggestionButtons
                                     onButtonClick={sendChatQuestion}
                                 />
