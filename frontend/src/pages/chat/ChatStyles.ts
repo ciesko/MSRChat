@@ -149,5 +149,8 @@ export const ChatStyles = makeStyles({
         maxWidth: '800px',
         marginBottom: '12px',
     },
-
+    externalLink: {
+        color: tokens.colorBrandForeground1,
+        ...shorthands.textDecoration('none'),
+    }
 });
