@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { SuggestionButtonStyles } from './SuggestionButtonStyles';
 import { Button, Subtitle2 } from '@fluentui/react-components';
+import { useEffect, useState } from 'react';
 
 export interface ISuggestionButtonsProps {
     onButtonClick: (questionText: string) => void;
@@ -14,6 +15,7 @@ const questions = [
 
 export const SuggestionButtons: React.FunctionComponent<ISuggestionButtonsProps> = (props: React.PropsWithChildren<ISuggestionButtonsProps>) => {
     const styles = SuggestionButtonStyles();
+
     return (
         <div className={styles.container}>
             <span className={styles.prompt}><i>Get started with an example question below or create your own.</i></span>
@@ -21,7 +23,7 @@ export const SuggestionButtons: React.FunctionComponent<ISuggestionButtonsProps>
                 {
                     questions.map((questionText, index) => {
                         return (
-                            <Button appearance='secondary' className={styles.button} size='large' key={index} onClick={() => props.onButtonClick(questionText)}>{questionText}</Button>
+                            <Button appearance='secondary' className={styles.button} size={'medium'} key={index} onClick={() => props.onButtonClick(questionText)}>{questionText}</Button>
                         )
                     })
                 }

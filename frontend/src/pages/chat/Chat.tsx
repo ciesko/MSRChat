@@ -611,18 +611,14 @@ const Chat = () => {
                                 }
                                 <span className={styles.title}>Questions about Project Green?</span>
                                 <span className={styles.subtitle}>
-                                    Project Green facilitates a dynamic research community within Microsoft by highlighting key trends, encouraging team formation around common goals, and identifying investment opportunities for impactful results.
+                                    Project Green is an annual event held by Microsoft Research to help the research community within Microsoft highlight trends, encourage team formation around common goals, and identify investment opportunities for impactful results.
                                     <br />
+                                    <br />
+                                    You can {' '}
+                                    <Link href="https://microsoft.sharepoint.com/sites/microsoft-research-internal/SitePages/Project-Green-2024.aspx">read more about Project Green</Link>{' '}
+                                    and the individual workshops, or use this prototype AI chat experience below to explore the rich research conversations and topics across workshops.
+                                    {'  '}<Link href="https://microsoft.sharepoint.com/sites/microsoft-research-internal/SitePages/MSR-copilot.aspx">More about the MSR copilot.</Link>
                                 </span>
-                                <Button
-                                icon={<ArrowLeft16Filled />}
-                                    appearance="primary"
-                                    as="a"
-                                    title="Click to go to Project Green Briefing Book page"
-                                    href="https://microsoft.sharepoint.com/sites/microsoft-research-internal/SitePages/Project-Green-2024.aspx"
-                                >
-                                    Project Green Briefing Book
-                                </Button>
                                 <SuggestionButtons
                                     onButtonClick={sendChatQuestion}
                                 />

@@ -26,7 +26,7 @@ export const SuggestionButtonStyles = makeStyles({
 
     prompt: {
         marginTop: '20px',
-        marginBottom: '30px',
+        marginBottom: '15px',
         fontSize: '16px',
         lineHeight: '22px',
         fontWeight: '600',
@@ -39,9 +39,8 @@ export const SuggestionButtonStyles = makeStyles({
     },
 
     button: {
-        width: '200px',
-        height: '120px',
-        fontSize: '14px',
+        width: '240px',
+        minHeight: '100px',
         backgroundColor: tokens.colorNeutralBackground5,
     },
 });
