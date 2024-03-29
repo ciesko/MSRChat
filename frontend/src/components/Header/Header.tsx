@@ -44,8 +44,9 @@ export const Header: React.FunctionComponent<IHeaderProps> = (
                     appearance="primary"
                     as="a"
                     title="Project Green Briefing Book page"
-                    href="https://microsoft.sharepoint.com/sites/microsoft-research-internal/SitePages/MSR-copilot.aspx"
+                    href="https://microsoft.sharepoint.com/sites/microsoft-research-internal/SitePages/Project-Green-2024.aspx"
                     icon={isSmallScreen ? <Book16Regular /> : undefined}
+                    target="_blank"
                 >
                     {isSmallScreen ? '' : 'Project Green Briefing Book'}
                 </Button>
