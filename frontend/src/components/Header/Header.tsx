@@ -36,20 +36,10 @@ export const Header: React.FunctionComponent<IHeaderProps> = (
                 />
                 <span className={styles.verticalBar}>|</span>
                 <Link href="/" className={styles.headerTitle}>
-                    MSR Project Green copilot
+                    MSR copilot Experience
                 </Link>
             </div>
             <div className={styles.rightCommandBar}>
-                <Button
-                    appearance="primary"
-                    as="a"
-                    title="Project Green Briefing Book page"
-                    href="https://microsoft.sharepoint.com/sites/microsoft-research-internal/SitePages/Project-Green-2024.aspx"
-                    icon={isSmallScreen ? <Book16Regular /> : undefined}
-                    target="_blank"
-                >
-                    {isSmallScreen ? '' : 'Project Green Briefing Book'}
-                </Button>
                 <Button
                     appearance="primary" 
                     as="a" 

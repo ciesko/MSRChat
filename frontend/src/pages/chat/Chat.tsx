@@ -609,10 +609,10 @@ const Chat = () => {
                                         aria-hidden="true"
                                     />
                                 }
-                                <span className={styles.title}>Questions about Project Green?</span>
+                                <span className={styles.title}>Questions about Microsoft Research?</span>
                                 <span className={styles.subtitle}>
-                                <p>Each year, Project Green convenes the Microsoft research community for a week of rich discussions and workshops about the latest trends in research and technology.</p> 
-                                <p>Read more about the 26 workshops via the <Link target="_blank" href="https://microsoft.sharepoint.com/sites/microsoft-research-internal/SitePages/Project-Green-2024.aspx">Project Green Briefing Book</Link>, or explore them using this prototype AI chat experience. <Link target="_blank" href="https://microsoft.sharepoint.com/sites/microsoft-research-internal/SitePages/MSR-copilot.aspx">About the MSR copilot project</Link>.</p>                                 
+                                <p>Use this copilot experience to explore MSR's extensive catalog of research contributions: internal and external projects, events, publications, and more.</p> 
+                                <p><Link target="_blank" href="https://microsoft.sharepoint.com/sites/microsoft-research-internal/SitePages/MSR-copilot.aspx">About the MSR copilot project</Link>.</p>                                 
                                 </span>
                                 <SuggestionButtons
                                     onButtonClick={sendChatQuestion}
