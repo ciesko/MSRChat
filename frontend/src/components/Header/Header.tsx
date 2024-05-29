@@ -23,7 +23,7 @@ export const Header: React.FunctionComponent<IHeaderProps> = (props: React.Props
                 />
                 <span className={styles.verticalBar}>|</span>
                 <Link href="/" className={styles.headerTitle}>
-                    TnR Security Copilot
+                    Security Office Hours Copilot
                 </Link>
             </div>
             <div className={styles.rightCommandBar}>
