@@ -56,7 +56,7 @@ const Chat = () => {
     const [clearingChat, setClearingChat] = useState<boolean>(false);
     const [hideErrorDialog, { toggle: toggleErrorDialog }] = useBoolean(true);
     const [errorMsg, setErrorMsg] = useState<ErrorMessage | null>()
-    const [audioMuted, setAudioMuted] = useState<boolean>(false);
+    const [audioMuted, setAudioMuted] = useState<boolean>(true);
 
     const [ASSISTANT, TOOL, ERROR] = ["assistant", "tool", "error"]
 
@@ -603,11 +603,13 @@ const Chat = () => {
                                     width={120}
                                     aria-hidden="true"
                                 />
-                                <span className={styles.title}>Questions about Microsoft Research Forum?</span>
-                                <span className={styles.subtitle}>The Research Forum series explores recent research advances, bold new ideas, and important discussions with the global research community.</span>
+                                <span className={styles.title}>Ask me about TnR Security!</span>
+                                <Link href="https://www.microsoft.com/en-us/research/project/tnr-security/" target="_blank">aka.ms/tnr/securityhelp</Link>
+                                <Link href="https://www.microsoft.com/en-us/research/project/tnr-security/" target="_blank">aka.ms/tnr/securitywave</Link>
+                                {/* <span className={styles.subtitle}>The Research Forum series explores recent research advances, bold new ideas, and important discussions with the global research community.</span>
                                 <SuggestionButtons
                                     onButtonClick={sendChatQuestion}
-                                />
+                                /> */}
                             </div>
                         ) : (
                             <div className={styles.chatMessageStream} role="log">
