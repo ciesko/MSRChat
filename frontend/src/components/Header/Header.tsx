@@ -36,7 +36,7 @@ export const Header: React.FunctionComponent<IHeaderProps> = (
                 />
                 <span className={styles.verticalBar}>|</span>
                 <Link href="/" className={styles.headerTitle}>
-                    MSR copilot Experience
+                    MSR copilot experience
                 </Link>
             </div>
             <div className={styles.rightCommandBar}>
