@@ -606,10 +606,9 @@ const Chat = () => {
                                 <span className={styles.title}>Ask me about TnR Security!</span>
                                 <Link href="https://aka.ms/tnr/securityhelp" target="_blank">aka.ms/tnr/securityhelp</Link>
                                 <Link href="https://aka.ms/tnr/securitywave" target="_blank">aka.ms/tnr/securitywave</Link>
-                                {/* <span className={styles.subtitle}>The Research Forum series explores recent research advances, bold new ideas, and important discussions with the global research community.</span>
                                 <SuggestionButtons
                                     onButtonClick={sendChatQuestion}
-                                /> */}
+                                />
                             </div>
                         ) : (
                             <div className={styles.chatMessageStream} role="log">
