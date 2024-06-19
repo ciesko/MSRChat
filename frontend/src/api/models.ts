@@ -101,6 +101,7 @@ export type FrontendSettings = {
     auth_enabled?: string | null;
     feedback_enabled?: string | null;
     speech_enabled?: boolean;
+    msr_feedback_enabled?: boolean;
 }
 
 export enum Feedback {

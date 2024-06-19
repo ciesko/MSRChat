@@ -205,3 +205,28 @@ class ConversationTelemetryClient():
         except Exception as e:
             error_message = f"Error: {e} - {traceback.format_exc()}"
             logging.error(error_message)
+
+    def upsert_feedback(self, user_id, message_id, message_feedback):
+        """
+        Creates new item in the container with the feedback for the message.
+
+        Args:
+            user_id (str): The ID of the user.
+            message_id (str): The ID of the message.
+            message_feedback (str): The feedback for the message.
+
+        Returns:
+            None
+        """
+        # Create id for the feedback item
+        item_id = str(uuid.uuid4())
+
+        feedback_item = {
+            'id': item_id,
+            'message_id': message_id,
+            'type': 'feedback',
+            'userId': user_id,
+            'feedback': message_feedback
+        }
+        self.container_client.upsert_item(feedback_item)
+       
