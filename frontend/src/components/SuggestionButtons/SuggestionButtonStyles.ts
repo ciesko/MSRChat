@@ -14,7 +14,7 @@ export const SuggestionButtonStyles = makeStyles({
         },
     },
 
-    questionsContainer: {
+    questionsContainerHorizontal: {
         display: 'flex',
         flexWrap: 'wrap',
         flexDirection: 'row',
@@ -24,9 +24,19 @@ export const SuggestionButtonStyles = makeStyles({
         ...shorthands.gap('15px'),
     },
 
+    questionsContainerVertical: {
+        display: 'flex',
+        flexWrap: 'wrap',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '100%',
+        ...shorthands.gap('15px'),
+    },
+
     prompt: {
         marginTop: '20px',
-        marginBottom: '30px',
+        marginBottom: '15px',
         fontSize: '16px',
         lineHeight: '22px',
         fontWeight: '600',

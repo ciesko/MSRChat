@@ -3,6 +3,8 @@ import { HeaderStyles } from './HeaderStyles';
 import { Image, Link, Title3 } from '@fluentui/react-components';
 import { CosmosDBStatus } from '../../api';
 import { HistoryButton, ShareButton } from '../common/Button';
+import { AppStateContext } from '../../state/AppProvider';
+import { useContext } from 'react';
 
 export interface IHeaderProps {
     azureImageUrl: string;
@@ -13,6 +15,7 @@ export interface IHeaderProps {
 
 export const Header: React.FunctionComponent<IHeaderProps> = (props: React.PropsWithChildren<IHeaderProps>) => {
     const styles = HeaderStyles();
+    const appStateContext = useContext(AppStateContext)
     return (
         <div className={styles.container}>
             <div className={styles.titleContainer}>
@@ -23,7 +26,7 @@ export const Header: React.FunctionComponent<IHeaderProps> = (props: React.Props
                 />
                 <span className={styles.verticalBar}>|</span>
                 <Link href="/" className={styles.headerTitle}>
-                    Security Office Hours Copilot
+                    {appStateContext?.state?.frontendSettings?.site_title}
                 </Link>
             </div>
             <div className={styles.rightCommandBar}>

@@ -27,6 +27,7 @@ orchestrator = create_orchestrator_instance(CUSTOM_ORCHESTRATOR_CLASS_NAME)
 def index():
     AppConfig = {
         "REACT_APP_THEME": os.environ.get("REACT_APP_THEME", "light"),
+        "REACT_APP_SITE_TITLE": os.environ.get("REACT_APP_SITE_TITLE", "MSR Copilot"),
     }
 
     # Render the React's index.html with additional context
@@ -99,12 +100,42 @@ AZURE_SPEECH_KEY = os.environ.get("AZURE_SPEECH_KEY")
 # Frontend Settings via Environment Variables
 AUTH_ENABLED = os.environ.get("AUTH_ENABLED", "true").lower() == "true"
 SPEECH_ENABLED = os.environ.get("AZURE_SPEECH_ENABLED", "false").lower() == "true"
+REACT_APP_SITE_TITLE = os.environ.get("REACT_APP_SITE_TITLE", "MSR Coplilot")
+REACT_APP_FRONTPAGE_HEADING = os.environ.get("REACT_APP_FRONTPAGE_HEADING", "Welcome to MSR Copilot")
+REACT_APP_FRONTPAGE_SUBHEADING = os.environ.get("REACT_APP_FRONTPAGE_SUBHEADING", "")
+REACT_APP_FRONTPAGE_LINKS = os.environ.get("REACT_APP_FRONTPAGE_LINKS", "[]")
+REACT_APP_FRONTPAGE_QUESTIONS = os.environ.get("REACT_APP_FRONTPAGE_QUESTIONS", "[]")
+REACT_APP_FRONTPAGE_SHOW_IMAGE = os.environ.get("REACT_APP_FRONTPAGE_SHOW_IMAGE", "true").lower() == "true"
+REACT_APP_FRONTPAGE_IMAGE_URL = os.environ.get("REACT_APP_FRONTPAGE_IMAGE_URL", "")
+REACT_APP_FRONTPAGE_VERTICAL_QUESTIONS = os.environ.get("REACT_APP_FRONTPAGE_VERTICAL_QUESTIONS", "true").lower() == "true"
+REACT_APP_FRONTPAGE_QUESTION_HEADING= os.environ.get("REACT_APP_FRONTPAGE_QUESTION_HEADING", "")
+
+# FRONT_PAGE_LINKS = json.loads(REACT_APP_FRONTPAGE_LINKS) AND CHECK IF IT IS A VALID JSON OBJECT. IF NOT SET IT TO EMPTY LIST
+try:
+    FRONT_PAGE_LINKS = json.loads(REACT_APP_FRONTPAGE_LINKS)
+except:
+    FRONT_PAGE_LINKS = []
+
+# FRONT_PAGE_QUESTIONS = json.loads(REACT_APP_FRONTPAGE_QUESTIONS) AND CHECK IF IT IS A VALID JSON OBJECT. IF NOT SET IT TO EMPTY LIST
+try:
+    FRONTPAGE_QUESTIONS = json.loads(REACT_APP_FRONTPAGE_QUESTIONS)
+except:
+    FRONTPAGE_QUESTIONS = []
 
 frontend_settings = { 
     "auth_enabled": AUTH_ENABLED, 
     "feedback_enabled": AZURE_COSMOSDB_ENABLE_FEEDBACK and AZURE_COSMOSDB_DATABASE not in [None, ""],
     "speech_enabled": SPEECH_ENABLED,
     "msr_feedback_enabled": MSR_AZURE_COSMOSDB_FEEDBACK_ENABLED,
+    "site_title": REACT_APP_SITE_TITLE,
+    "frontpage_heading": REACT_APP_FRONTPAGE_HEADING,
+    "frontpage_subheading": REACT_APP_FRONTPAGE_SUBHEADING,
+    "frontpage_links": FRONT_PAGE_LINKS,
+    "frontpage_questions": FRONTPAGE_QUESTIONS,
+    "frontpage_show_image": REACT_APP_FRONTPAGE_SHOW_IMAGE,
+    "frontpage_image_url": REACT_APP_FRONTPAGE_IMAGE_URL,
+    "frontpage_vertical_questions": REACT_APP_FRONTPAGE_VERTICAL_QUESTIONS,
+    "frontpage_question_heading": REACT_APP_FRONTPAGE_QUESTION_HEADING
 }
 
 message_uuid = ""
