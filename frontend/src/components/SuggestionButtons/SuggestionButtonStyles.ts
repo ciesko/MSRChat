@@ -8,16 +8,25 @@ export const SuggestionButtonStyles = makeStyles({
         alignItems: 'center',
         justifyContent: 'center',
         ...shorthands.gap('5px'),
-        marginTop: '25px',
         '@media (max-width: 400px)': {
             marginTop: '10px',
             ...shorthands.gap('2px'),
         },
     },
 
+    questionsContainer: {
+        display: 'flex',
+        flexWrap: 'wrap',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '100%',
+        ...shorthands.gap('15px'),
+    },
+
     prompt: {
         marginTop: '20px',
-        marginBottom: '10px',
+        marginBottom: '30px',
         fontSize: '16px',
         lineHeight: '22px',
         fontWeight: '600',
@@ -27,5 +36,12 @@ export const SuggestionButtonStyles = makeStyles({
             lineHeight: '16px',
             fontWeight: '600',
         },
+    },
+
+    button: {
+        width: '200px',
+        height: '120px',
+        fontSize: '14px',
+        backgroundColor: tokens.colorNeutralBackground1,
     },
 });
