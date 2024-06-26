@@ -111,6 +111,7 @@ export type FrontendSettings = {
     frontpage_image_url?: string | undefined;
     frontpage_vertical_questions?: boolean;
     frontpage_question_heading?: string | undefined;
+    input_placeholder?: string | undefined;
 }
 
 export enum Feedback {

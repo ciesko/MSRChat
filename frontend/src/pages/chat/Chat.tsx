@@ -737,7 +737,7 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
                                     </div>
                                     <QuestionInput
                                         clearOnSend
-                                        placeholder="Type a new question..."
+                                        placeholder={appStateContext?.state.frontendSettings?.input_placeholder}
                                         disabled={isLoading}
                                         onSend={sendChatQuestion}
                                         conversationId={appStateContext?.state.currentChat?.id ? appStateContext?.state.currentChat?.id : undefined}
