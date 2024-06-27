@@ -1,14 +1,16 @@
-
 import { Caption1Strong, Link } from "@fluentui/react-components";
 import { FooterStyles } from "./FooterStyles";
+import { AppStateContext } from "../../state/AppProvider";
+import { useContext } from "react";
 
 function Footer() {
     const styles = FooterStyles();
+    const appStateContext = useContext(AppStateContext)
     return (
         <div
             className={styles.footerContainer}
         >
-            <Link href="mailto:mcrinfo@microsoft.com">
+            <Link href={appStateContext?.state.frontendSettings?.contact_us_link || '' }>
                 <Caption1Strong className={styles.footerText}>Contact Us</Caption1Strong>
             </Link>
             <Caption1Strong className={styles.footerText}>|</Caption1Strong>
