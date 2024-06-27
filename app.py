@@ -1,6 +1,7 @@
 import json
 import os
 import logging
+from backend.conversationtelemetry import ConversationTelemetryClient
 import openai
 import uuid
 import aiohttp
@@ -26,6 +27,7 @@ orchestrator = create_orchestrator_instance(CUSTOM_ORCHESTRATOR_CLASS_NAME)
 def index():
     AppConfig = {
         "REACT_APP_THEME": os.environ.get("REACT_APP_THEME", "light"),
+        "REACT_APP_SITE_TITLE": os.environ.get("REACT_APP_SITE_TITLE", "MSR Copilot"),
     }
 
     # Render the React's index.html with additional context
@@ -77,6 +79,13 @@ AZURE_COSMOSDB_MONGO_VCORE_DATABASE = os.environ.get("AZURE_COSMOSDB_MONGO_VCORE
 AZURE_COSMOSDB_MONGO_VCORE_CONTAINER = os.environ.get("AZURE_COSMOSDB_MONGO_VCORE_CONTAINER")
 AZURE_COSMOSDB_MONGO_VCORE_INDEX = os.environ.get("AZURE_COSMOSDB_MONGO_VCORE_INDEX")
 
+# MSR CosmosDB Settings
+MSR_AZURE_COSMOSDB_ACCOUNT = os.environ.get("MSR_AZURE_COSMOSDB_ACCOUNT")
+MSR_AZURE_COSMOSDB_ACCOUNT_KEY= os.environ.get("MSR_AZURE_COSMOSDB_ACCOUNT_KEY")
+MSR_AZURE_COSMOSDB_FEEDBACK_CONTAINER="feedback"
+MSR_AZURE_COSMOSDB_DATABASE=os.environ.get("MSR_AZURE_COSMOSDB_DATABASE")
+MSR_AZURE_COSMOSDB_FEEDBACK_ENABLED = os.environ.get("MSR_AZURE_COSMOSDB_FEEDBACK_ENABLED", "false").lower() == "true"
+
 # Chat History CosmosDB Integration Settings
 AZURE_COSMOSDB_DATABASE = os.environ.get("AZURE_COSMOSDB_DATABASE")
 AZURE_COSMOSDB_ACCOUNT = os.environ.get("AZURE_COSMOSDB_ACCOUNT")
@@ -91,11 +100,45 @@ AZURE_SPEECH_KEY = os.environ.get("AZURE_SPEECH_KEY")
 # Frontend Settings via Environment Variables
 AUTH_ENABLED = os.environ.get("AUTH_ENABLED", "true").lower() == "true"
 SPEECH_ENABLED = os.environ.get("AZURE_SPEECH_ENABLED", "false").lower() == "true"
+REACT_APP_SITE_TITLE = os.environ.get("REACT_APP_SITE_TITLE", "MSR Coplilot")
+REACT_APP_FRONTPAGE_HEADING = os.environ.get("REACT_APP_FRONTPAGE_HEADING", "Welcome to MSR Copilot")
+REACT_APP_FRONTPAGE_SUBHEADING = os.environ.get("REACT_APP_FRONTPAGE_SUBHEADING", "")
+REACT_APP_FRONTPAGE_LINKS = os.environ.get("REACT_APP_FRONTPAGE_LINKS", "[]")
+REACT_APP_FRONTPAGE_QUESTIONS = os.environ.get("REACT_APP_FRONTPAGE_QUESTIONS", "[]")
+REACT_APP_FRONTPAGE_SHOW_IMAGE = os.environ.get("REACT_APP_FRONTPAGE_SHOW_IMAGE", "true").lower() == "true"
+REACT_APP_FRONTPAGE_IMAGE_URL = os.environ.get("REACT_APP_FRONTPAGE_IMAGE_URL", "")
+REACT_APP_FRONTPAGE_VERTICAL_QUESTIONS = os.environ.get("REACT_APP_FRONTPAGE_VERTICAL_QUESTIONS", "true").lower() == "true"
+REACT_APP_FRONTPAGE_QUESTION_HEADING= os.environ.get("REACT_APP_FRONTPAGE_QUESTION_HEADING", "")
+REACT_APP_INPUT_PLACEHOLDER= os.environ.get("REACT_APP_INPUT_PLACEHOLDER", "Ask a question...")
+REACT_APP_CONTACT_US_LINK = os.environ.get("REACT_APP_CONTACT_US_LINK", "")
+# FRONT_PAGE_LINKS = json.loads(REACT_APP_FRONTPAGE_LINKS) AND CHECK IF IT IS A VALID JSON OBJECT. IF NOT SET IT TO EMPTY LIST
+try:
+    FRONT_PAGE_LINKS = json.loads(REACT_APP_FRONTPAGE_LINKS)
+except:
+    FRONT_PAGE_LINKS = []
+
+# FRONT_PAGE_QUESTIONS = json.loads(REACT_APP_FRONTPAGE_QUESTIONS) AND CHECK IF IT IS A VALID JSON OBJECT. IF NOT SET IT TO EMPTY LIST
+try:
+    FRONTPAGE_QUESTIONS = json.loads(REACT_APP_FRONTPAGE_QUESTIONS)
+except:
+    FRONTPAGE_QUESTIONS = []
 
 frontend_settings = { 
     "auth_enabled": AUTH_ENABLED, 
     "feedback_enabled": AZURE_COSMOSDB_ENABLE_FEEDBACK and AZURE_COSMOSDB_DATABASE not in [None, ""],
     "speech_enabled": SPEECH_ENABLED,
+    "msr_feedback_enabled": MSR_AZURE_COSMOSDB_FEEDBACK_ENABLED,
+    "site_title": REACT_APP_SITE_TITLE,
+    "frontpage_heading": REACT_APP_FRONTPAGE_HEADING,
+    "frontpage_subheading": REACT_APP_FRONTPAGE_SUBHEADING,
+    "frontpage_links": FRONT_PAGE_LINKS,
+    "frontpage_questions": FRONTPAGE_QUESTIONS,
+    "frontpage_show_image": REACT_APP_FRONTPAGE_SHOW_IMAGE,
+    "frontpage_image_url": REACT_APP_FRONTPAGE_IMAGE_URL,
+    "frontpage_vertical_questions": REACT_APP_FRONTPAGE_VERTICAL_QUESTIONS,
+    "frontpage_question_heading": REACT_APP_FRONTPAGE_QUESTION_HEADING,
+    "input_placeholder": REACT_APP_INPUT_PLACEHOLDER,
+    "contact_us_link": REACT_APP_CONTACT_US_LINK
 }
 
 message_uuid = ""
@@ -121,6 +164,20 @@ if AZURE_COSMOSDB_DATABASE and AZURE_COSMOSDB_ACCOUNT and AZURE_COSMOSDB_CONVERS
     except Exception as e:
         logging.exception("Exception in CosmosDB initialization", e)
         cosmos_conversation_client = None
+
+# Initialize MSR CosmosDB client for feedback
+msr_cosmos_db_client = None
+if MSR_AZURE_COSMOSDB_ACCOUNT and MSR_AZURE_COSMOSDB_ACCOUNT_KEY and MSR_AZURE_COSMOSDB_DATABASE:
+    try:
+        msr_cosmos_db_client = ConversationTelemetryClient(
+            cosmosdb_endpoint=f'https://{MSR_AZURE_COSMOSDB_ACCOUNT}.documents.azure.com:443/', 
+            credential=MSR_AZURE_COSMOSDB_ACCOUNT_KEY, 
+            database_name=MSR_AZURE_COSMOSDB_DATABASE,
+            container_name=MSR_AZURE_COSMOSDB_FEEDBACK_CONTAINER
+        )
+    except Exception as e:
+        logging.exception("Exception in MSR CosmosDB initialization", e)
+        msr_cosmos_db_client = None
 
 
 def is_chat_model():
@@ -262,6 +319,9 @@ def update_message():
     ## check request for message_id
     message_id = request.json.get("message_id", None)
     message_feedback = request.json.get("message_feedback", None)
+    ## check request for the optional value msr_feedback being true
+    msr_feedback = request.json.get("msr_feedback", False)
+
     try:
         if not message_id:
             return jsonify({"error": "message_id is required"}), 400
@@ -269,6 +329,11 @@ def update_message():
         if not message_feedback:
             return jsonify({"error": "message_feedback is required"}), 400
 
+        ## if msr_feedback is true, write the feedback to the MSR CosmosDB
+        if msr_feedback and msr_cosmos_db_client:
+            msr_cosmos_db_client.upsert_feedback(user_id, message_id, message_feedback)
+            return jsonify({"message": f"Successfully added feedback to message {message_id} in MSR CosmosDB"}), 200
+        
         ## update the message in cosmos
         updated_message = cosmos_conversation_client.update_message_feedback(user_id, message_id, message_feedback)
         if updated_message:

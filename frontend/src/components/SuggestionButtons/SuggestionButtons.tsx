@@ -1,29 +1,32 @@
 import * as React from 'react';
 import { SuggestionButtonStyles } from './SuggestionButtonStyles';
 import { Button, Subtitle2 } from '@fluentui/react-components';
+import { AppStateContext } from '../../state/AppProvider';
+import { useContext } from 'react';
 
 export interface ISuggestionButtonsProps {
     onButtonClick: (questionText: string) => void;
 }
 
-const questions = [
-    `Explain the key challenges tackled by MSR in Research Forum Episode 3.`,
-    `Which emerging technologies were highlighted in Research Forum Episode 3?`,
-    `Detail significant insights discussed at each Research Forum episode to-date.`,
-]
-
 export const SuggestionButtons: React.FunctionComponent<ISuggestionButtonsProps> = (props: React.PropsWithChildren<ISuggestionButtonsProps>) => {
     const styles = SuggestionButtonStyles();
+    const appStateContext = useContext(AppStateContext)
+
     return (
-    <div className={styles.container}>
-        <span className={styles.prompt}><i>Get started with an example question below:</i></span>
-        {
-            questions.map((questionText, index) => {
-                return (
-                    <Button appearance='subtle' size='small' key={index} onClick={() => props.onButtonClick(questionText)}>{questionText}</Button>
-                )
-            })
-        }
-    </div>
-  );
+        <div className={styles.container}>
+            <span className={styles.prompt}><i>{appStateContext?.state.frontendSettings?.frontpage_question_heading}</i></span>
+            <div className={appStateContext?.state.frontendSettings?.frontpage_vertical_questions ? styles.questionsContainerVertical : styles.questionsContainerHorizontal}>
+                {
+                    appStateContext?.state.frontendSettings?.frontpage_questions?.map((questionText, index) => {
+                        return (
+                            appStateContext?.state.frontendSettings?.frontpage_vertical_questions ?
+                                <Button appearance='subtle' size='small' key={index} onClick={() => props.onButtonClick(questionText)}>{questionText}</Button>
+                                :
+                                <Button appearance='secondary' className={styles.button} size='medium' key={index} onClick={() => props.onButtonClick(questionText)}>{questionText}</Button>
+                        )
+                    })
+                }
+            </div>
+        </div>
+    );
 };

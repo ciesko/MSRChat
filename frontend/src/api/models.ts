@@ -101,6 +101,18 @@ export type FrontendSettings = {
     auth_enabled?: string | null;
     feedback_enabled?: string | null;
     speech_enabled?: boolean;
+    msr_feedback_enabled?: boolean;
+    site_title?: string | undefined;
+    frontpage_heading?: string | undefined;
+    frontpage_subheading?: string | undefined;
+    frontpage_links?: {text: string, url: string}[],
+    frontpage_questions?: string[],
+    frontpage_show_image?: boolean,
+    frontpage_image_url?: string | undefined;
+    frontpage_vertical_questions?: boolean;
+    frontpage_question_heading?: string | undefined;
+    input_placeholder?: string | undefined;
+    contact_us_link?: string | undefined;
 }
 
 export enum Feedback {

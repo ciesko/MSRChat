@@ -39,7 +39,7 @@ const enum messageStatus {
     Done = "Done"
 }
 
-const Chat = ({ embedDisplay }: { embedDisplay: boolean  }) => {
+const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
     const styles = ChatStyles();
     const appStateContext = useContext(AppStateContext)
     const AUTH_ENABLED = appStateContext?.state.frontendSettings?.auth_enabled;
@@ -597,14 +597,27 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean  }) => {
                     <div className={embedDisplay ? styles.chatContainerEmbed : styles.chatContainer}>
                         {!messages || messages.length < 1 ? (
                             <div className={styles.chatEmptyState}>
-                                <Image
-                                    src={LogoImage}
-                                    height={120}
-                                    width={120}
-                                    aria-hidden="true"
-                                />
-                                <span className={styles.title}>Questions about Microsoft Research Forum?</span>
-                                <span className={styles.subtitle}>The Research Forum series explores recent research advances, bold new ideas, and important discussions with the global research community.</span>
+                                {
+                                    appStateContext?.state.frontendSettings?.frontpage_show_image && (
+                                        <Image
+                                            src={appStateContext?.state.frontendSettings?.frontpage_image_url ? appStateContext?.state.frontendSettings?.frontpage_image_url : LogoImage}
+                                            height={120}
+                                            width={120}
+                                            aria-hidden="true"
+                                        />
+                                    )
+                                }
+                                <span className={styles.title}>{appStateContext?.state.frontendSettings?.frontpage_heading}</span>
+                                {
+                                    appStateContext?.state.frontendSettings?.frontpage_subheading && (
+                                        <span className={styles.subtitle}>{appStateContext?.state.frontendSettings?.frontpage_subheading}</span>
+                                    )
+                                }
+                                {
+                                    appStateContext?.state.frontendSettings?.frontpage_links?.map((link, index) => (
+                                        <Link key={index} href={link.url} target="_blank">{link.text}</Link>
+                                    ))
+                                }
                                 <SuggestionButtons
                                     onButtonClick={sendChatQuestion}
                                 />
@@ -724,7 +737,7 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean  }) => {
                                     </div>
                                     <QuestionInput
                                         clearOnSend
-                                        placeholder="Type a new question..."
+                                        placeholder={appStateContext?.state.frontendSettings?.input_placeholder}
                                         disabled={isLoading}
                                         onSend={sendChatQuestion}
                                         conversationId={appStateContext?.state.currentChat?.id ? appStateContext?.state.currentChat?.id : undefined}

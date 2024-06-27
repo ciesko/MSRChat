@@ -12,7 +12,7 @@ export class AudioService {
     private synthesizerAudioConfig = AudioConfig.fromSpeakerOutput(this.audioPlayer);
     private speechConfig: SpeechConfig | undefined;
     private speechToken: SpeechAuth | undefined;
-    public audioMuted = false;
+    public audioMuted = true;
 
     private currentSpokenText: {
         message_id: string | undefined;

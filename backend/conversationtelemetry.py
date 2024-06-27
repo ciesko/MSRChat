@@ -205,3 +205,45 @@ class ConversationTelemetryClient():
         except Exception as e:
             error_message = f"Error: {e} - {traceback.format_exc()}"
             logging.error(error_message)
+
+    def upsert_feedback(self, user_id, message_id, message_feedback):
+        """
+        Creates new item in the container with the feedback.
+        If the item already exists, updates the feedback.
+
+        Args:
+            user_id (str): The ID of the user.
+            message_id (str): The ID of the message.
+            message_feedback (str): The feedback for the message.
+
+        Returns:
+            None
+        """
+        # Query the database for an item with the given message_id
+        query = "SELECT * FROM c WHERE c.message_id = @message_id"
+        parameters = [{"name": "@message_id", "value": message_id}]
+        items = list(self.container_client.query_items(
+            query=query,
+            parameters=parameters,
+            enable_cross_partition_query=True
+        ))
+
+        if len(items) == 0:
+            item_id = str(uuid.uuid4())
+
+            feedback_item = {
+                'id': item_id,
+                'timestamp': datetime.now().isoformat(),
+                'message_id': message_id,
+                'type': 'feedback',
+                'userId': user_id,
+                'feedback': message_feedback
+            }
+            self.container_client.upsert_item(feedback_item)
+        else:
+            # If the item exists, update it
+            item = items[0]
+            item["feedback"] = message_feedback
+            self.container_client.replace_item(item=item, body=item)
+
+       
