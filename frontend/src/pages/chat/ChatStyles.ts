@@ -75,7 +75,7 @@ export const ChatStyles = makeStyles({
         flexDirection: 'column',
         justifyContent: 'center',
         alignItems: 'center',
-        maxWidth: '700px',
+        maxWidth: '900px',
         ...shorthands.gap('10px'),
         width: '100%',
         textAlign: 'center',
