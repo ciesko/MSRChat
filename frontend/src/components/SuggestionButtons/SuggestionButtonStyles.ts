@@ -31,7 +31,7 @@ export const SuggestionButtonStyles = makeStyles({
         alignItems: 'center',
         justifyContent: 'center',
         width: '100%',
-        ...shorthands.gap('15px'),
+        ...shorthands.gap('5px'),
     },
 
     prompt: {
