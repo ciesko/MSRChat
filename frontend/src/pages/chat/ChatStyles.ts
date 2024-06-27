@@ -18,7 +18,7 @@ export const ChatStyles = makeStyles({
         height: 'calc(100vh - 90px)',
         ...shorthands.padding('30px'),
         boxSizing: 'border-box',
-        backgroundColor: tokens.colorNeutralBackground1,
+        backgroundColor: tokens.colorNeutralBackground4,
         '@media (max-width: 400px)': {
             ...shorthands.padding('15px'),
             height: 'calc(100vh - 130px)',

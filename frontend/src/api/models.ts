@@ -113,6 +113,7 @@ export type FrontendSettings = {
     frontpage_question_heading?: string | undefined;
     input_placeholder?: string | undefined;
     contact_us_link?: string | undefined;
+    submit_feedback_url?: string | undefined;
 }
 
 export enum Feedback {

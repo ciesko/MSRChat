@@ -1,10 +1,11 @@
 import * as React from 'react';
 import { HeaderStyles } from './HeaderStyles';
-import { Image, Link, Title3 } from '@fluentui/react-components';
+import { Button, Image, Link } from '@fluentui/react-components';
 import { CosmosDBStatus } from '../../api';
-import { HistoryButton, ShareButton } from '../common/Button';
+import { HistoryButton } from '../common/Button';
 import { AppStateContext } from '../../state/AppProvider';
-import { useContext } from 'react';
+import { useContext, useEffect, useState } from 'react';
+import { PersonFeedback16Regular } from '@fluentui/react-icons';
 
 export interface IHeaderProps {
     azureImageUrl: string;
@@ -15,7 +16,19 @@ export interface IHeaderProps {
 
 export const Header: React.FunctionComponent<IHeaderProps> = (props: React.PropsWithChildren<IHeaderProps>) => {
     const styles = HeaderStyles();
-    const appStateContext = useContext(AppStateContext)
+    const appStateContext = useContext(AppStateContext);
+
+    const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth < 600);
+
+    useEffect(() => {
+        const checkSize = () => setIsSmallScreen(window.innerWidth < 600);
+
+        window.addEventListener('resize', checkSize);
+
+        // Cleanup function
+        return () => window.removeEventListener('resize', checkSize);
+    }, []);
+
     return (
         <div className={styles.container}>
             <div className={styles.titleContainer}>
@@ -33,7 +46,18 @@ export const Header: React.FunctionComponent<IHeaderProps> = (props: React.Props
                 {(props.appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured) &&
                     <HistoryButton onClick={props.onHistoryClick} text={props.appStateContext?.state?.isChatHistoryOpen ? "Hide chat history" : "Show chat history"} />
                 }
-                <ShareButton className={styles.shareButton} onClick={props.onShareClick} />
+                {
+                    appStateContext?.state.frontendSettings?.submit_feedback_url &&
+                    <Button
+                        appearance="primary"
+                        as="a"
+                        title="Submit feedback"
+                        href={appStateContext?.state.frontendSettings?.submit_feedback_url}
+                        icon={isSmallScreen ? <PersonFeedback16Regular /> : undefined}
+                    >
+                        {isSmallScreen ? '' : 'Submit feedback'}
+                    </Button>
+                }
             </div>
         </div>
     );

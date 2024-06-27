@@ -610,7 +610,7 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
                                 <span className={styles.title}>{appStateContext?.state.frontendSettings?.frontpage_heading}</span>
                                 {
                                     appStateContext?.state.frontendSettings?.frontpage_subheading && (
-                                        <span className={styles.subtitle}>{appStateContext?.state.frontendSettings?.frontpage_subheading}</span>
+                                        <p className={styles.subtitle}>{appStateContext?.state.frontendSettings?.frontpage_subheading}</p>
                                     )
                                 }
                                 {
