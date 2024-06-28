@@ -58,7 +58,7 @@ export const Answer = ({
     }, [isRefAccordionOpen]);
 
     useEffect(() => {
-        if (answer.message_id == undefined) return;
+        if (answer.message_id == undefined || answer.message_id == 'generating') return;
 
         let currentFeedbackState;
         if (appStateContext?.state.feedbackState && appStateContext?.state.feedbackState[answer.message_id]) {
@@ -189,7 +189,7 @@ export const Answer = ({
             >
                 <CardHeader
                     action={
-                        (FEEDBACK_ENABLED && answer.message_id !== undefined) ?
+                        (FEEDBACK_ENABLED && answer.message_id !== 'generating' && answer.message_id !== undefined) ?
                             <div className={styles.feedbackButtonContainer}>
                                 <Button
                                     appearance="transparent"
@@ -225,7 +225,7 @@ export const Answer = ({
                         className={styles.answerText}
                     />
                     {
-                        SPEECH_ENABLED && isLastAnswer &&  <SpeakText answer={answer} /> 
+                        SPEECH_ENABLED && isLastAnswer && <SpeakText answer={answer} />
                     }
                 </div>
                 <div className={styles.answerFooter}>

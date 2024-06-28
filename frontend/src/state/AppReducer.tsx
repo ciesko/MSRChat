@@ -80,6 +80,11 @@ export const appStateReducer = (state: AppState, action: Action): AppState => {
                 ...state,
                 audioService: action.payload
             };
+        case 'TOGGLE_AUDIO_MUTE':
+            return {
+                ...state,
+                audioMuted: !state.audioMuted
+            };
         default:
             return state;
       }
