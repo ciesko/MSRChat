@@ -4,17 +4,19 @@ import { AskResponse } from '../../api';
 import { parseAnswer } from '../Answer/AnswerParser';
 
 export interface ISpeakTextProps {
-    answer: AskResponse;
+  answer: AskResponse;
 }
 
 export const SpeakText: React.FunctionComponent<ISpeakTextProps> = (props: React.PropsWithChildren<ISpeakTextProps>) => {
-    const appStateContext = React.useContext(AppStateContext);
-    
-    React.useEffect(() => {
-            const answer_id = props.answer.message_id;
-            const answer_text = parseAnswer(props.answer).markdownFormatText;
-            appStateContext?.state.audioService?.speakAnswer(answer_id ? answer_id : "", answer_text);
-    }, [props.answer]);
+  const appStateContext = React.useContext(AppStateContext);
+
+  React.useEffect(() => {
+    if (!appStateContext?.state.audioMuted && appStateContext?.state.audioService) {
+      const answer_id = props.answer.message_id;
+      const answer_text = parseAnswer(props.answer).markdownFormatText;
+      appStateContext?.state.audioService?.speakAnswer(answer_id ? answer_id : "", answer_text);
+    }
+  }, [props.answer]);
 
   return (
     <>

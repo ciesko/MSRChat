@@ -14,6 +14,7 @@ export interface AppState {
     feedbackState: { [answerId: string]: Feedback.Neutral | Feedback.Positive | Feedback.Negative; };
     speech_enabled: boolean | undefined;
     audioService: AudioService | null;
+    audioMuted: boolean;
 }
 
 export type Action =
@@ -31,8 +32,8 @@ export type Action =
     | { type: 'FETCH_FRONTEND_SETTINGS', payload: FrontendSettings | null }  // API Call
     | { type: 'SET_FEEDBACK_STATE'; payload: { answerId: string; feedback: Feedback.Positive | Feedback.Negative | Feedback.Neutral } }
     | { type: 'GET_FEEDBACK_STATE'; payload: string }
-    | { type: 'SET_AUDIO_SERVICE'; payload: AudioService };
-
+    | { type: 'SET_AUDIO_SERVICE'; payload: AudioService }
+    | { type: 'TOGGLE_AUDIO_MUTE' };
 
 const initialState: AppState = {
     isChatHistoryOpen: false,
@@ -48,6 +49,7 @@ const initialState: AppState = {
     feedbackState: {},
     speech_enabled: undefined,
     audioService: new AudioService(),
+    audioMuted: true,
 };
 
 export const AppStateContext = createContext<{

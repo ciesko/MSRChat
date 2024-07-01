@@ -55,9 +55,7 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
     const [processMessages, setProcessMessages] = useState<messageStatus>(messageStatus.NotRunning);
     const [clearingChat, setClearingChat] = useState<boolean>(false);
     const [hideErrorDialog, { toggle: toggleErrorDialog }] = useBoolean(true);
-    const [errorMsg, setErrorMsg] = useState<ErrorMessage | null>()
-    const [audioMuted, setAudioMuted] = useState<boolean>(true);
-
+    const [errorMsg, setErrorMsg] = useState<ErrorMessage | null>();
     const [ASSISTANT, TOOL, ERROR] = ["assistant", "tool", "error"]
 
     useEffect(() => {
@@ -531,12 +529,6 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
         setIsCitationPanelOpen(true);
     };
 
-    const onViewSource = (citation: Citation) => {
-        if (citation.url && !citation.url.includes("blob.core")) {
-            window.open(citation.url, "_blank");
-        }
-    };
-
     const parseCitationFromMessage = (message: ChatMessage) => {
         if (message?.role && message?.role === "tool") {
             try {
@@ -559,7 +551,7 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
     }
 
     const toggleAudioMute = () => {
-        setAudioMuted(!audioMuted);
+        appStateContext?.dispatch({ type: 'TOGGLE_AUDIO_MUTE' });
         appStateContext?.state.audioService?.toggleMute();
     }
 
@@ -705,12 +697,12 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
                                         <Button
                                             appearance="transparent"
                                             size="large"
-                                            icon={audioMuted ? <SpeakerMuteRegular /> : <Speaker224Regular />}
-                                            aria-label={audioMuted ? "Unmute" : "Mute"}
+                                            icon={appStateContext?.state.audioMuted  ? <SpeakerMuteRegular /> : <Speaker224Regular />}
+                                            aria-label={appStateContext?.state.audioMuted  ? "Unmute" : "Mute"}
                                             tabIndex={0}
                                             onClick={toggleAudioMute}
                                             onKeyDown={e => e.key === "Enter" || e.key === " " ? toggleAudioMute() : null}
-                                            title={audioMuted ? "Unmute" : "Mute"}
+                                            title={appStateContext?.state.audioMuted  ? "Unmute" : "Mute"}
                                         />
                                     )
                                 }

@@ -32,7 +32,7 @@ export const ChatStyles = makeStyles({
         justifyContent: 'space-between',
         ...shorthands.padding('30px'),
         height: '100vh',
-        backgroundColor: tokens.colorNeutralBackground1,
+        backgroundColor: tokens.colorNeutralBackground4,
         '@media (max-width: 400px)': {
             ...shorthands.padding('15px'),
             height: 'calc(100vh - 130px)',
