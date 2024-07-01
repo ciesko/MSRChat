@@ -8,6 +8,10 @@ import Chat from "./pages/chat/Chat";
 import { AppStateProvider } from "./state/AppProvider";
 import { FluentProvider, tokens } from "@fluentui/react-components";
 import ThemeService from "./services/themeService";
+import { applyGlobalStyles } from "./GlobalStyles";
+
+// apply global styles for chat output answers to match Fluent UI components
+applyGlobalStyles();
 
 export default function App() {
     const [embedDisplay, setEmbedDisplay] = React.useState<boolean>(false);
