@@ -12,6 +12,7 @@ import { AnswerStyles } from "./AnswerStyles";
 import { ChevronDown24Regular, ChevronRight24Regular, ThumbDislike20Filled, ThumbLike20Filled, ThumbLike20Regular, ThumbDislike20Regular } from "@fluentui/react-icons";
 import { AppStateContext } from "../../state/AppProvider";
 import { SpeakText } from "../SpeakText/SpeakText";
+import { StreamingText } from "../StreamingText/StreamingText";
 
 interface Props {
     answer: AskResponse;
@@ -218,12 +219,7 @@ export const Answer = ({
                 >
                 </CardHeader>
                 <div>
-                    <ReactMarkdown
-                        linkTarget="_blank"
-                        remarkPlugins={[remarkGfm, supersub]}
-                        children={parsedAnswer.markdownFormatText}
-                        className={styles.answerText}
-                    />
+                    <StreamingText markdownFormatText={parsedAnswer.markdownFormatText || ''} />
                     {
                         SPEECH_ENABLED && isLastAnswer && <SpeakText answer={answer} />
                     }
