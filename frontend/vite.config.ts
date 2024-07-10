@@ -15,6 +15,7 @@ export default defineConfig({
             "/chat": "http://127.0.0.1:5000",
             "/conversation": "http://127.0.0.1:5000",
             "/speech": "http://127.0.0.1:5000",
+            "/upload": "http://127.0.0.1:5000",
         }
     }
 });

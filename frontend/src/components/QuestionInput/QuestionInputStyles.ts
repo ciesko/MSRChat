@@ -40,19 +40,6 @@ export const QuestionInputStyles = makeStyles({
 
     sendButton: {
         color: tokens.colorBrandForeground1
-    },
-
-    footer: {
-        display: 'flex',
-        flexDirection: 'row',
-        verticalAlign: 'middle',
-        justifyContent: 'space-between',
-        width: '100%',
-        paddingRight: '25px',
-    },
-    footerText: {
-        verticalAlign: 'middle',
-        marginTop: '5px',
-    },
+    }
 });
 

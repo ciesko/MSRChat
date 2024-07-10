@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect, useContext, useLayoutEffect } from "react";
-import { ShieldLock48Regular, ErrorCircleRegular, Broom16Regular, Add16Regular, Stop24Regular, Speaker024Regular, SpeakerMuteRegular, Speaker224Regular } from "@fluentui/react-icons";
+import { ShieldLock48Regular, ErrorCircleRegular, Broom16Regular, Add16Regular, Stop24Regular,  SpeakerMuteRegular, Speaker224Regular, Attach16Regular } from "@fluentui/react-icons";
 
 import uuid from 'react-uuid';
 import { isEmpty } from "lodash-es";
@@ -20,7 +20,8 @@ import {
     historyClear,
     ChatHistoryLoadingState,
     CosmosDBStatus,
-    ErrorMessage
+    ErrorMessage,
+    uploadFileTest
 } from "../../api";
 import { Answer } from "../../components/Answer";
 import { QuestionInput } from "../../components/QuestionInput";
@@ -32,6 +33,7 @@ import { ChatStyles } from "./ChatStyles";
 import { QuestionDisplay } from "../../components/QuestionDisplay/QuestionDisplay";
 import { CitationDetails } from "../../components/CitationDetails/CitationDetails";
 import { SuggestionButtons } from "../../components/SuggestionButtons/SuggestionButtons";
+import { ComplianceMessage } from "../../components/ComplianceMessage/ComplianceMessage";
 
 const enum messageStatus {
     NotRunning = "Not Running",
@@ -56,7 +58,13 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
     const [clearingChat, setClearingChat] = useState<boolean>(false);
     const [hideErrorDialog, { toggle: toggleErrorDialog }] = useBoolean(true);
     const [errorMsg, setErrorMsg] = useState<ErrorMessage | null>();
-    const [ASSISTANT, TOOL, ERROR] = ["assistant", "tool", "error"]
+    const [ASSISTANT, TOOL, ERROR] = ["assistant", "tool", "error"];
+    const [file, setFile] = useState();
+    const [showFileDialog, setShowFileDialog] = useState(false);
+
+    useEffect(() => {
+        console.debug(file);
+    }, [file])
 
     useEffect(() => {
         if (appStateContext?.state.isCosmosDBAvailable?.status === CosmosDBStatus.NotWorking && appStateContext.state.chatHistoryLoadingState === ChatHistoryLoadingState.Fail && hideErrorDialog) {
@@ -154,7 +162,7 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
 
         let result = {} as ChatResponse;
         try {
-            const response = await conversationApi(request, abortController.signal);
+            const response = await conversationApi(request, abortController.signal, file ? file : undefined);
             if (response?.body) {
                 const reader = response.body.getReader();
                 let runningText = "";
@@ -555,6 +563,14 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
         appStateContext?.state.audioService?.toggleMute();
     }
 
+    const handleDocUpload = (e: any) => {
+        setFile(e.target.files[0]);
+    }
+
+    const handleDocumentSubmit = () => {
+        setShowFileDialog(false);
+    }
+
     useEffect(() => {
         if (appStateContext?.state.chatHistoryLoadingState !== ChatHistoryLoadingState.Loading) {
             try {
@@ -726,6 +742,11 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
                                             disabled={disabledButton()}
                                             aria-label="clear chat button"
                                         />
+                                        <Button
+                                            icon={<Attach16Regular />}
+                                            onClick={() => setShowFileDialog(true)}
+                                            aria-label="attach document button"
+                                        />
                                     </div>
                                     <QuestionInput
                                         clearOnSend
@@ -735,7 +756,10 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
                                         conversationId={appStateContext?.state.currentChat?.id ? appStateContext?.state.currentChat?.id : undefined}
                                         speechEnabled={SPEECH_ENABLED ? true : false}
                                     />
-
+                                </div>
+                                <div className={styles.footer}>
+                                    <Caption1 className={styles.footerText}><i>AI may generate incorrect answers, please check citations for accuracy.</i></Caption1>
+                                    <ComplianceMessage />
                                 </div>
                             </div>
                         </div>
@@ -760,6 +784,25 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
                         <DialogTitle>{errorMsg?.title}</DialogTitle>
                         <DialogContent>
                             {errorMsg?.subtitle}
+                        </DialogContent>
+                        <DialogActions>
+                            <DialogTrigger disableButtonEnhancement>
+                                <Button appearance="secondary">Close</Button>
+                            </DialogTrigger>
+                        </DialogActions>
+                    </DialogBody>
+                </DialogSurface>
+            </Dialog>
+            <Dialog
+                open={showFileDialog}
+                >
+                <DialogSurface>
+                    <DialogBody>
+                        <DialogTitle>Attach Document</DialogTitle>
+                        <DialogContent>
+                                <h1>React File Upload</h1>
+                                <input type="file" onChange={handleDocUpload}/>
+                                <button onClick={handleDocumentSubmit}>Upload</button>
                         </DialogContent>
                         <DialogActions>
                             <DialogTrigger disableButtonEnhancement>

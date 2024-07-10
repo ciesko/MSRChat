@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { Send32Regular } from "@fluentui/react-icons";
-import { Button, Caption1, Textarea, TextareaOnChangeData } from "@fluentui/react-components";
+import { Button, Textarea, TextareaOnChangeData } from "@fluentui/react-components";
 import { QuestionInputStyles } from "./QuestionInputStyles";
-import { ComplianceMessage } from "../ComplianceMessage/ComplianceMessage";
 import { Microphone } from "../Microphone/Microphone";
 import React from "react";
 import { AppStateContext } from "../../state/AppProvider";
@@ -93,10 +92,6 @@ export const QuestionInput = ({ onSend, disabled, placeholder, clearOnSend, conv
                         disabled={sendQuestionDisabled || microphoneActive}
                     />
                 </div>
-            </div>
-            <div className={Newstyles.footer}>
-                <Caption1 className={Newstyles.footerText}><i>AI may generate incorrect answers, please check citations for accuracy.</i></Caption1>
-                <ComplianceMessage />
             </div>
         </div>
     );

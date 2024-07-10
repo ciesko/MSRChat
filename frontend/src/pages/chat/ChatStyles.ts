@@ -164,4 +164,17 @@ export const ChatStyles = makeStyles({
         marginBottom: '12px',
     },
 
+    footer: {
+        display: 'flex',
+        flexDirection: 'row',
+        verticalAlign: 'middle',
+        justifyContent: 'space-between',
+        width: '100%',
+        paddingRight: '25px',
+    },
+    footerText: {
+        verticalAlign: 'middle',
+        marginTop: '5px',
+    },
+
 });

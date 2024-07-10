@@ -4,7 +4,7 @@ from flask import  Response, request, jsonify
 
 class DefaultOrchestrator(Orchestrator):
     # Post chat info if data configured
-    def conversation_with_data(self, request_body, message_uuid):
+    def conversation_with_data(self, request_body, message_uuid, file=None):
         # Set up request variables
         body, headers = super().prepare_body_headers_with_data(request)
         base_url = super().AZURE_OPENAI_ENDPOINT if super().AZURE_OPENAI_ENDPOINT else f"https://{super().AZURE_OPENAI_RESOURCE}.openai.azure.com/"
@@ -32,7 +32,7 @@ class DefaultOrchestrator(Orchestrator):
             return Response(super().stream_with_data(body, headers, endpoint, message_uuid, history_metadata), mimetype='text/event-stream')
 
     # Post chat info if data not configured
-    def conversation_without_data(self, request_body, message_uuid):
+    def conversation_without_data(self, request_body, message_uuid, file=None):
         # Setup for direct query to OpenAI
         openai.api_type = "azure"
         openai.api_base = super().AZURE_OPENAI_ENDPOINT if super().AZURE_OPENAI_ENDPOINT else f"https://{super().AZURE_OPENAI_RESOURCE}.openai.azure.com/"
@@ -54,6 +54,12 @@ class DefaultOrchestrator(Orchestrator):
                     "role": message["role"] ,
                     "content": message["content"]
                 })
+
+        if(file):
+            messages.append({
+                "role": "user",
+                "content": f"File: {super().parse_file(file)}"
+            })
 
         history_metadata = request_body.get("history_metadata", {})
         history_metadata = super().conversation_client.create_conversation_item(

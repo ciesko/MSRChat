@@ -203,17 +203,28 @@ def should_use_data():
 
 @app.route("/conversation", methods=["GET", "POST"])
 def conversation():
+    print(request)
     message_uuid = str(uuid.uuid4())
-    request_body = request.json
-    return conversation_internal(request_body, message_uuid)
+    request_body = None
+    file = request.files.get("file", None)
 
-def conversation_internal(request_body, message_uuid):
+    request_body = {}
+    for key in request.form:
+        try:
+            request_body[key] = json.loads(request.form[key])
+        except json.JSONDecodeError:
+            request_body[key] = request.form[key]
+        
+    return conversation_internal(request_body, message_uuid, file)
+
+def conversation_internal(request_body, message_uuid, file=None):
     try:
+        print(request_body)
         use_data = should_use_data()
         if use_data:
-            return orchestrator.conversation_with_data(request_body, message_uuid)
+            return orchestrator.conversation_with_data(request_body, message_uuid, file)
         else:
-            return orchestrator.conversation_without_data(request_body, message_uuid)
+            return orchestrator.conversation_without_data(request_body, message_uuid, file)
     except Exception as e:
         logging.exception("Exception in /conversation")
         return jsonify({"error": str(e)}), 500
@@ -546,7 +557,7 @@ def generate_title(conversation_messages):
         return messages[-2]['content']
 
 if __name__ == "__main__":
-    if DEBUG.lower() == "true":
+    if True:
         app.run(debug=True, use_debugger=True, use_reloader=True)
     else:
         app.run()
