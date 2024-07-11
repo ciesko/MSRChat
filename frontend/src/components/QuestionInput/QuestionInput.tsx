@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Send32Regular } from "@fluentui/react-icons";
-import { Button, Textarea, TextareaOnChangeData } from "@fluentui/react-components";
+import { Button, Caption1, Subtitle1, Subtitle2, Textarea, TextareaOnChangeData } from "@fluentui/react-components";
 import { QuestionInputStyles } from "./QuestionInputStyles";
 import { Microphone } from "../Microphone/Microphone";
 import React from "react";
@@ -13,9 +13,10 @@ interface Props {
     clearOnSend?: boolean;
     conversationId?: string;
     speechEnabled: boolean;
+    fileName?: string;
 }
 
-export const QuestionInput = ({ onSend, disabled, placeholder, clearOnSend, conversationId, speechEnabled }: Props) => {
+export const QuestionInput = ({ onSend, disabled, placeholder, clearOnSend, conversationId, speechEnabled, fileName }: Props) => {
     const appStateContext = React.useContext(AppStateContext);
     const Newstyles = QuestionInputStyles();
     const [question, setQuestion] = useState<string>("");
@@ -93,6 +94,10 @@ export const QuestionInput = ({ onSend, disabled, placeholder, clearOnSend, conv
                     />
                 </div>
             </div>
+            {
+                fileName &&
+                <Caption1 style={{width: "100%"}}>Attached File: {fileName}</Caption1>
+            }
         </div>
     );
 };

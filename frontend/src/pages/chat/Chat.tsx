@@ -59,12 +59,8 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
     const [hideErrorDialog, { toggle: toggleErrorDialog }] = useBoolean(true);
     const [errorMsg, setErrorMsg] = useState<ErrorMessage | null>();
     const [ASSISTANT, TOOL, ERROR] = ["assistant", "tool", "error"];
-    const [file, setFile] = useState();
+    const [file, setFile] = useState<File | undefined>(undefined);
     const [showFileDialog, setShowFileDialog] = useState(false);
-
-    useEffect(() => {
-        console.debug(file);
-    }, [file])
 
     useEffect(() => {
         if (appStateContext?.state.isCosmosDBAvailable?.status === CosmosDBStatus.NotWorking && appStateContext.state.chatHistoryLoadingState === ChatHistoryLoadingState.Fail && hideErrorDialog) {
@@ -571,6 +567,11 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
         setShowFileDialog(false);
     }
 
+    const handleDocCancel = () => {
+        setFile(undefined);
+        setShowFileDialog(false);
+    }
+
     useEffect(() => {
         if (appStateContext?.state.chatHistoryLoadingState !== ChatHistoryLoadingState.Loading) {
             try {
@@ -744,7 +745,7 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
                                         />
                                         <Button
                                             icon={<Attach16Regular />}
-                                            onClick={() => setShowFileDialog(true)}
+                                            onClick={() => {setShowFileDialog(true); setFile(undefined);}}
                                             aria-label="attach document button"
                                         />
                                     </div>
@@ -755,6 +756,7 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
                                         onSend={sendChatQuestion}
                                         conversationId={appStateContext?.state.currentChat?.id ? appStateContext?.state.currentChat?.id : undefined}
                                         speechEnabled={SPEECH_ENABLED ? true : false}
+                                        fileName={file ? file.name : undefined}
                                     />
                                 </div>
                                 <div className={styles.footer}>
@@ -799,14 +801,17 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
                 <DialogSurface>
                     <DialogBody>
                         <DialogTitle>Attach Document</DialogTitle>
-                        <DialogContent>
-                                <h1>React File Upload</h1>
-                                <input type="file" onChange={handleDocUpload}/>
-                                <button onClick={handleDocumentSubmit}>Upload</button>
+                        <DialogContent style={{margin: '1em 0em'}}> 
+                                <Button style={{width: '100%'}} onClick={() => document.getElementById('fileInput')?.click()}>Select File</Button>
+                                {file && <h3>File to attach: {file.name}</h3>}
+                                <input id="fileInput" type="file" onChange={handleDocUpload} style={{display: 'none'}}/>
                         </DialogContent>
                         <DialogActions>
                             <DialogTrigger disableButtonEnhancement>
-                                <Button appearance="secondary">Close</Button>
+                                <Button onClick={handleDocumentSubmit} appearance="secondary">Attach</Button>
+                            </DialogTrigger>
+                            <DialogTrigger disableButtonEnhancement>
+                                <Button onClick={handleDocCancel} appearance="secondary">Cancel</Button>
                             </DialogTrigger>
                         </DialogActions>
                     </DialogBody>
