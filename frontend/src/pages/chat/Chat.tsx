@@ -929,7 +929,6 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
                     />
                   )
                 }
-                <Button>Generate Project</Button>
               </div>
               <div className={styles.chatInputContainer}>
                 <div className={styles.chatInput}>
