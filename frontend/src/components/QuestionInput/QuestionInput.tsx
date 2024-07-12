@@ -94,10 +94,6 @@ export const QuestionInput = ({ onSend, disabled, placeholder, clearOnSend, conv
                     />
                 </div>
             </div>
-            {
-                fileName &&
-                <Caption1 style={{width: "100%"}}>Attached File: {fileName}</Caption1>
-            }
         </div>
     );
 };

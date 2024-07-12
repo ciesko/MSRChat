@@ -50,6 +50,9 @@ class DefaultOrchestrator(Orchestrator):
 
         for message in request_messages:
             if message:
+                # if message starts with User Provided File: then skip
+                if message["content"].startswith("User Provided File: "):
+                    continue
                 messages.append({
                     "role": message["role"] ,
                     "content": message["content"]
@@ -58,7 +61,7 @@ class DefaultOrchestrator(Orchestrator):
         if(file):
             messages.append({
                 "role": "user",
-                "content": f"File: {super().parse_file(file)}"
+                "content": f"User Provided File: {super().parse_file(file)}"
             })
 
         history_metadata = request_body.get("history_metadata", {})

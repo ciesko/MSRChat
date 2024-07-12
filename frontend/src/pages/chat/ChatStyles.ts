@@ -176,5 +176,9 @@ export const ChatStyles = makeStyles({
         verticalAlign: 'middle',
         marginTop: '5px',
     },
+    fileButtonSelected: {
+        backgroundColor:tokens.colorBrandBackground,
+        color: tokens.colorNeutralForegroundOnBrand,
+    }
 
 });
