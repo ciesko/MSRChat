@@ -105,8 +105,7 @@ export const ChatStyles = makeStyles({
         flexDirection: 'column',
         alignItems: 'center',
         height: '100%',
-        ...shorthands.gap('10px'),
-        ...shorthands.margin('8px'),
+        justifyContent: 'space-around'
     },
 
     citationPanelHeaderContainer: {
