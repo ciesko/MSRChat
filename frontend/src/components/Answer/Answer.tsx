@@ -36,7 +36,7 @@ export const Answer = ({
     const [isRefAccordionOpen, { toggle: toggleIsRefAccordionOpen }] = useBoolean(false);
     const filePathTruncationLimit = 50;
 
-    const parsedAnswer = useMemo(() => parseAnswer(answer), [answer]);
+    const parsedAnswer = useMemo(() => parseAnswer(answer), [answer.answer]);
     const [chevronIsExpanded, setChevronIsExpanded] = useState(isRefAccordionOpen);
 
     const [feedbackState, setFeedbackState] = useState(initializeAnswerFeedback(answer));
@@ -68,6 +68,13 @@ export const Answer = ({
         }
         setFeedbackState(currentFeedbackState)
     }, [appStateContext?.state.feedbackState, feedbackState, answer.message_id]);
+
+    useEffect(() => {
+      appStateContext?.dispatch({
+        type: "SET_OBJECT_STATE",
+        payload: { objectState: parsedAnswer.state },
+      });
+    }, [parsedAnswer]);
 
     const createCitationFilepath = (citation: Citation, index: number, truncate: boolean = false) => {
         let citationFilename = "";

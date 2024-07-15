@@ -85,6 +85,11 @@ export const appStateReducer = (state: AppState, action: Action): AppState => {
                 ...state,
                 audioMuted: !state.audioMuted
             };
+        case 'SET_OBJECT_STATE':
+            return {
+                ...state,
+                objectState: action.payload.objectState
+            };
         default:
             return state;
       }
