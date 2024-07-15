@@ -70,10 +70,13 @@ export const Answer = ({
     }, [appStateContext?.state.feedbackState, feedbackState, answer.message_id]);
 
     useEffect(() => {
-      appStateContext?.dispatch({
-        type: "SET_OBJECT_STATE",
-        payload: { objectState: parsedAnswer.state },
-      });
+      if(parsedAnswer.markdownFormatText && parsedAnswer.markdownFormatText != "Generating answer...")
+      {
+        appStateContext?.dispatch({
+          type: "SET_OBJECT_STATE",
+          payload: { objectState: parsedAnswer.state },
+        });
+      }
     }, [parsedAnswer]);
 
     const createCitationFilepath = (citation: Citation, index: number, truncate: boolean = false) => {

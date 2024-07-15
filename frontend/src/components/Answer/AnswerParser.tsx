@@ -1,9 +1,8 @@
-import { AskResponse, Citation, Action } from "../../api";
+import { AskResponse, Citation } from "../../api";
 import { cloneDeep } from "lodash-es";
 
 type ParsedAnswer = {
     citations: Citation[];
-    actions: Action[];
     markdownFormatText: string;
     state?: any;
 };
@@ -38,8 +37,7 @@ export function parseAnswer(answer: AskResponse): ParsedAnswer {
         }
     })
 
-    return {
-        actions: answer.actions,
+    return { 
         citations: filteredCitations,
         markdownFormatText: answerText,
         state: state
