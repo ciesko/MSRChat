@@ -55,7 +55,7 @@ class DefaultOrchestrator(Orchestrator):
                     continue
                 messages.append({
                     "role": message["role"] ,
-                    "content": message["content"]
+                    "content": f"User Provided File: {message['content']}"
                 })
 
         if(file):
