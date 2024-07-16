@@ -15,6 +15,7 @@ export interface AppState {
     speech_enabled: boolean | undefined;
     audioService: AudioService | null;
     audioMuted: boolean;
+    objectState: any;
 }
 
 export type Action =
@@ -33,7 +34,8 @@ export type Action =
     | { type: 'SET_FEEDBACK_STATE'; payload: { answerId: string; feedback: Feedback.Positive | Feedback.Negative | Feedback.Neutral } }
     | { type: 'GET_FEEDBACK_STATE'; payload: string }
     | { type: 'SET_AUDIO_SERVICE'; payload: AudioService }
-    | { type: 'TOGGLE_AUDIO_MUTE' };
+    | { type: 'TOGGLE_AUDIO_MUTE' }
+    | { type: 'SET_OBJECT_STATE'; payload: any };
 
 const initialState: AppState = {
     isChatHistoryOpen: false,
@@ -50,6 +52,7 @@ const initialState: AppState = {
     speech_enabled: undefined,
     audioService: new AudioService(),
     audioMuted: true,
+    objectState: {},
 };
 
 export const AppStateContext = createContext<{
@@ -135,6 +138,11 @@ export const AppStateProvider: React.FC<AppStateProviderProps> = ({ children }) 
         }
     }
     , [state.frontendSettings?.speech_enabled]);
+
+    useEffect(() => {
+        console.debug("Object State Updated: ", state.objectState);
+    }
+    , [state.objectState]);
 
     return (
         <AppStateContext.Provider value={{ state, dispatch }}>

@@ -4,10 +4,21 @@ import { cloneDeep } from "lodash-es";
 type ParsedAnswer = {
     citations: Citation[];
     markdownFormatText: string;
+    state?: any;
 };
 
 export function parseAnswer(answer: AskResponse): ParsedAnswer {
     let answerText = answer.answer;
+    let state = {};
+    
+    // Extract State by looking for --START STATE-- and --END STATE--
+    const startStateIndex = answerText.indexOf("--START STATE--");
+    const endStateIndex = answerText.indexOf("--END STATE--");
+    if (startStateIndex !== -1 && endStateIndex !== -1) {
+        state = answerText.slice(startStateIndex + "--START STATE--".length, endStateIndex);
+        answerText = answerText.slice(0, startStateIndex) + answerText.slice(endStateIndex + "--END STATE--".length);   
+    }
+
     const citationLinks = answerText.match(/\[(doc\d\d?\d?)]/g);
 
     const lengthDocN = "[doc".length;
@@ -26,8 +37,9 @@ export function parseAnswer(answer: AskResponse): ParsedAnswer {
         }
     })
 
-    return {
+    return { 
         citations: filteredCitations,
-        markdownFormatText: answerText
+        markdownFormatText: answerText,
+        state: state
     };
 }
