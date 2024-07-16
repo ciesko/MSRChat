@@ -36,7 +36,7 @@ export function parseAnswer(answer: AskResponse): ParsedAnswer {
           filteredCitations.push(citation);
         }
     })
-
+    console.log("State: ", state);
     return { 
         citations: filteredCitations,
         markdownFormatText: answerText,

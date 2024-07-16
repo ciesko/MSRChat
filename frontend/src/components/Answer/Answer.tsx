@@ -12,6 +12,7 @@ import { AnswerStyles } from "./AnswerStyles";
 import { ChevronDown24Regular, ChevronRight24Regular, ThumbDislike20Filled, ThumbLike20Filled, ThumbLike20Regular, ThumbDislike20Regular } from "@fluentui/react-icons";
 import { AppStateContext } from "../../state/AppProvider";
 import { SpeakText } from "../SpeakText/SpeakText";
+import { PostUserData, Project } from "../PostUserData/PostUserData";
 
 interface Props {
     answer: AskResponse;
@@ -70,13 +71,12 @@ export const Answer = ({
     }, [appStateContext?.state.feedbackState, feedbackState, answer.message_id]);
 
     useEffect(() => {
-      if(parsedAnswer.markdownFormatText && parsedAnswer.markdownFormatText != "Generating answer...")
-      {
-        appStateContext?.dispatch({
-          type: "SET_OBJECT_STATE",
-          payload: { objectState: parsedAnswer.state },
-        });
-      }
+        if (parsedAnswer.markdownFormatText && parsedAnswer.markdownFormatText != "Generating answer...") {
+            appStateContext?.dispatch({
+                type: "SET_OBJECT_STATE",
+                payload: { objectState: parsedAnswer.state },
+            });
+        }
     }, [parsedAnswer]);
 
     const createCitationFilepath = (citation: Citation, index: number, truncate: boolean = false) => {
@@ -191,6 +191,27 @@ export const Answer = ({
         );
     }
 
+    const createProjectObject = (state: any): Project => {
+        // state is an object as a string, so we need to parse it but use a try catch block to handle any errors
+        let data;
+        try {
+            data = JSON.parse(state);
+        } catch (e) {
+            console.error("Error parsing state object: ", e);
+        }
+
+        console.log("Data: ", data);
+        let project: Project = {
+            project_name: data?.project_name || "",
+            project_overview: data?.project_overview || "",
+            team_members: data?.team_members || [],
+            resources: data?.resources || [],
+            status: data?.status || "",
+        }
+        console.log("Project OBJECT! : ",project);
+        return project;
+    }
+
     return (
         <>
             <Card
@@ -237,6 +258,16 @@ export const Answer = ({
                     {
                         SPEECH_ENABLED && isLastAnswer && <SpeakText answer={answer} />
                     }
+                    {
+                        parsedAnswer.state &&
+                        <PostUserData
+                            buttonTitle="Preview project"
+                            messageId={answer.message_id || ""}
+                            onSaveSuccess={() => { }}
+                            project={createProjectObject(parsedAnswer.state)}
+                        />
+                    }
+
                 </div>
                 <div className={styles.answerFooter}>
                     {!!parsedAnswer.citations.length && (

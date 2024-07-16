@@ -44,8 +44,11 @@ export const PostUserData: React.FunctionComponent<IPostUserDataProps> = (props:
     const [error, setError] = React.useState<string>('');
     const [success, setSuccess] = React.useState<boolean>(false);
     const [project, setProject] = React.useState<Project>(props.project);
-    const [newMember, setNewMember] = React.useState<string>('');
-    const [newResource, setNewResource] = React.useState<string>('');
+
+    React.useEffect(() => {
+        console.log("Project changed", props.project);
+        setProject(props.project);
+    }, [props.project]);
 
     const submitProject = async () => {
         setSaving(true);
