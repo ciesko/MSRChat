@@ -197,7 +197,7 @@ export const Answer = ({
         try {
             data = JSON.parse(state);
         } catch (e) {
-            console.error("Error parsing state object: ", e);
+            
         }
 
         let project: Project = {
@@ -258,7 +258,7 @@ export const Answer = ({
                         SPEECH_ENABLED && isLastAnswer && <SpeakText answer={answer} />
                     }
                     {
-                        parsedAnswer.state &&
+                        parsedAnswer.state && createProjectObject(parsedAnswer.state).project_name !== 'undefined' && isLastAnswer &&
                         <PostUserData
                             buttonTitle="Preview project"
                             messageId={answer.message_id || ""}
