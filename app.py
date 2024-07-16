@@ -359,6 +359,30 @@ def update_message():
         logging.exception("Exception in /history/message_feedback")
         return jsonify({"error": str(e)}), 500
 
+@app.route("/history/post_user_data", methods=["POST"])
+def post_user_data():
+    authenticated_user = get_authenticated_user_details(request_headers=request.headers)
+    user_id = authenticated_user['user_principal_id']
+
+    ## check request for message_id
+    message_id = request.json.get("message_id", None)
+    user_data = request.json.get("user_data", None)
+
+    try:
+        if not message_id:
+            return jsonify({"error": "message_id is required"}), 400
+
+        if not user_data:
+            return jsonify({"error": "user_data is required"}), 400
+
+
+        msr_cosmos_db_client.upsert_user_data(user_id, message_id, user_data)
+        return jsonify({"message": f"Successfully added user data {message_id} in MSR CosmosDB"}), 200
+
+    except Exception as e:
+        logging.exception("Exception in /history/post_user_data")
+        return jsonify({"error": str(e)}), 500
+    
 @app.route("/history/delete", methods=["DELETE"])
 def delete_conversation():
     ## get the user id from the request headers

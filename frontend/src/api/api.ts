@@ -362,6 +362,32 @@ export const historyMessageFeedback = async (messageId: string, feedback: string
     return response;
 }
 
+export const post_user_data = async (messageId: string, user_data: any): Promise<Response> => {
+    const response = await fetch("/history/post_user_data", {
+        method: "POST",
+        body: JSON.stringify({
+            message_id: messageId,
+            user_data: user_data
+        }),
+        headers: {
+            "Content-Type": "application/json"
+        },
+    })
+        .then((res) => {
+            return res
+        })
+        .catch((err) => {
+            console.error("There was an issue logging feedback.");
+            let errRes: Response = {
+                ...new Response,
+                ok: false,
+                status: 500,
+            }
+            return errRes;
+        })
+    return response;
+}
+
 export const uploadFileTest = async (file: File): Promise<Response> => {
     const formData = new FormData();
     formData.append("file", file);
