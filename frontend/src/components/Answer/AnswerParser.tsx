@@ -35,8 +35,8 @@ export function parseAnswer(answer: AskResponse): ParsedAnswer {
           citation.reindex_id = citationReindex.toString(); // reindex from 1 for display
           filteredCitations.push(citation);
         }
-    })
-    console.log("State: ", state);
+    });
+    
     return { 
         citations: filteredCitations,
         markdownFormatText: answerText,

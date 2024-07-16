@@ -46,7 +46,6 @@ export const PostUserData: React.FunctionComponent<IPostUserDataProps> = (props:
     const [project, setProject] = React.useState<Project>(props.project);
 
     React.useEffect(() => {
-        console.log("Project changed", props.project);
         setProject(props.project);
     }, [props.project]);
 

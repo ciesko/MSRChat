@@ -200,7 +200,6 @@ export const Answer = ({
             console.error("Error parsing state object: ", e);
         }
 
-        console.log("Data: ", data);
         let project: Project = {
             project_name: data?.project_name || "",
             project_overview: data?.project_overview || "",
@@ -208,7 +207,7 @@ export const Answer = ({
             resources: data?.resources || [],
             status: data?.status || "",
         }
-        console.log("Project OBJECT! : ",project);
+
         return project;
     }
 
