@@ -78,4 +78,14 @@ export const AnswerStyles = makeStyles({
         ...shorthands.margin('10px'),
         ...shorthands.gap('8px'),
     },
+    postDataRow: {
+        width: '100%',
+        // position elements at end
+        display: 'flex',
+        justifyContent: 'flex-end',
+        alignItems: 'center',
+        ...shorthands.gap('8px'),
+        marginTop: '8px',
+        marginRight: '20px',
+    },
 });

@@ -43,4 +43,7 @@ export const PostUserDataStyles = makeStyles({
         // center text
         textAlign: 'center',
     },
+    warningText: {
+        color: tokens.colorPaletteRedForeground1,
+    },
 });

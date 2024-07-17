@@ -14,7 +14,8 @@ import {
     Textarea,
     tokens,
     Subtitle2,
-    Link
+    Link,
+    Caption1
 } from "@fluentui/react-components";
 import { PostUserDataStyles } from './PostUserDataStyles';
 import { CheckmarkCircleFilled, ErrorCircleFilled } from '@fluentui/react-icons';
@@ -76,7 +77,7 @@ export const PostUserData: React.FunctionComponent<IPostUserDataProps> = (props:
     return (
         <Dialog>
             <DialogTrigger disableButtonEnhancement>
-                <Button>{props.buttonTitle}</Button>
+                <Button appearance='primary'>{props.buttonTitle}</Button>
             </DialogTrigger>
             <DialogSurface>
                 <DialogBody>
@@ -117,7 +118,7 @@ export const PostUserData: React.FunctionComponent<IPostUserDataProps> = (props:
                                     <Textarea
                                         onChange={(e, d) => setProject({ ...project, project_overview: d.value })}
                                         defaultValue={project.project_overview}
-                                        rows={5}
+                                        rows={10}
                                         disabled={saving || success}
                                     />
                                 </Field>
@@ -145,12 +146,17 @@ export const PostUserData: React.FunctionComponent<IPostUserDataProps> = (props:
                                         }
                                     />
                                 </div>
+                                <Caption1 className={styles.warningText}>Changes may be lost if you close the form.</Caption1>
                             </div>
                         }
                     </DialogContent>
                     <DialogActions>
                         <DialogTrigger disableButtonEnhancement>
-                            <Button appearance="secondary">Close</Button>
+                            <Button appearance="secondary">
+                                {
+                                    success ? 'Close' : 'Cancel'
+                                }
+                            </Button>
                         </DialogTrigger>
                         <Button
                             appearance="primary"

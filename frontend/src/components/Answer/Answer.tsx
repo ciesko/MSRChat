@@ -197,12 +197,15 @@ export const Answer = ({
         try {
             data = JSON.parse(state);
         } catch (e) {
-            
+
         }
 
+        const projectName = (!data?.project_name || data?.project_name === 'undefined') ? "" : data?.project_name;
+        const projectOverview = (!data?.project_overview || data?.project_overview === 'undefined') ? "" : data?.project_overview;
+
         let project: Project = {
-            project_name: data?.project_name || "",
-            project_overview: data?.project_overview || "",
+            project_name: projectName,
+            project_overview: projectOverview,
             team_members: data?.team_members || [],
             resources: data?.resources || [],
             status: data?.status || "",
@@ -258,13 +261,15 @@ export const Answer = ({
                         SPEECH_ENABLED && isLastAnswer && <SpeakText answer={answer} />
                     }
                     {
-                        parsedAnswer.state && createProjectObject(parsedAnswer.state).project_name !== 'undefined' && isLastAnswer && parsedAnswer.markdownFormatText != "Generating answer..." &&
-                        <PostUserData
-                            buttonTitle="Preview project"
-                            messageId={answer.message_id || ""}
-                            onSaveSuccess={() => { }}
-                            project={createProjectObject(parsedAnswer.state)}
-                        />
+                        parsedAnswer.state && isLastAnswer && parsedAnswer.markdownFormatText != "Generating answer..." &&
+                        <div className={styles.postDataRow}>
+                            <PostUserData
+                                buttonTitle="Preview project"
+                                messageId={answer.message_id || ""}
+                                onSaveSuccess={() => { }}
+                                project={createProjectObject(parsedAnswer.state)}
+                            />
+                        </div>
                     }
 
                 </div>
