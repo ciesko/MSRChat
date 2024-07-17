@@ -258,7 +258,7 @@ export const Answer = ({
                         SPEECH_ENABLED && isLastAnswer && <SpeakText answer={answer} />
                     }
                     {
-                        parsedAnswer.state && createProjectObject(parsedAnswer.state).project_name !== 'undefined' && isLastAnswer &&
+                        parsedAnswer.state && createProjectObject(parsedAnswer.state).project_name !== 'undefined' && isLastAnswer && parsedAnswer.markdownFormatText != "Generating answer..." &&
                         <PostUserData
                             buttonTitle="Preview project"
                             messageId={answer.message_id || ""}
