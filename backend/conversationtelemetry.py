@@ -19,8 +19,8 @@ class ConversationTelemetryClient():
         container_client (ContainerClient): The client object for interacting with the container.
     """
 
-    def __init__(self, cosmosdb_endpoint: str, credential: any, database_name: str, container_name: str):
-        self.enabled = os.environ.get("ENABLE_CONVERSATION_TELEMETRY", "false").lower() == "true"
+    def __init__(self, cosmosdb_endpoint: str, credential: any, database_name: str, container_name: str, enabled: bool = True):
+        self.enabled = enabled
         if self.enabled:
             self.cosmosdb_endpoint = cosmosdb_endpoint
             self.credential = credential

@@ -81,10 +81,13 @@ AZURE_COSMOSDB_MONGO_VCORE_INDEX = os.environ.get("AZURE_COSMOSDB_MONGO_VCORE_IN
 
 # MSR CosmosDB Settings
 MSR_AZURE_COSMOSDB_ACCOUNT = os.environ.get("MSR_AZURE_COSMOSDB_ACCOUNT")
-MSR_AZURE_COSMOSDB_ACCOUNT_KEY= os.environ.get("MSR_AZURE_COSMOSDB_ACCOUNT_KEY")
-MSR_AZURE_COSMOSDB_FEEDBACK_CONTAINER="feedback"
+MSR_AZURE_COSMOSDB_ACCOUNT_KEY = os.environ.get("MSR_AZURE_COSMOSDB_ACCOUNT_KEY")
+MSR_AZURE_COSMOSDB_FEEDBACK_CONTAINER = os.environ.get("MSR_AZURE_COSMOSDB_FEEDBACK_CONTAINER")
 MSR_AZURE_COSMOSDB_DATABASE=os.environ.get("MSR_AZURE_COSMOSDB_DATABASE")
 MSR_AZURE_COSMOSDB_FEEDBACK_ENABLED = os.environ.get("MSR_AZURE_COSMOSDB_FEEDBACK_ENABLED", "false").lower() == "true"
+MSR_ENABLE_CONVERSATION_TELEMETRY = os.environ.get("MSR_ENABLE_CONVERSATION_TELEMETRY", "false").lower() == "true"
+MSR_AZURE_COSMOSDB_USERDATA_CONTAINER = os.environ.get("MSR_AZURE_COSMOSDB_USERDATA_CONTAINER")
+MSR_AZURE_COSMOSDB_USERDATA_ENABLED = os.environ.get("MSR_AZURE_COSMOSDB_USERDATA_ENABLED", "false").lower() == "true"
 
 # Chat History CosmosDB Integration Settings
 AZURE_COSMOSDB_DATABASE = os.environ.get("AZURE_COSMOSDB_DATABASE")
@@ -162,26 +165,42 @@ if AZURE_COSMOSDB_DATABASE and AZURE_COSMOSDB_ACCOUNT and AZURE_COSMOSDB_CONVERS
             credential=credential, 
             database_name=AZURE_COSMOSDB_DATABASE,
             container_name=AZURE_COSMOSDB_CONVERSATIONS_CONTAINER,
-            enable_message_feedback = AZURE_COSMOSDB_ENABLE_FEEDBACK
+            enable_message_feedback = AZURE_COSMOSDB_ENABLE_FEEDBACK,
+            enabled = True
         )
     except Exception as e:
         logging.exception("Exception in CosmosDB initialization", e)
         cosmos_conversation_client = None
 
 # Initialize MSR CosmosDB client for feedback
-msr_cosmos_db_client = None
-if MSR_AZURE_COSMOSDB_ACCOUNT and MSR_AZURE_COSMOSDB_ACCOUNT_KEY and MSR_AZURE_COSMOSDB_DATABASE:
+msr_cosmos_db_client_feedback = None
+if MSR_AZURE_COSMOSDB_ACCOUNT and MSR_AZURE_COSMOSDB_ACCOUNT_KEY and MSR_AZURE_COSMOSDB_DATABASE and MSR_AZURE_COSMOSDB_FEEDBACK_CONTAINER and MSR_AZURE_COSMOSDB_FEEDBACK_ENABLED:
     try:
-        msr_cosmos_db_client = ConversationTelemetryClient(
+        msr_cosmos_db_client_feedback = ConversationTelemetryClient(
             cosmosdb_endpoint=f'https://{MSR_AZURE_COSMOSDB_ACCOUNT}.documents.azure.com:443/', 
             credential=MSR_AZURE_COSMOSDB_ACCOUNT_KEY, 
             database_name=MSR_AZURE_COSMOSDB_DATABASE,
-            container_name=MSR_AZURE_COSMOSDB_FEEDBACK_CONTAINER
+            container_name=MSR_AZURE_COSMOSDB_FEEDBACK_CONTAINER,
+            enabled = True
         )
     except Exception as e:
         logging.exception("Exception in MSR CosmosDB initialization", e)
-        msr_cosmos_db_client = None
+        msr_cosmos_db_client_feedback = None
 
+# Initialize MSR CosmosDB client for posting user data
+msr_cosmos_db_client_userdata = None
+if MSR_AZURE_COSMOSDB_ACCOUNT and MSR_AZURE_COSMOSDB_ACCOUNT_KEY and MSR_AZURE_COSMOSDB_DATABASE and MSR_AZURE_COSMOSDB_USERDATA_CONTAINER and MSR_AZURE_COSMOSDB_USERDATA_ENABLED:
+    try:
+        msr_cosmos_db_client_userdata = ConversationTelemetryClient(
+            cosmosdb_endpoint=f'https://{MSR_AZURE_COSMOSDB_ACCOUNT}.documents.azure.com:443/', 
+            credential=MSR_AZURE_COSMOSDB_ACCOUNT_KEY, 
+            database_name=MSR_AZURE_COSMOSDB_DATABASE,
+            container_name=MSR_AZURE_COSMOSDB_USERDATA_CONTAINER,
+            enabled = True
+        )
+    except Exception as e:
+        logging.exception("Exception in MSR CosmosDB initialization", e)
+        msr_cosmos_db_client_userdata = None
 
 def is_chat_model():
     if 'gpt-4' in AZURE_OPENAI_MODEL_NAME.lower() or AZURE_OPENAI_MODEL_NAME.lower() in ['gpt-35-turbo-4k', 'gpt-35-turbo-16k']:
@@ -344,8 +363,8 @@ def update_message():
             return jsonify({"error": "message_feedback is required"}), 400
 
         ## if msr_feedback is true, write the feedback to the MSR CosmosDB
-        if msr_feedback and msr_cosmos_db_client:
-            msr_cosmos_db_client.upsert_feedback(user_id, message_id, message_feedback)
+        if msr_feedback and msr_cosmos_db_client_feedback:
+            msr_cosmos_db_client_feedback.upsert_feedback(user_id, message_id, message_feedback)
             return jsonify({"message": f"Successfully added feedback to message {message_id} in MSR CosmosDB"}), 200
         
         ## update the message in cosmos
@@ -376,7 +395,7 @@ def post_user_data():
             return jsonify({"error": "user_data is required"}), 400
 
 
-        msr_cosmos_db_client.upsert_user_data(user_id, message_id, user_data)
+        msr_cosmos_db_client_userdata.upsert_user_data(user_id, message_id, user_data)
         return jsonify({"message": f"Successfully added user data {message_id} in MSR CosmosDB"}), 200
 
     except Exception as e:

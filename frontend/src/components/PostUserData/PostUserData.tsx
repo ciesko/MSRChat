@@ -74,7 +74,7 @@ export const PostUserData: React.FunctionComponent<IPostUserDataProps> = (props:
     }
 
     return (
-        <Dialog>
+        <Dialog modalType='non-modal'>
             <DialogTrigger disableButtonEnhancement>
                 <Button>{props.buttonTitle}</Button>
             </DialogTrigger>

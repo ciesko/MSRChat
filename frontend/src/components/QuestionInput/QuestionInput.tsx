@@ -24,7 +24,7 @@ export const QuestionInput = ({ onSend, disabled, placeholder, clearOnSend, conv
 
     const sendQuestion = () => {
         appStateContext?.state.audioService?.stopAudioPlayback();
-        if (disabled || !question.trim()) {
+        if (disabled || (!question.trim() && !fileName)) {
             return;
         }
 
@@ -58,7 +58,7 @@ export const QuestionInput = ({ onSend, disabled, placeholder, clearOnSend, conv
         setQuestion(data.value || "");
     };
 
-    const sendQuestionDisabled = disabled || !question.trim();
+    const sendQuestionDisabled = disabled || (!question.trim() && !fileName);
 
     return (
         <div className={Newstyles.container}>

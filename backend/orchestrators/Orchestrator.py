@@ -66,6 +66,8 @@ class Orchestrator(ABC):
     AZURE_COSMOSDB_DATABASE_NAME = os.environ.get("MSR_AZURE_COSMOSDB_DATABASE")
     AZURE_COSMOSDB_CONTAINER_NAME = os.environ.get("MSR_AZURE_COSMOSDB_CONVERSATIONS_CONTAINER")
     AZURE_COSMOSDB_ACCOUNT_KEY = os.environ.get("MSR_AZURE_COSMOSDB_ACCOUNT_KEY")
+    AZURE_ENABLE_CONVERSATION_TELEMETRY = os.environ.get("ENABLE_CONVERSATION_TELEMETRY", "false").lower() == "true" or os.environ.get("MSR_ENABLE_CONVERSATION_TELEMETRY", "false").lower() == "true"
+
 
     # CosmosDB Mongo vcore vector db Settings
     AZURE_COSMOSDB_MONGO_VCORE_CONNECTION_STRING = os.environ.get("AZURE_COSMOSDB_MONGO_VCORE_CONNECTION_STRING")  #This has to be secure string
@@ -104,7 +106,8 @@ class Orchestrator(ABC):
         cosmosdb_endpoint=str(AZURE_COSMOSDB_ENDPOINT),
         credential=str(AZURE_COSMOSDB_ACCOUNT_KEY),
         database_name=str(AZURE_COSMOSDB_DATABASE_NAME),
-        container_name=str(AZURE_COSMOSDB_CONTAINER_NAME)
+        container_name=str(AZURE_COSMOSDB_CONTAINER_NAME),
+        enabled=AZURE_ENABLE_CONVERSATION_TELEMETRY
     )
 
     # methods to implement in orchestrator
