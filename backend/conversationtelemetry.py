@@ -246,7 +246,7 @@ class ConversationTelemetryClient():
             item["feedback"] = message_feedback
             self.container_client.replace_item(item=item, body=item)
 
-    def upsert_user_data(self, user_id, message_id, data):
+    def upsert_user_data(self, user_id, user_alias, message_id, data):
         """
         Creates new item in the container with the feedback.
         If the item already exists, updates the feedback.
@@ -277,6 +277,7 @@ class ConversationTelemetryClient():
                 'message_id': message_id,
                 'type': 'user_data',
                 'userId': user_id,
+                'userAlias': user_alias,
                 'data': data
             }
             self.container_client.upsert_item(data)

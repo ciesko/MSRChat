@@ -382,6 +382,7 @@ def update_message():
 def post_user_data():
     authenticated_user = get_authenticated_user_details(request_headers=request.headers)
     user_id = authenticated_user['user_principal_id']
+    user_alias = authenticated_user['user_name']
 
     ## check request for message_id
     message_id = request.json.get("message_id", None)
@@ -395,7 +396,7 @@ def post_user_data():
             return jsonify({"error": "user_data is required"}), 400
 
 
-        msr_cosmos_db_client_userdata.upsert_user_data(user_id, message_id, user_data)
+        msr_cosmos_db_client_userdata.upsert_user_data(user_id, user_alias, message_id, user_data)
         return jsonify({"message": f"Successfully added user data {message_id} in MSR CosmosDB"}), 200
 
     except Exception as e:
