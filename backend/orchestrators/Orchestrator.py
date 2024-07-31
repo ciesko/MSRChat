@@ -6,6 +6,7 @@ import requests
 import copy
 from dotenv import load_dotenv
 from docx import Document
+import fitz
 
 from backend.conversationtelemetry import ConversationTelemetryClient
 load_dotenv()
@@ -163,8 +164,6 @@ class Orchestrator(ABC):
     def parse_file(self, file):
         res = ""
 
-        print(file.content_type)
-
         # if file is palin text, return the text
         if file.content_type == "text/plain":
             res = file.read().decode("utf-8")
@@ -176,7 +175,15 @@ class Orchestrator(ABC):
             for para in doc.paragraphs:
                 fullText.append(para.text)
             res = '\n'.join(fullText)
-        
+
+        # if file is pdf, parse using pdf
+        elif file.content_type == "application/pdf":
+            document = fitz.open(stream=file.read(), filetype="pdf")
+
+            for page_num in range(len(document)):
+                page = document[page_num]
+                res += page.get_text()
+       
         else:
             return "The user has provided a non supported file type"
         
