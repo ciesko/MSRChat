@@ -5,6 +5,7 @@ import logging
 import requests
 import copy
 from dotenv import load_dotenv
+from azure.identity import DefaultAzureCredential
 
 from backend.conversationtelemetry import ConversationTelemetryClient
 load_dotenv()
@@ -65,7 +66,7 @@ class Orchestrator(ABC):
     AZURE_COSMOSDB_ENDPOINT = f'https://{os.environ.get("MSR_AZURE_COSMOSDB_ACCOUNT")}.documents.azure.com:443/'
     AZURE_COSMOSDB_DATABASE_NAME = os.environ.get("MSR_AZURE_COSMOSDB_DATABASE")
     AZURE_COSMOSDB_CONTAINER_NAME = os.environ.get("MSR_AZURE_COSMOSDB_CONVERSATIONS_CONTAINER")
-    AZURE_COSMOSDB_ACCOUNT_KEY = os.environ.get("MSR_AZURE_COSMOSDB_ACCOUNT_KEY")
+    # AZURE_COSMOSDB_ACCOUNT_KEY = os.environ.get("MSR_AZURE_COSMOSDB_ACCOUNT_KEY")
 
     # CosmosDB Mongo vcore vector db Settings
     AZURE_COSMOSDB_MONGO_VCORE_CONNECTION_STRING = os.environ.get("AZURE_COSMOSDB_MONGO_VCORE_CONNECTION_STRING")  #This has to be secure string
@@ -83,7 +84,7 @@ class Orchestrator(ABC):
 
     # Elasticsearch Integration Settings
     ELASTICSEARCH_ENDPOINT = os.environ.get("ELASTICSEARCH_ENDPOINT")
-    ELASTICSEARCH_ENCODED_API_KEY = os.environ.get("ELASTICSEARCH_ENCODED_API_KEY")
+    # ELASTICSEARCH_ENCODED_API_KEY = os.environ.get("ELASTICSEARCH_ENCODED_API_KEY")
     ELASTICSEARCH_INDEX = os.environ.get("ELASTICSEARCH_INDEX")
     ELASTICSEARCH_QUERY_TYPE = os.environ.get("ELASTICSEARCH_QUERY_TYPE", "simple")
     ELASTICSEARCH_TOP_K = os.environ.get("ELASTICSEARCH_TOP_K", SEARCH_TOP_K)
@@ -99,10 +100,11 @@ class Orchestrator(ABC):
     SHOULD_STREAM = True if AZURE_OPENAI_STREAM.lower() == "true" else False
 
     message_uuid = ""
+    credential = DefaultAzureCredential()
 
     conversation_client = ConversationTelemetryClient(
         cosmosdb_endpoint=str(AZURE_COSMOSDB_ENDPOINT),
-        credential=str(AZURE_COSMOSDB_ACCOUNT_KEY),
+        credential=credential,
         database_name=str(AZURE_COSMOSDB_DATABASE_NAME),
         container_name=str(AZURE_COSMOSDB_CONTAINER_NAME)
     )
@@ -161,6 +163,7 @@ class Orchestrator(ABC):
     def prepare_body_headers_with_data(self, request, **kwargs):
         request_messages = request.json["messages"]
         key=kwargs.get('key', self.AZURE_OPENAI_KEY)
+        # credential = DefaultAzureCredential()
 
         body = {
             "messages": request_messages,
@@ -257,7 +260,7 @@ class Orchestrator(ABC):
                             "type": "AzureCognitiveSearch",
                             "parameters": {
                                 "endpoint": self.ELASTICSEARCH_ENDPOINT,
-                                "encodedApiKey": self.ELASTICSEARCH_ENCODED_API_KEY,
+                                "encodedApiKey": credential,
                                 "indexName": self.ELASTICSEARCH_INDEX,
                                 "fieldsMapping": {
                                     "contentFields": self.parse_multi_columns(self.ELASTICSEARCH_CONTENT_COLUMNS) if self.ELASTICSEARCH_CONTENT_COLUMNS else [],

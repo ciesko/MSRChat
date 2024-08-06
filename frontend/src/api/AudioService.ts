@@ -29,12 +29,10 @@ export class AudioService {
 
     private createResources = async () => {
         this.speechToken = await getSpeechAuthToken();
-        console.log('Speech token from front end:', this.speechToken);
         if (!this.speechToken) {
             throw new Error('Speech was cancelled. Auth token cannot be retrieved.');
         } else {
             this.speechConfig = SpeechConfig.fromAuthorizationToken(this.speechToken.access_token, "westus3");
-            console.log('Speech config:', this.speechConfig);
             this.recognizer = SpeechRecognizer.FromConfig(this.speechConfig, this.autoDetectSourceLanguageConfig, this.recognizerAudioConfig);
             this.synthesizer = new SpeechSynthesizer(this.speechConfig, this.synthesizerAudioConfig);
             // by default mute the audio

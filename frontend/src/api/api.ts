@@ -19,6 +19,7 @@ export async function conversationApi(options: ConversationRequest, abortSignal:
 
 export async function getUserInfo(): Promise<UserInfo[]> {
     const response = await fetch('/.auth/me');
+    console.log(response)
     if (!response.ok) {
         console.log("No identity provider found. Access to chat will be blocked.")
         return [];
@@ -308,7 +309,6 @@ export async function getSpeechAuthToken(): Promise<any> {
     }
     const tokenJson = await response.json();
 
-    console.log("Token JSON: ", tokenJson);
     // Create expires time 9 minutes from now
     const expiresTime = new Date();
     expiresTime.setMinutes(expiresTime.getMinutes() + 9);

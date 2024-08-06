@@ -3,7 +3,7 @@ import dataclasses
 import time
 
 from tqdm import tqdm
-from azure.identity import AzureDeveloperCliCredential
+from azure.identity import AzureDeveloperCliCredential, DefaultAzureCredential
 from azure.core.credentials import AzureKeyCredential
 from azure.search.documents.indexes import SearchIndexClient
 from azure.search.documents.indexes.models import (
@@ -210,9 +210,7 @@ if __name__ == "__main__":
         else AzureDeveloperCliCredential(tenant_id=args.tenantid, process_timeout=60)
     )
     default_creds = azd_credential if args.searchkey == None else None
-    search_creds = (
-        default_creds if args.searchkey == None else AzureKeyCredential(args.searchkey)
-    )
+    search_creds = DefaultAzureCredential()
     formrecognizer_creds = (
         default_creds
         if args.formrecognizerkey == None
