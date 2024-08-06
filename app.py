@@ -8,6 +8,7 @@ import aiohttp
 from azure.identity import DefaultAzureCredential
 from flask import Flask, request, jsonify, send_from_directory, render_template
 from dotenv import load_dotenv
+from azure.cognitiveservices.speech import SpeechConfig
 
 from backend.auth.auth_utils import get_authenticated_user_details
 from backend.history.cosmosdbservice import CosmosConversationClient
@@ -95,7 +96,7 @@ AZURE_COSMOSDB_ENABLE_FEEDBACK = os.environ.get("AZURE_COSMOSDB_ENABLE_FEEDBACK"
 
 # Speech
 AZURE_SPEECH_REGION = os.environ.get("AZURE_SPEECH_REGION")
-AZURE_SPEECH_KEY = os.environ.get("AZURE_SPEECH_KEY")
+# AZURE_SPEECH_KEY = os.environ.get("AZURE_SPEECH_KEY")
 
 # Frontend Settings via Environment Variables
 AUTH_ENABLED = os.environ.get("AUTH_ENABLED", "true").lower() == "true"
@@ -200,6 +201,25 @@ def should_use_data():
         return True
     
     return False
+
+# def get_speech_access_token():
+#     credential = DefaultAzureCredential()
+#     token = credential.get_token("https://cognitiveservices.azure.com/.default")
+#     return token
+
+async def get_speech_config():
+    credential = DefaultAzureCredential()
+    speech_token_endpoint = os.environ.get("AZURE_SPEECH_TOKEN_ENDPOINT")
+    speech_resource_id = os.environ.get("AZURE_SPEECH_RESOURCE_ID")
+    speech_region = os.environ.get("AZURE_SPEECH_REGION")
+
+    token = await credential.get_token(speech_token_endpoint).token
+    region = speech_region
+    authorizationToken = "aad#" + speech_resource_id + "#" + token
+
+    stripped_token = authorizationToken.split('#')[-1]
+    print(stripped_token)
+    return stripped_token
 
 @app.route("/conversation", methods=["GET", "POST"])
 def conversation():
@@ -503,22 +523,37 @@ def get_frontend_settings():
     
 @app.route("/speech/issueToken", methods=["GET"])
 async def speech_issue_token():
-    """Generate short-lived (10 minutes) access token (JWT) for Azure Speech service."""
-    if not AZURE_SPEECH_KEY:
-        return jsonify({"error": "Azure Speech key is not configured"}), 404
     if not AZURE_SPEECH_REGION:
         return jsonify({"error": "Azure Speech region is not configured"}), 404
 
-    url = f"https://{AZURE_SPEECH_REGION}.api.cognitive.microsoft.com/sts/v1.0/issueToken"
+    # url = f"https://{AZURE_SPEECH_REGION}.api.cognitive.microsoft.com/sts/v1.0/issueToken"
 
     try:
-        async with aiohttp.ClientSession() as session: 
-            async with session.post(url, headers={"Ocp-Apim-Subscription-Key": AZURE_SPEECH_KEY}) as response: 
-                access_token = await response.text()
-                return jsonify({"access_token": access_token, "region": AZURE_SPEECH_REGION}), 200
+        credential = DefaultAzureCredential()
+        speech_token_endpoint = os.environ.get("AZURE_SPEECH_TOKEN_ENDPOINT")
+        speech_resource_id = os.environ.get("AZURE_SPEECH_RESOURCE_ID")
+        speech_region = os.environ.get("AZURE_SPEECH_REGION")
+
+        token = credential.get_token(speech_token_endpoint).token
+        region = speech_region
+        authorizationToken = "aad#" + speech_resource_id + "#" + token
+
+        stripped_token = authorizationToken.split('#')[-1]
+
+        return jsonify({"access_token": authorizationToken, "region": AZURE_SPEECH_REGION}), 200
+    # try:
+    #     access_token = await get_speech_access_token()
+    #     return jsonify({"access_token": access_token, "region": AZURE_SPEECH_REGION}), 200
+
+    # try:
+    #     async with aiohttp.ClientSession() as session: 
+    #         async with session.post(url, headers={"Ocp-Apim-Subscription-Key": AZURE_SPEECH_KEY}) as response: 
+    #             access_token = await response.text()
+    #             return jsonify({"access_token": access_token, "region": AZURE_SPEECH_REGION}), 200
     except Exception:
         logging.exception("Exception in /speech/issueToken")
         return jsonify({"error": "Azure Speech is not working."}), 500
+
     
 def generate_title(conversation_messages):
     ## make sure the messages are sorted by _ts descending

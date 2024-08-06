@@ -299,13 +299,16 @@ export const historyEnsure = async (): Promise<CosmosDBHealth> => {
     return response;
 }
 
-export async function getSpeechAuthToken(): Promise<SpeechAuth | undefined> {
+export async function getSpeechAuthToken(): Promise<any> {
+// export async function getSpeechAuthToken(): Promise<SpeechAuth | undefined> {
     const response = await fetch('/speech/issueToken');
     if (!response.ok) {
         console.log("Can't retrieve access token, speech will be disabled.")
         return undefined;
     }
     const tokenJson = await response.json();
+
+    console.log("Token JSON: ", tokenJson);
     // Create expires time 9 minutes from now
     const expiresTime = new Date();
     expiresTime.setMinutes(expiresTime.getMinutes() + 9);
@@ -316,6 +319,7 @@ export async function getSpeechAuthToken(): Promise<SpeechAuth | undefined> {
         expiresTime: expiresTime
     }
     return token;
+    // return tokenJson.access_token;
 }
 
 export const frontendSettings = async (): Promise<Response | null> => {
