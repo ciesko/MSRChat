@@ -257,7 +257,7 @@ class Orchestrator(ABC):
                             "type": "AzureCognitiveSearch",
                             "parameters": {
                                 "endpoint": self.ELASTICSEARCH_ENDPOINT,
-                                "encodedApiKey": ELASTICSEARCH_ENCODED_API_KEY,
+                                "encodedApiKey": self.ELASTICSEARCH_ENCODED_API_KEY,
                                 "indexName": self.ELASTICSEARCH_INDEX,
                                 "fieldsMapping": {
                                     "contentFields": self.parse_multi_columns(self.ELASTICSEARCH_CONTENT_COLUMNS) if self.ELASTICSEARCH_CONTENT_COLUMNS else [],

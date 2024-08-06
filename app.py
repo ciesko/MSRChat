@@ -151,7 +151,6 @@ message_uuid = ""
 cosmos_conversation_client = None
 if AZURE_COSMOSDB_DATABASE and AZURE_COSMOSDB_ACCOUNT and AZURE_COSMOSDB_CONVERSATIONS_CONTAINER:
     try :
-        print("cosmos conversation client in app.py")
         cosmos_endpoint = f'https://{AZURE_COSMOSDB_ACCOUNT}.documents.azure.com:443/'
 
         cosmos_conversation_client = CosmosConversationClient(
