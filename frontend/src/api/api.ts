@@ -19,7 +19,6 @@ export async function conversationApi(options: ConversationRequest, abortSignal:
 
 export async function getUserInfo(): Promise<UserInfo[]> {
     const response = await fetch('/.auth/me');
-    console.log(response)
     if (!response.ok) {
         console.log("No identity provider found. Access to chat will be blocked.")
         return [];
@@ -300,8 +299,7 @@ export const historyEnsure = async (): Promise<CosmosDBHealth> => {
     return response;
 }
 
-export async function getSpeechAuthToken(): Promise<any> {
-// export async function getSpeechAuthToken(): Promise<SpeechAuth | undefined> {
+export async function getSpeechAuthToken(): Promise<SpeechAuth | undefined> {
     const response = await fetch('/speech/issueToken');
     if (!response.ok) {
         console.log("Can't retrieve access token, speech will be disabled.")
@@ -319,7 +317,6 @@ export async function getSpeechAuthToken(): Promise<any> {
         expiresTime: expiresTime
     }
     return token;
-    // return tokenJson.access_token;
 }
 
 export const frontendSettings = async (): Promise<Response | null> => {

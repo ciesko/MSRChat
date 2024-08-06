@@ -5,10 +5,10 @@ from backend.conversationtelemetry import ConversationTelemetryClient
 import openai
 import uuid
 import aiohttp
+from azure.identity import DefaultAzureCredential
 from flask import Flask, request, jsonify, send_from_directory, render_template
 from dotenv import load_dotenv
 from azure.cognitiveservices.speech import SpeechConfig
-from azure.identity import DefaultAzureCredential
 
 from backend.auth.auth_utils import get_authenticated_user_details
 from backend.history.cosmosdbservice import CosmosConversationClient
@@ -156,7 +156,7 @@ if AZURE_COSMOSDB_DATABASE and AZURE_COSMOSDB_ACCOUNT and AZURE_COSMOSDB_CONVERS
 
         cosmos_conversation_client = CosmosConversationClient(
             cosmosdb_endpoint=cosmos_endpoint, 
-            credential=DefaultAzureCredential(), 
+            credential=credential, 
             database_name=AZURE_COSMOSDB_DATABASE,
             container_name=AZURE_COSMOSDB_CONVERSATIONS_CONTAINER,
             enable_message_feedback = AZURE_COSMOSDB_ENABLE_FEEDBACK
@@ -197,7 +197,6 @@ def should_use_data():
         return True
     
     return False
-
 
 @app.route("/conversation", methods=["GET", "POST"])
 def conversation():
@@ -515,7 +514,6 @@ async def speech_issue_token():
         logging.exception("Exception in /speech/issueToken")
         return jsonify({"error": "Azure Speech is not working."}), 500
 
-    
 def generate_title(conversation_messages):
     ## make sure the messages are sorted by _ts descending
     title_prompt = 'Summarize the conversation so far into a 4-word or less title. Do not use any quotation marks or punctuation. Respond with a json object in the format {{"title": string}}. Do not include any other commentary or description.'

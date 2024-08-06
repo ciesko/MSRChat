@@ -83,7 +83,7 @@ class Orchestrator(ABC):
 
     # Elasticsearch Integration Settings
     ELASTICSEARCH_ENDPOINT = os.environ.get("ELASTICSEARCH_ENDPOINT")
-    # ELASTICSEARCH_ENCODED_API_KEY = os.environ.get("ELASTICSEARCH_ENCODED_API_KEY")
+    ELASTICSEARCH_ENCODED_API_KEY = os.environ.get("ELASTICSEARCH_ENCODED_API_KEY")
     ELASTICSEARCH_INDEX = os.environ.get("ELASTICSEARCH_INDEX")
     ELASTICSEARCH_QUERY_TYPE = os.environ.get("ELASTICSEARCH_QUERY_TYPE", "simple")
     ELASTICSEARCH_TOP_K = os.environ.get("ELASTICSEARCH_TOP_K", SEARCH_TOP_K)
@@ -100,7 +100,6 @@ class Orchestrator(ABC):
 
     message_uuid = ""
 
-        # credential=str(AZURE_COSMOSDB_ACCOUNT_KEY),
     conversation_client = ConversationTelemetryClient(
         cosmosdb_endpoint=str(AZURE_COSMOSDB_ENDPOINT),
         credential=DefaultAzureCredential(),
@@ -258,7 +257,7 @@ class Orchestrator(ABC):
                             "type": "AzureCognitiveSearch",
                             "parameters": {
                                 "endpoint": self.ELASTICSEARCH_ENDPOINT,
-                                "encodedApiKey": credential,
+                                "encodedApiKey": ELASTICSEARCH_ENCODED_API_KEY,
                                 "indexName": self.ELASTICSEARCH_INDEX,
                                 "fieldsMapping": {
                                     "contentFields": self.parse_multi_columns(self.ELASTICSEARCH_CONTENT_COLUMNS) if self.ELASTICSEARCH_CONTENT_COLUMNS else [],
