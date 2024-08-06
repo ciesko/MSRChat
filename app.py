@@ -5,10 +5,10 @@ from backend.conversationtelemetry import ConversationTelemetryClient
 import openai
 import uuid
 import aiohttp
-from azure.identity import DefaultAzureCredential
 from flask import Flask, request, jsonify, send_from_directory, render_template
 from dotenv import load_dotenv
 from azure.cognitiveservices.speech import SpeechConfig
+from azure.identity import DefaultAzureCredential
 
 from backend.auth.auth_utils import get_authenticated_user_details
 from backend.history.cosmosdbservice import CosmosConversationClient
@@ -56,7 +56,6 @@ SEARCH_ENABLE_IN_DOMAIN = os.environ.get("SEARCH_ENABLE_IN_DOMAIN", "true")
 # ACS Integration Settings
 AZURE_SEARCH_SERVICE = os.environ.get("AZURE_SEARCH_SERVICE")
 AZURE_SEARCH_INDEX = os.environ.get("AZURE_SEARCH_INDEX")
-# AZURE_SEARCH_KEY = os.environ.get("AZURE_SEARCH_KEY")
 AZURE_SEARCH_TOP_K = os.environ.get("AZURE_SEARCH_TOP_K", SEARCH_TOP_K)
 AZURE_SEARCH_ENABLE_IN_DOMAIN = os.environ.get("AZURE_SEARCH_ENABLE_IN_DOMAIN", SEARCH_ENABLE_IN_DOMAIN)
 AZURE_SEARCH_CONTENT_COLUMNS = os.environ.get("AZURE_SEARCH_CONTENT_COLUMNS")
@@ -82,7 +81,6 @@ AZURE_COSMOSDB_MONGO_VCORE_INDEX = os.environ.get("AZURE_COSMOSDB_MONGO_VCORE_IN
 
 # MSR CosmosDB Settings
 MSR_AZURE_COSMOSDB_ACCOUNT = os.environ.get("MSR_AZURE_COSMOSDB_ACCOUNT")
-# MSR_AZURE_COSMOSDB_ACCOUNT_KEY= os.environ.get("MSR_AZURE_COSMOSDB_ACCOUNT_KEY")
 MSR_AZURE_COSMOSDB_FEEDBACK_CONTAINER="feedback"
 MSR_AZURE_COSMOSDB_DATABASE=os.environ.get("MSR_AZURE_COSMOSDB_DATABASE")
 MSR_AZURE_COSMOSDB_FEEDBACK_ENABLED = os.environ.get("MSR_AZURE_COSMOSDB_FEEDBACK_ENABLED", "false").lower() == "true"
@@ -91,7 +89,6 @@ MSR_AZURE_COSMOSDB_FEEDBACK_ENABLED = os.environ.get("MSR_AZURE_COSMOSDB_FEEDBAC
 AZURE_COSMOSDB_DATABASE = os.environ.get("AZURE_COSMOSDB_DATABASE")
 AZURE_COSMOSDB_ACCOUNT = os.environ.get("AZURE_COSMOSDB_ACCOUNT")
 AZURE_COSMOSDB_CONVERSATIONS_CONTAINER = os.environ.get("AZURE_COSMOSDB_CONVERSATIONS_CONTAINER")
-# AZURE_COSMOSDB_ACCOUNT_KEY = os.environ.get("AZURE_COSMOSDB_ACCOUNT_KEY")
 AZURE_COSMOSDB_ENABLE_FEEDBACK = os.environ.get("AZURE_COSMOSDB_ENABLE_FEEDBACK", "false").lower() == "true"
 
 # Speech
@@ -154,11 +151,12 @@ message_uuid = ""
 cosmos_conversation_client = None
 if AZURE_COSMOSDB_DATABASE and AZURE_COSMOSDB_ACCOUNT and AZURE_COSMOSDB_CONVERSATIONS_CONTAINER:
     try :
+        print("cosmos conversation client in app.py")
         cosmos_endpoint = f'https://{AZURE_COSMOSDB_ACCOUNT}.documents.azure.com:443/'
 
         cosmos_conversation_client = CosmosConversationClient(
             cosmosdb_endpoint=cosmos_endpoint, 
-            credential=credential, 
+            credential=DefaultAzureCredential(), 
             database_name=AZURE_COSMOSDB_DATABASE,
             container_name=AZURE_COSMOSDB_CONVERSATIONS_CONTAINER,
             enable_message_feedback = AZURE_COSMOSDB_ENABLE_FEEDBACK
