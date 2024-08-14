@@ -7,3 +7,4 @@ python-dotenv==1.0.0
 azure-cosmos==4.5.0
 applicationinsights==0.11.10
 aiohttp==3.9.2
+azure-cognitiveservices-speech==1.38.0
