@@ -306,6 +306,7 @@ export async function getSpeechAuthToken(): Promise<SpeechAuth | undefined> {
         return undefined;
     }
     const tokenJson = await response.json();
+
     // Create expires time 9 minutes from now
     const expiresTime = new Date();
     expiresTime.setMinutes(expiresTime.getMinutes() + 9);

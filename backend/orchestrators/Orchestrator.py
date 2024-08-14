@@ -5,6 +5,7 @@ import logging
 import requests
 import copy
 from dotenv import load_dotenv
+from azure.identity import DefaultAzureCredential
 
 from backend.conversationtelemetry import ConversationTelemetryClient
 load_dotenv()
@@ -65,7 +66,6 @@ class Orchestrator(ABC):
     AZURE_COSMOSDB_ENDPOINT = f'https://{os.environ.get("MSR_AZURE_COSMOSDB_ACCOUNT")}.documents.azure.com:443/'
     AZURE_COSMOSDB_DATABASE_NAME = os.environ.get("MSR_AZURE_COSMOSDB_DATABASE")
     AZURE_COSMOSDB_CONTAINER_NAME = os.environ.get("MSR_AZURE_COSMOSDB_CONVERSATIONS_CONTAINER")
-    AZURE_COSMOSDB_ACCOUNT_KEY = os.environ.get("MSR_AZURE_COSMOSDB_ACCOUNT_KEY")
 
     # CosmosDB Mongo vcore vector db Settings
     AZURE_COSMOSDB_MONGO_VCORE_CONNECTION_STRING = os.environ.get("AZURE_COSMOSDB_MONGO_VCORE_CONNECTION_STRING")  #This has to be secure string
@@ -102,7 +102,7 @@ class Orchestrator(ABC):
 
     conversation_client = ConversationTelemetryClient(
         cosmosdb_endpoint=str(AZURE_COSMOSDB_ENDPOINT),
-        credential=str(AZURE_COSMOSDB_ACCOUNT_KEY),
+        credential=DefaultAzureCredential(),
         database_name=str(AZURE_COSMOSDB_DATABASE_NAME),
         container_name=str(AZURE_COSMOSDB_CONTAINER_NAME)
     )

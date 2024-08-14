@@ -8,6 +8,7 @@ import aiohttp
 from azure.identity import DefaultAzureCredential
 from flask import Flask, request, jsonify, send_from_directory, render_template
 from dotenv import load_dotenv
+from azure.cognitiveservices.speech import SpeechConfig
 
 from backend.auth.auth_utils import get_authenticated_user_details
 from backend.history.cosmosdbservice import CosmosConversationClient
@@ -55,7 +56,6 @@ SEARCH_ENABLE_IN_DOMAIN = os.environ.get("SEARCH_ENABLE_IN_DOMAIN", "true")
 # ACS Integration Settings
 AZURE_SEARCH_SERVICE = os.environ.get("AZURE_SEARCH_SERVICE")
 AZURE_SEARCH_INDEX = os.environ.get("AZURE_SEARCH_INDEX")
-AZURE_SEARCH_KEY = os.environ.get("AZURE_SEARCH_KEY")
 AZURE_SEARCH_TOP_K = os.environ.get("AZURE_SEARCH_TOP_K", SEARCH_TOP_K)
 AZURE_SEARCH_ENABLE_IN_DOMAIN = os.environ.get("AZURE_SEARCH_ENABLE_IN_DOMAIN", SEARCH_ENABLE_IN_DOMAIN)
 AZURE_SEARCH_CONTENT_COLUMNS = os.environ.get("AZURE_SEARCH_CONTENT_COLUMNS")
@@ -81,7 +81,6 @@ AZURE_COSMOSDB_MONGO_VCORE_INDEX = os.environ.get("AZURE_COSMOSDB_MONGO_VCORE_IN
 
 # MSR CosmosDB Settings
 MSR_AZURE_COSMOSDB_ACCOUNT = os.environ.get("MSR_AZURE_COSMOSDB_ACCOUNT")
-MSR_AZURE_COSMOSDB_ACCOUNT_KEY= os.environ.get("MSR_AZURE_COSMOSDB_ACCOUNT_KEY")
 MSR_AZURE_COSMOSDB_FEEDBACK_CONTAINER="feedback"
 MSR_AZURE_COSMOSDB_DATABASE=os.environ.get("MSR_AZURE_COSMOSDB_DATABASE")
 MSR_AZURE_COSMOSDB_FEEDBACK_ENABLED = os.environ.get("MSR_AZURE_COSMOSDB_FEEDBACK_ENABLED", "false").lower() == "true"
@@ -90,12 +89,12 @@ MSR_AZURE_COSMOSDB_FEEDBACK_ENABLED = os.environ.get("MSR_AZURE_COSMOSDB_FEEDBAC
 AZURE_COSMOSDB_DATABASE = os.environ.get("AZURE_COSMOSDB_DATABASE")
 AZURE_COSMOSDB_ACCOUNT = os.environ.get("AZURE_COSMOSDB_ACCOUNT")
 AZURE_COSMOSDB_CONVERSATIONS_CONTAINER = os.environ.get("AZURE_COSMOSDB_CONVERSATIONS_CONTAINER")
-AZURE_COSMOSDB_ACCOUNT_KEY = os.environ.get("AZURE_COSMOSDB_ACCOUNT_KEY")
 AZURE_COSMOSDB_ENABLE_FEEDBACK = os.environ.get("AZURE_COSMOSDB_ENABLE_FEEDBACK", "false").lower() == "true"
 
 # Speech
 AZURE_SPEECH_REGION = os.environ.get("AZURE_SPEECH_REGION")
-AZURE_SPEECH_KEY = os.environ.get("AZURE_SPEECH_KEY")
+AZURE_SPEECH_TOKEN_ENDPOINT = os.environ.get("AZURE_SPEECH_TOKEN_ENDPOINT")
+AZURE_SPEECH_RESOURCE_ID = os.environ.get("AZURE_SPEECH_RESOURCE_ID")
 
 # Frontend Settings via Environment Variables
 AUTH_ENABLED = os.environ.get("AUTH_ENABLED", "true").lower() == "true"
@@ -112,6 +111,8 @@ REACT_APP_FRONTPAGE_QUESTION_HEADING= os.environ.get("REACT_APP_FRONTPAGE_QUESTI
 REACT_APP_INPUT_PLACEHOLDER= os.environ.get("REACT_APP_INPUT_PLACEHOLDER", "Ask a question...")
 REACT_APP_CONTACT_US_LINK = os.environ.get("REACT_APP_CONTACT_US_LINK", "")
 REACT_APP_SUBMIT_FEEDBACK_URL = os.environ.get("REACT_APP_SUBMIT_FEEDBACK_URL", "")
+
+credential = DefaultAzureCredential()
 
 # FRONT_PAGE_LINKS = json.loads(REACT_APP_FRONTPAGE_LINKS) AND CHECK IF IT IS A VALID JSON OBJECT. IF NOT SET IT TO EMPTY LIST
 try:
@@ -152,11 +153,6 @@ if AZURE_COSMOSDB_DATABASE and AZURE_COSMOSDB_ACCOUNT and AZURE_COSMOSDB_CONVERS
     try :
         cosmos_endpoint = f'https://{AZURE_COSMOSDB_ACCOUNT}.documents.azure.com:443/'
 
-        if not AZURE_COSMOSDB_ACCOUNT_KEY:
-            credential = DefaultAzureCredential()
-        else:
-            credential = AZURE_COSMOSDB_ACCOUNT_KEY
-
         cosmos_conversation_client = CosmosConversationClient(
             cosmosdb_endpoint=cosmos_endpoint, 
             credential=credential, 
@@ -170,11 +166,11 @@ if AZURE_COSMOSDB_DATABASE and AZURE_COSMOSDB_ACCOUNT and AZURE_COSMOSDB_CONVERS
 
 # Initialize MSR CosmosDB client for feedback
 msr_cosmos_db_client = None
-if MSR_AZURE_COSMOSDB_ACCOUNT and MSR_AZURE_COSMOSDB_ACCOUNT_KEY and MSR_AZURE_COSMOSDB_DATABASE:
+if MSR_AZURE_COSMOSDB_ACCOUNT and MSR_AZURE_COSMOSDB_DATABASE:
     try:
         msr_cosmos_db_client = ConversationTelemetryClient(
             cosmosdb_endpoint=f'https://{MSR_AZURE_COSMOSDB_ACCOUNT}.documents.azure.com:443/', 
-            credential=MSR_AZURE_COSMOSDB_ACCOUNT_KEY, 
+            credential=credential, 
             database_name=MSR_AZURE_COSMOSDB_DATABASE,
             container_name=MSR_AZURE_COSMOSDB_FEEDBACK_CONTAINER
         )
@@ -189,7 +185,7 @@ def is_chat_model():
     return False
 
 def should_use_data():
-    if AZURE_SEARCH_SERVICE and AZURE_SEARCH_INDEX and AZURE_SEARCH_KEY:
+    if AZURE_SEARCH_SERVICE and AZURE_SEARCH_INDEX:
         if DEBUG_LOGGING:
             logging.debug("Using Azure Cognitive Search")
         return True
@@ -503,23 +499,20 @@ def get_frontend_settings():
     
 @app.route("/speech/issueToken", methods=["GET"])
 async def speech_issue_token():
-    """Generate short-lived (10 minutes) access token (JWT) for Azure Speech service."""
-    if not AZURE_SPEECH_KEY:
-        return jsonify({"error": "Azure Speech key is not configured"}), 404
     if not AZURE_SPEECH_REGION:
         return jsonify({"error": "Azure Speech region is not configured"}), 404
 
-    url = f"https://{AZURE_SPEECH_REGION}.api.cognitive.microsoft.com/sts/v1.0/issueToken"
-
     try:
-        async with aiohttp.ClientSession() as session: 
-            async with session.post(url, headers={"Ocp-Apim-Subscription-Key": AZURE_SPEECH_KEY}) as response: 
-                access_token = await response.text()
-                return jsonify({"access_token": access_token, "region": AZURE_SPEECH_REGION}), 200
+        credential = DefaultAzureCredential()
+        token = credential.get_token(AZURE_SPEECH_TOKEN_ENDPOINT).token
+        authorizationToken = "aad#" + AZURE_SPEECH_RESOURCE_ID + "#" + token
+
+        return jsonify({"access_token": authorizationToken, "region": AZURE_SPEECH_REGION}), 200
+
     except Exception:
         logging.exception("Exception in /speech/issueToken")
         return jsonify({"error": "Azure Speech is not working."}), 500
-    
+
 def generate_title(conversation_messages):
     ## make sure the messages are sorted by _ts descending
     title_prompt = 'Summarize the conversation so far into a 4-word or less title. Do not use any quotation marks or punctuation. Respond with a json object in the format {{"title": string}}. Do not include any other commentary or description.'
