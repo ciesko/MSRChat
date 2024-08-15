@@ -32,6 +32,7 @@ import { ChatStyles } from "./ChatStyles";
 import { QuestionDisplay } from "../../components/QuestionDisplay/QuestionDisplay";
 import { CitationDetails } from "../../components/CitationDetails/CitationDetails";
 import { SuggestionButtons } from "../../components/SuggestionButtons/SuggestionButtons";
+import { UserProfileForm } from "../../components/UserProfileForm/UserProfileForm";
 
 const enum messageStatus {
     NotRunning = "Not Running",
@@ -585,7 +586,7 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
                     <Subtitle1 align="center">If you deployed in the last 10 minutes, please wait and reload the page after 10 minutes.</Subtitle1>
                 </div>
             ) : (
-                <div className={styles.container}>
+                <div className={styles.containerWithForm}>
                     <div className={embedDisplay ? styles.chatContainerEmbed : styles.chatContainer}>
                         {!messages || messages.length < 1 ? (
                             <div className={styles.chatEmptyState}>
@@ -740,6 +741,7 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
                             </div>
                         </div>
                     </div>
+                    <UserProfileForm />
                     {/* Citation Panel */}
                     <CitationDetails
                         open={((messages && messages.length > 0) && (isCitationPanelOpen && activeCitation)) ? true : false}

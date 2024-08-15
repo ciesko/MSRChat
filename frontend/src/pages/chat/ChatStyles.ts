@@ -5,7 +5,14 @@ export const ChatStyles = makeStyles({
         display: 'flex',
         flexDirection: 'column',
     },
-
+    containerWithForm: {
+        display: 'flex',
+        flexDirection: 'row',
+        '@media (max-width: 600px)': {
+            flexDirection: 'column',
+        },
+        ...shorthands.gap('20px'),
+    },
     chatContainer: {
         display: 'flex',
         flexDirection: 'column',
