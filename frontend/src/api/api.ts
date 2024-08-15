@@ -2,15 +2,18 @@ import { UserInfo, ConversationRequest, Conversation, ChatMessage, CosmosDBHealt
 import { chatHistorySampleData } from "../constants/chatHistory";
 import { SpeechConfig, AutoDetectSourceLanguageConfig, AudioConfig, SpeechRecognizer, ResultReason } from "microsoft-cognitiveservices-speech-sdk";
 
-export async function conversationApi(options: ConversationRequest, abortSignal: AbortSignal): Promise<Response> {
+export async function conversationApi(options: ConversationRequest, abortSignal: AbortSignal, file?: File): Promise<Response> {
+    const formData = new FormData();
+
+    if (file) {
+        formData.append("file", file);
+    }
+
+    formData.append("messages", JSON.stringify(options.messages));
+
     const response = await fetch("/conversation", {
         method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            messages: options.messages
-        }),
+        body: formData,
         signal: abortSignal
     });
 
