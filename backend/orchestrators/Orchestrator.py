@@ -193,7 +193,15 @@ class Orchestrator(ABC):
 
     # Format request body and headers with relevant info based on search type
     def prepare_body_headers_with_data(self, request, **kwargs):
-        request_messages = request.json["messages"]
+        messages_str = request.form.get('messages')
+        request_messages = json.loads(messages_str)
+ 
+        file = request.files.get('file', None)
+        if file:
+            request_messages.append({
+                "role": "user",
+                "content": f"File: {parse_file(file)}",
+            })
         key=kwargs.get('key', self.AZURE_OPENAI_KEY)
 
         body = {

@@ -33,6 +33,7 @@ import { QuestionDisplay } from "../../components/QuestionDisplay/QuestionDispla
 import { CitationDetails } from "../../components/CitationDetails/CitationDetails";
 import { SuggestionButtons } from "../../components/SuggestionButtons/SuggestionButtons";
 import { UserProfileForm } from "../../components/UserProfileForm/UserProfileForm";
+import { UploadedFiles } from "../../components/UploadedFiles/UploadedFiles";
 
 const enum messageStatus {
     NotRunning = "Not Running",
@@ -112,7 +113,11 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
         }
     }
 
-    const makeApiRequestWithoutCosmosDB = async (question: string, conversationId?: string) => {
+    const makeApiRequestWithoutCosmosDB = async (question: string, conversationId?: string, file?: File) => {
+        console.log("makeApiRequestWithoutCosmosDB")
+        console.log("question", question)
+        console.log("conversationId", conversationId)
+        console.log("file", file)
         setIsLoading(true);
         setShowLoadingMessage(true);
         const abortController = new AbortController();
@@ -155,7 +160,7 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
 
         let result = {} as ChatResponse;
         try {
-            const response = await conversationApi(request, abortController.signal);
+            const response = await conversationApi(request, abortController.signal, file);
             if (response?.body) {
                 const reader = response.body.getReader();
                 let runningText = "";
@@ -588,6 +593,11 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
             ) : (
                 <div className={styles.containerWithForm}>
                     <div className={embedDisplay ? styles.chatContainerEmbed : styles.chatContainer}>
+                    <UploadedFiles 
+                        onFileUpload={(file) => {
+                            makeApiRequestWithoutCosmosDB("Add file", undefined, file)
+                        }}
+                    />
                         {!messages || messages.length < 1 ? (
                             <div className={styles.chatEmptyState}>
                                 {
