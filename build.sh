@@ -6,10 +6,7 @@ if [ -z "$AZURE_ARTIFACTS_PAT" ]; then
 fi
 
 # Create pip.conf with authentication details
-mkdir -p ~/.pip
-cat <<EOF > ~/.pip/pip.conf
-[global]
-extra-index-url=https://v-chearley:${AZURE_ARTIFACTS_PAT}@pkgs.dev.azure.com/tnrdev/_packaging/tnrdev/pypi/simple/
-EOF
+export POETRY_HTTP_BASIC_tnrdev_USERNAME=<username>
+export POETRY_HTTP_BASIC_tnrdev_PASSWORD=$AZURE_ARTIFACTS_PAT
 
 echo "pip authenticated to Azure Artifacts successfully."
