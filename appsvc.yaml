@@ -15,7 +15,7 @@ preBuildTask:
     mkdir -p ~/.pip
     cat <<EOF > ~/.pip/pip.conf
     [global]
-    extra-index-url=https://<username>:${AZURE_ARTIFACTS_PAT}@pkgs.dev.azure.com/<organization>/<project>/_packaging/<feed>/pypi/simple/
+    extra-index-url=https://v-chearley:${AZURE_ARTIFACTS_PAT}@pkgs.dev.azure.com/tnrdev/_packaging/tnrdev/pypi/simple/
     EOF
 
     echo "pip authenticated to Azure Artifacts successfully."
