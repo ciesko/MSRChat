@@ -1,3 +1,6 @@
 version: 1
 
-pre-build: bash build.sh
+pre-build: |
+  pip install poetry
+  poetry config http-basic.tnrdev agent $AZURE_ARTIFACTS_PAT
+  echo "finished pre-build"
