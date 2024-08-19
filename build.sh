@@ -6,7 +6,7 @@ if [ -z "$AZURE_ARTIFACTS_PAT" ]; then
 fi
 
 # Create pip.conf with authentication details
-export POETRY_HTTP_BASIC_tnrdev_USERNAME=<username>
-export POETRY_HTTP_BASIC_tnrdev_PASSWORD=$AZURE_ARTIFACTS_PAT
+export POETRY_HTTP_BASIC_TNRDEV_USERNAME=agent
+export POETRY_HTTP_BASIC_TNRDEV_PASSWORD=$AZURE_ARTIFACTS_PAT
 
 echo "pip authenticated to Azure Artifacts successfully."
