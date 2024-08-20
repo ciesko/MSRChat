@@ -12,6 +12,10 @@ from semantic_kernel.contents.chat_history import ChatHistory
 
 class UpdatedOrchestrator(Orchestrator):
     def __init__(self):
+        """
+        By default, it uses the api key is provided in AZURE_OPENAI_KEY env variable.
+        Otherwise, it falls back to trying to grab a token credential from AD token provider, associated with your logged-in Azure account.
+        """
         prompt_template = r"{{$input_text}}"
         api_endpoint = (
             super().AZURE_OPENAI_ENDPOINT
@@ -20,13 +24,16 @@ class UpdatedOrchestrator(Orchestrator):
         )
         self.api_deployment = "gpt-4o"
 
-        # TODO: implement logic for super().AZURE_OPENAI_KEY
+        api_key = super().AZURE_OPENAI_KEY
+        use_ad_token_provider = api_key is None
+
         self.chat = BasicChat(
             prompt_template=prompt_template,
             api_endpoint=api_endpoint,
             api_version="2023-08-01-preview",
             api_deployment=self.api_deployment,
-            use_ad_token_provider=True,
+            use_ad_token_provider=use_ad_token_provider,
+            api_key=api_key,
             temperature=float(super().AZURE_OPENAI_TEMPERATURE),
             max_tokens=int(super().AZURE_OPENAI_MAX_TOKENS),
             top_p=float(super().AZURE_OPENAI_TOP_P),
