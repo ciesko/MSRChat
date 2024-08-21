@@ -8,6 +8,7 @@ from .Orchestrator import Orchestrator
 import flask
 from tnr_ai_tools.basic_chat import BasicChat
 from semantic_kernel.contents.chat_history import ChatHistory
+from werkzeug.datastructures.file_storage import FileStorage
 
 
 class UpdatedOrchestrator(Orchestrator):
@@ -40,10 +41,14 @@ class UpdatedOrchestrator(Orchestrator):
         )
 
     def conversation_without_data(
-        self, request_body: Dict[str, Any], message_uuid: str
+        self,
+        request_body: Dict[str, Any],
+        message_uuid: str,
+        file: FileStorage | None = None,
     ) -> Tuple[flask.Response, int]:
         """
         Invokes LM call using the messages from the request_body, and returns a flask Response (with application/json mimetype) and a status code 200.
+        Optionally can take in a file  that was attached to the message.
 
         Example of `request_body`:
         {'messages':
