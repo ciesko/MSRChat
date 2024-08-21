@@ -9,7 +9,6 @@ export const DynamicFormStyles = makeStyles({
         flexDirection: 'column',
         alignItems: 'start',
         ...shorthands.gap(tokens.spacingVerticalM),
-        ...shorthands.margin(tokens.spacingHorizontalM),
     },
     footerActionRow: {
         width: '100%',

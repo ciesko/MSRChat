@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { DynamicFieldType, IDynamicFormField } from './DynamicFormModels';
 import { Field, Input, Select, SpinButton, Textarea, TextareaOnChangeData } from '@fluentui/react-components';
+import { set } from 'lodash';
 
 export interface IDynamicFormFieldProps {
     field: IDynamicFormField;
@@ -8,7 +9,11 @@ export interface IDynamicFormFieldProps {
 }
 
 export const DynamicFormField: React.FunctionComponent<IDynamicFormFieldProps> = (props: React.PropsWithChildren<IDynamicFormFieldProps>) => {
-
+    const [value, setValue] = React.useState<string | number | boolean | Date | string[] | undefined>(props.field.value);
+    React.useEffect(() => {
+        setValue(props.field.value);
+    }, [props.field.value]);
+    
     const getField = (field: IDynamicFormField) => {
         switch (field.type) {
             case DynamicFieldType.text:
@@ -18,10 +23,11 @@ export const DynamicFormField: React.FunctionComponent<IDynamicFormFieldProps> =
                         required={field.required}
                     >
                         <Input
-                            value={String(field.value) || ''}
+                            value={String(value) || ''}
                             onChange={(event: React.FormEvent<HTMLDivElement>, data?: any) => {
                                 if (props.onChange) {
                                     props.onChange(data?.value as string);
+                                    setValue(data?.value);
                                 }
                             }}
                         />
@@ -54,6 +60,7 @@ export const DynamicFormField: React.FunctionComponent<IDynamicFormFieldProps> =
                             onChange={(event, data) => {
                                 if (props.onChange) {
                                     props.onChange(data.value as string);
+                                    setValue(data.value);
                                 }
                             }
                             }
@@ -74,10 +81,11 @@ export const DynamicFormField: React.FunctionComponent<IDynamicFormFieldProps> =
                         style={{ width: '100%' }}
                     >
                         <Textarea
-                            value={String(field.value) || ''}
+                            value={String(value) || ''}
                             onChange={(ev: React.ChangeEvent<HTMLTextAreaElement>, data: TextareaOnChangeData) => {
                                 if (props.onChange) {
                                     props.onChange(data.value);
+                                    setValue(data.value);
                                 }
                             }}
                             rows={4}

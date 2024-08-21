@@ -766,6 +766,7 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
                         <DynamicForm
                             formTitle="User Profile Form"
                             fields={formData}
+                            onClearAllClick={() => sendChatQuestion("Clear form.")}  
                         />
               
                     {/* Citation Panel */}
@@ -798,7 +799,9 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
                 </DialogSurface>
             </Dialog>
             <LoadingDialog 
-                open={showImportingData}
+                open={showImportingData || isLoading}
+                title={showImportingData ? "Importing file and building profile" : "Working on your request"}
+                subTitle={showImportingData ? "This may take a while." : "This shouldn't take long."}
             />
         </div>
     );

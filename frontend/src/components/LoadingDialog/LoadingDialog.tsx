@@ -1,9 +1,11 @@
-import { Dialog, DialogSurface, DialogBody, DialogTitle, DialogContent, DialogActions, DialogTrigger, Button, Spinner, Subtitle2 } from '@fluentui/react-components';
+import { Dialog, DialogSurface, DialogBody, DialogTitle, DialogContent, DialogActions, DialogTrigger, Button, Spinner, Subtitle2, Title2, Title3 } from '@fluentui/react-components';
 import * as React from 'react';
 import { LoadingDialogStyles } from './LoadingDialogStyles';
 
 export interface ILoadingDialogProps { 
     open: boolean;
+    title: string;
+    subTitle?: string;
 }
 
 export const LoadingDialog: React.FunctionComponent<ILoadingDialogProps> = (props: React.PropsWithChildren<ILoadingDialogProps>) => {
@@ -27,16 +29,11 @@ export const LoadingDialog: React.FunctionComponent<ILoadingDialogProps> = (prop
             >
                 <DialogSurface>
                     <DialogBody>
-                        <DialogTitle>
+                        <DialogContent className={styles.content}>
                             <div className={styles.titleRow}>
-                                <Spinner />Importing data
+                                <Spinner /><Title3>{props.title}</Title3>
                             </div>
-                        </DialogTitle>
-                        <DialogContent>
-                            <div>
-
-                                <Subtitle2>This may take a while.</Subtitle2>
-                            </div>
+                                <Subtitle2>{props.subTitle}</Subtitle2>
                         </DialogContent>
                     </DialogBody>
                 </DialogSurface>

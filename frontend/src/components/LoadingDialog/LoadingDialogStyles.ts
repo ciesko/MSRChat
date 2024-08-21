@@ -4,7 +4,14 @@ export const LoadingDialogStyles = makeStyles({
     titleRow: {
         display: 'flex',
         flexDirection: 'row',
-        alignItems: 'flex-start',
+        alignItems: 'center',
         ...shorthands.gap(tokens.spacingHorizontalM),
+    },
+    content: {
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        ...shorthands.gap(tokens.spacingVerticalM),
     },
 });
