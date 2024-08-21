@@ -6,7 +6,10 @@ export const UploadedFilesStyles = makeStyles({
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'start',
+        minHeight: '140px',
         ...shorthands.gap('10px'),
+        ...shorthands.margin('10px'),
+        ...shorthands.overflow('auto'), // Add this line to enable scrolling if content exceeds container height
     },
     fileUploadControl: {
         display: 'none',
