@@ -10,6 +10,7 @@ from docx import Document
 import fitz
 
 from backend.conversationtelemetry import ConversationTelemetryClient
+from werkzeug.datastructures.file_storage import FileStorage
 
 load_dotenv()
 
@@ -207,7 +208,7 @@ class Orchestrator(ABC):
         else:
             return columns.split(",")
 
-    def parse_file(self, file):
+    def parse_file(self, file: FileStorage):
         res = ""
 
         # if file is palin text, return the text

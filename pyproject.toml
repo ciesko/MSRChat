@@ -18,6 +18,8 @@ applicationinsights = "0.11.10"
 aiohttp = "3.9.2"
 azure-cognitiveservices-speech = "1.38.0"
 tnr-ai-tools = "^0.1.14"
+python-docx = "^1.1.2"
+pymupdf = "^1.24.9"
 
 [[tool.poetry.source]]
 name = "tnrdev"
