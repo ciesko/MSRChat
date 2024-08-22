@@ -4,6 +4,7 @@ echo.
 echo Restoring backend python packages
 echo.
 call poetry install
+call poetry shell
 if "%errorlevel%" neq "0" (
     echo Failed to restore backend python packages
     exit /B %errorlevel%
