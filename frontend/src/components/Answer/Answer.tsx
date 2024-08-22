@@ -276,9 +276,6 @@ export const Answer = ({
                         })}
                     </div>
                 }
-                <CardFooter>
-                    <Caption1><i>AI-generated content may be incorrect</i></Caption1>
-                </CardFooter>
             </Card>
             <Dialog
                 onOpenChange={() => {

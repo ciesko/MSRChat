@@ -6,6 +6,8 @@ import requests
 import copy
 from dotenv import load_dotenv
 from azure.identity import DefaultAzureCredential
+from docx import Document
+import fitz
 
 from backend.conversationtelemetry import ConversationTelemetryClient
 load_dotenv()
@@ -15,11 +17,11 @@ class Orchestrator(ABC):
     DEBUG_LOGGING = DEBUG.lower() == "true"
 
     @abstractmethod
-    def conversation_with_data(self, request_body, message_uuid):
+    def conversation_with_data(self, request_body, message_uuid, file=None):
         pass
 
     @abstractmethod
-    def conversation_without_data(self, request_body, message_uuid):
+    def conversation_without_data(self, request_body, message_uuid, file=None):
         pass
 
     # Initialize search variables
@@ -156,10 +158,50 @@ class Orchestrator(ABC):
             return columns.split("|")
         else:
             return columns.split(",")
+        
+    def parse_file(self, file):
+        res = ""
+
+        # if file is palin text, return the text
+        if file.content_type == "text/plain":
+            res = file.read().decode("utf-8")
+        
+        # if file is docx parse using docx
+        elif file.content_type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+            doc = Document(file)
+            fullText = []
+            for para in doc.paragraphs:
+                fullText.append(para.text)
+            res = '\n'.join(fullText)
+
+        # if file is pdf, parse using pdf
+        elif file.content_type == "application/pdf":
+            document = fitz.open(stream=file.read(), filetype="pdf")
+
+            for page_num in range(len(document)):
+                page = document[page_num]
+                res += page.get_text()
+       
+        else:
+            return "The user has provided a non supported file type"
+        
+        # check if res is more than 50000 characters
+        if len(res) > 50000:
+            return "The user has provided a file with more than the 1000 character limit"
+        
+        return res
 
     # Format request body and headers with relevant info based on search type
     def prepare_body_headers_with_data(self, request, **kwargs):
-        request_messages = request.json["messages"]
+        messages_str = request.form.get('messages')
+        request_messages = json.loads(messages_str)
+ 
+        file = request.files.get('file', None)
+        if file:
+            request_messages.append({
+                "role": "user",
+                "content": f"File: {parse_file(file)}",
+            })
         key=kwargs.get('key', self.AZURE_OPENAI_KEY)
 
         body = {

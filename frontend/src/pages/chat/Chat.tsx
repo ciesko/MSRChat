@@ -2,7 +2,7 @@ import { useRef, useState, useEffect, useContext, useLayoutEffect } from "react"
 import { ShieldLock48Regular, ErrorCircleRegular, Broom16Regular, Add16Regular, Stop24Regular, Speaker024Regular, SpeakerMuteRegular, Speaker224Regular } from "@fluentui/react-icons";
 
 import uuid from 'react-uuid';
-import { isEmpty } from "lodash-es";
+import { isEmpty, set } from "lodash-es";
 
 import LogoImage from "../../assets/chatIcon.svg";
 
@@ -32,6 +32,12 @@ import { ChatStyles } from "./ChatStyles";
 import { QuestionDisplay } from "../../components/QuestionDisplay/QuestionDisplay";
 import { CitationDetails } from "../../components/CitationDetails/CitationDetails";
 import { SuggestionButtons } from "../../components/SuggestionButtons/SuggestionButtons";
+import { UploadedFiles } from "../../components/UploadedFiles/UploadedFiles";
+import { DynamicForm } from "../../components/DynamicForm/DynamicForm";
+import { DynamicFormData } from "../../components/DynamicForm/DynamicFormData";
+import { DynamicFormParser } from "../../components/DynamicForm/DynamicFormParser";
+import { IDynamicFormField } from "../../components/DynamicForm/DynamicFormModels";
+import { LoadingDialog } from "../../components/LoadingDialog/LoadingDialog";
 
 const enum messageStatus {
     NotRunning = "Not Running",
@@ -57,6 +63,8 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
     const [hideErrorDialog, { toggle: toggleErrorDialog }] = useBoolean(true);
     const [errorMsg, setErrorMsg] = useState<ErrorMessage | null>();
     const [ASSISTANT, TOOL, ERROR] = ["assistant", "tool", "error"]
+    const [formData, setFormData] = useState<IDynamicFormField[]>([]);
+    const [showImportingData, setShowImportingData] = useState<boolean>(false);
 
     useEffect(() => {
         if (appStateContext?.state.isCosmosDBAvailable?.status === CosmosDBStatus.NotWorking && appStateContext.state.chatHistoryLoadingState === ChatHistoryLoadingState.Fail && hideErrorDialog) {
@@ -97,7 +105,6 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
             assistantMessage = resultMessage
             assistantMessage.content = assistantContent
         }
-
         if (resultMessage.role === TOOL) toolMessage = resultMessage
 
         if (!conversationId) {
@@ -111,9 +118,14 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
         }
     }
 
-    const makeApiRequestWithoutCosmosDB = async (question: string, conversationId?: string) => {
+    const makeApiRequestWithoutCosmosDB = async (question: string, conversationId?: string, file?: File) => {
         setIsLoading(true);
         setShowLoadingMessage(true);
+        // if file then set loading dialog
+        if (file) {
+            setShowImportingData(true);
+        }
+
         const abortController = new AbortController();
         abortFuncs.current.unshift(abortController);
 
@@ -154,7 +166,7 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
 
         let result = {} as ChatResponse;
         try {
-            const response = await conversationApi(request, abortController.signal);
+            const response = await conversationApi(request, abortController.signal, file);
             if (response?.body) {
                 const reader = response.body.getReader();
                 let runningText = "";
@@ -183,6 +195,9 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
                         catch { }
                     });
                 }
+                const formData = DynamicFormParser(assistantMessage.content);
+                setFormData(formData.formData);
+                assistantMessage.content = formData.trimmedAnswer;
                 conversation.messages.push(toolMessage, assistantMessage)
                 appStateContext?.dispatch({ type: 'UPDATE_CURRENT_CHAT', payload: conversation });
                 setMessages([...messages, toolMessage, assistantMessage]);
@@ -212,6 +227,9 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
         } finally {
             setIsLoading(false);
             setShowLoadingMessage(false);
+            if (file) {
+                setShowImportingData(false);
+            }
             abortFuncs.current = abortFuncs.current.filter(a => a !== abortController);
             setProcessMessages(messageStatus.Done)
         }
@@ -585,8 +603,13 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
                     <Subtitle1 align="center">If you deployed in the last 10 minutes, please wait and reload the page after 10 minutes.</Subtitle1>
                 </div>
             ) : (
-                <div className={styles.container}>
+                <div className={styles.containerWithForm}>
                     <div className={embedDisplay ? styles.chatContainerEmbed : styles.chatContainer}>
+                        <UploadedFiles
+                            onFileUpload={(file) => {
+                                makeApiRequestWithoutCosmosDB("Fill out values on form based on this document.", undefined, file)
+                            }}
+                        />
                         {!messages || messages.length < 1 ? (
                             <div className={styles.chatEmptyState}>
                                 {
@@ -697,12 +720,12 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
                                         <Button
                                             appearance="transparent"
                                             size="large"
-                                            icon={appStateContext?.state.audioMuted  ? <SpeakerMuteRegular /> : <Speaker224Regular />}
-                                            aria-label={appStateContext?.state.audioMuted  ? "Unmute" : "Mute"}
+                                            icon={appStateContext?.state.audioMuted ? <SpeakerMuteRegular /> : <Speaker224Regular />}
+                                            aria-label={appStateContext?.state.audioMuted ? "Unmute" : "Mute"}
                                             tabIndex={0}
                                             onClick={toggleAudioMute}
                                             onKeyDown={e => e.key === "Enter" || e.key === " " ? toggleAudioMute() : null}
-                                            title={appStateContext?.state.audioMuted  ? "Unmute" : "Mute"}
+                                            title={appStateContext?.state.audioMuted ? "Unmute" : "Mute"}
                                         />
                                     )
                                 }
@@ -740,6 +763,12 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
                             </div>
                         </div>
                     </div>
+                        <DynamicForm
+                            formTitle="User Profile Form"
+                            fields={formData}
+                            onClearAllClick={() => sendChatQuestion("Clear form.")}  
+                        />
+              
                     {/* Citation Panel */}
                     <CitationDetails
                         open={((messages && messages.length > 0) && (isCitationPanelOpen && activeCitation)) ? true : false}
@@ -769,6 +798,11 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
                     </DialogBody>
                 </DialogSurface>
             </Dialog>
+            <LoadingDialog 
+                open={showImportingData || isLoading}
+                title={showImportingData ? "Importing file and building profile" : "Working on your request"}
+                subTitle={showImportingData ? "This may take a while." : "This shouldn't take long."}
+            />
         </div>
     );
 };

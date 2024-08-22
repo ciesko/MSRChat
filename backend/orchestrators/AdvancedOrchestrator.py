@@ -13,7 +13,7 @@ class AdvancedOrchestrator(Orchestrator):
         self.load_balancer = LoadBalancer()
         
     # Post chat info if data configured
-    def conversation_with_data(self, request_body, message_uuid):
+    def conversation_with_data(self, request_body, message_uuid, file=None):
         logging.debug(f"ADV ORCH COVO W/ DATA")
         # Get a weighted random OpenAIContext object
         openai_context = self.load_balancer.get_openai_context()
@@ -57,7 +57,7 @@ class AdvancedOrchestrator(Orchestrator):
             return Response(super().stream_with_data(body, headers, endpoint, message_uuid, history_metadata), mimetype='text/event-stream')
 
     # Post chat info if data not configured
-    def conversation_without_data(self, request_body, message_uuid):
+    def conversation_without_data(self, request_body, message_uuid, file=None):
         # Get a weighted random OpenAIContext object
         openai_context = self.load_balancer.get_openai_context()
 
