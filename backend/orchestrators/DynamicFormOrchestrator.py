@@ -11,9 +11,10 @@ from semantic_kernel.contents.chat_history import ChatHistory
 from werkzeug.datastructures.file_storage import FileStorage
 
 
-class UpdatedOrchestrator(Orchestrator):
+class DynamicFormOrchestrator(Orchestrator):
     def __init__(self):
         """
+        Orchestrates conversation for dynamic forms (e.g. profile form data for matcmaker project)
         By default, it uses the api key is provided in AZURE_OPENAI_KEY env variable.
         Otherwise, it falls back to trying to grab a token credential from AD token provider, associated with your logged-in Azure account.
         """
@@ -62,25 +63,41 @@ class UpdatedOrchestrator(Orchestrator):
             ]
         }
         """
+        # Extract text from file
+        file_name = None
+        file_content = None
+        if file:
+            file_name = file.filename
+            file_content = self.parse_file(file)
+            message_for_attachment = dict(
+                role="system",
+                content=f"<attachment><filename/>{file_name}<content/>{file_content}</attachment>",
+            )
+            message_for_context = dict(
+                role="system",
+                content=f"The attachment `{file_name}` was attached here in the conversation.",
+            )
 
-        # Construct prompt from chat history
-        message_dicts = []
-        message_dicts.append(
+        # Construct prompt using chat history
+        chat_history = ChatHistory()
+        chat_history.add_message(
             {"role": "system", "content": super().AZURE_OPENAI_SYSTEM_MESSAGE}
         )
+        if file:
+            chat_history.add_message(message_for_attachment)
 
         request_messages = request_body["messages"]
         for request_message in request_messages:
             if request_message:
-                message_dicts.append(
+                chat_history.add_message(
                     {
                         "role": request_message["role"],
                         "content": request_message["content"],
                     }
                 )
 
-        chat_history = ChatHistory()
-        [chat_history.add_message(m) for m in message_dicts]
+        if file:
+            chat_history.add_message(message_for_context)
         prompt = chat_history.to_prompt()
 
         # Create conversation item in client

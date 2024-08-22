@@ -208,7 +208,7 @@ class Orchestrator(ABC):
         else:
             return columns.split(",")
 
-    def parse_file(self, file: FileStorage):
+    def parse_file(self, file: FileStorage) -> str:
         res = ""
 
         # if file is palin text, return the text
@@ -255,7 +255,7 @@ class Orchestrator(ABC):
             request_messages.append(
                 {
                     "role": "user",
-                    "content": f"File: {parse_file(file)}",
+                    "content": f"File: {self.parse_file(file)}",
                 }
             )
         key = kwargs.get("key", self.AZURE_OPENAI_KEY)
