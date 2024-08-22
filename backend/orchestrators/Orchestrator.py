@@ -10,7 +10,9 @@ from docx import Document
 import fitz
 
 from backend.conversationtelemetry import ConversationTelemetryClient
+
 load_dotenv()
+
 
 class Orchestrator(ABC):
     DEBUG = os.environ.get("DEBUG", "false")
@@ -43,15 +45,23 @@ class Orchestrator(ABC):
     AZURE_OPENAI_KEY = os.environ.get("AZURE_OPENAI_KEY")
     AZURE_OPENAI_EMBEDDING_NAME = os.environ.get("AZURE_OPENAI_EMBEDDING_NAME", "")
     AZURE_OPENAI_RESOURCE = os.environ.get("AZURE_OPENAI_RESOURCE")
-    AZURE_OPENAI_PREVIEW_API_VERSION = os.environ.get("AZURE_OPENAI_PREVIEW_API_VERSION", "2023-08-01-preview")
+    AZURE_OPENAI_PREVIEW_API_VERSION = os.environ.get(
+        "AZURE_OPENAI_PREVIEW_API_VERSION", "2023-08-01-preview"
+    )
     # AZURE_OPENAI_SYSTEM_MESSAGE = os.environ.get("AZURE_OPENAI_SYSTEM_MESSAGE", "You are an AI assistant that helps people find information.")
     AZURE_OPENAI_SYSTEM_MESSAGE = os.environ.get("AZURE_OPENAI_SYSTEM_MESSAGE")
 
     # Azure Search Settings
     AZURE_SEARCH_QUERY_TYPE = os.environ.get("AZURE_SEARCH_QUERY_TYPE")
-    AZURE_SEARCH_USE_SEMANTIC_SEARCH = os.environ.get("AZURE_SEARCH_USE_SEMANTIC_SEARCH", "false")
-    AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG = os.environ.get("AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG", "default")
-    AZURE_SEARCH_PERMITTED_GROUPS_COLUMN = os.environ.get("AZURE_SEARCH_PERMITTED_GROUPS_COLUMN")
+    AZURE_SEARCH_USE_SEMANTIC_SEARCH = os.environ.get(
+        "AZURE_SEARCH_USE_SEMANTIC_SEARCH", "false"
+    )
+    AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG = os.environ.get(
+        "AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG", "default"
+    )
+    AZURE_SEARCH_PERMITTED_GROUPS_COLUMN = os.environ.get(
+        "AZURE_SEARCH_PERMITTED_GROUPS_COLUMN"
+    )
     AZURE_SEARCH_SERVICE = os.environ.get("AZURE_SEARCH_SERVICE")
     AZURE_SEARCH_KEY = os.environ.get("AZURE_SEARCH_KEY")
     AZURE_SEARCH_INDEX = os.environ.get("AZURE_SEARCH_INDEX")
@@ -60,28 +70,58 @@ class Orchestrator(ABC):
     AZURE_SEARCH_URL_COLUMN = os.environ.get("AZURE_SEARCH_URL_COLUMN")
     AZURE_SEARCH_FILENAME_COLUMN = os.environ.get("AZURE_SEARCH_FILENAME_COLUMN")
     AZURE_SEARCH_VECTOR_COLUMNS = os.environ.get("AZURE_SEARCH_VECTOR_COLUMNS")
-    AZURE_SEARCH_ENABLE_IN_DOMAIN = os.environ.get("AZURE_SEARCH_ENABLE_IN_DOMAIN", SEARCH_ENABLE_IN_DOMAIN)
+    AZURE_SEARCH_ENABLE_IN_DOMAIN = os.environ.get(
+        "AZURE_SEARCH_ENABLE_IN_DOMAIN", SEARCH_ENABLE_IN_DOMAIN
+    )
     AZURE_SEARCH_TOP_K = os.environ.get("AZURE_SEARCH_TOP_K", SEARCH_TOP_K)
-    AZURE_SEARCH_STRICTNESS = os.environ.get("AZURE_SEARCH_STRICTNESS", SEARCH_STRICTNESS)
+    AZURE_SEARCH_STRICTNESS = os.environ.get(
+        "AZURE_SEARCH_STRICTNESS", SEARCH_STRICTNESS
+    )
 
     # Azure CosmosDB
     AZURE_COSMOSDB_ENDPOINT = f'https://{os.environ.get("MSR_AZURE_COSMOSDB_ACCOUNT")}.documents.azure.com:443/'
     AZURE_COSMOSDB_DATABASE_NAME = os.environ.get("MSR_AZURE_COSMOSDB_DATABASE")
-    AZURE_COSMOSDB_CONTAINER_NAME = os.environ.get("MSR_AZURE_COSMOSDB_CONVERSATIONS_CONTAINER")
+    AZURE_COSMOSDB_CONTAINER_NAME = os.environ.get(
+        "MSR_AZURE_COSMOSDB_CONVERSATIONS_CONTAINER"
+    )
 
     # CosmosDB Mongo vcore vector db Settings
-    AZURE_COSMOSDB_MONGO_VCORE_CONNECTION_STRING = os.environ.get("AZURE_COSMOSDB_MONGO_VCORE_CONNECTION_STRING")  #This has to be secure string
-    AZURE_COSMOSDB_MONGO_VCORE_DATABASE = os.environ.get("AZURE_COSMOSDB_MONGO_VCORE_DATABASE")
-    AZURE_COSMOSDB_MONGO_VCORE_CONTAINER = os.environ.get("AZURE_COSMOSDB_MONGO_VCORE_CONTAINER")
-    AZURE_COSMOSDB_MONGO_VCORE_INDEX = os.environ.get("AZURE_COSMOSDB_MONGO_VCORE_INDEX")
-    AZURE_COSMOSDB_MONGO_VCORE_TOP_K = os.environ.get("AZURE_COSMOSDB_MONGO_VCORE_TOP_K", AZURE_SEARCH_TOP_K)
-    AZURE_COSMOSDB_MONGO_VCORE_STRICTNESS = os.environ.get("AZURE_COSMOSDB_MONGO_VCORE_STRICTNESS", AZURE_SEARCH_STRICTNESS)  
-    AZURE_COSMOSDB_MONGO_VCORE_ENABLE_IN_DOMAIN = os.environ.get("AZURE_COSMOSDB_MONGO_VCORE_ENABLE_IN_DOMAIN", AZURE_SEARCH_ENABLE_IN_DOMAIN)
-    AZURE_COSMOSDB_MONGO_VCORE_CONTENT_COLUMNS = os.environ.get("AZURE_COSMOSDB_MONGO_VCORE_CONTENT_COLUMNS", "")
-    AZURE_COSMOSDB_MONGO_VCORE_FILENAME_COLUMN = os.environ.get("AZURE_COSMOSDB_MONGO_VCORE_FILENAME_COLUMN")
-    AZURE_COSMOSDB_MONGO_VCORE_TITLE_COLUMN = os.environ.get("AZURE_COSMOSDB_MONGO_VCORE_TITLE_COLUMN")
-    AZURE_COSMOSDB_MONGO_VCORE_URL_COLUMN = os.environ.get("AZURE_COSMOSDB_MONGO_VCORE_URL_COLUMN")
-    AZURE_COSMOSDB_MONGO_VCORE_VECTOR_COLUMNS = os.environ.get("AZURE_COSMOSDB_MONGO_VCORE_VECTOR_COLUMNS")
+    AZURE_COSMOSDB_MONGO_VCORE_CONNECTION_STRING = os.environ.get(
+        "AZURE_COSMOSDB_MONGO_VCORE_CONNECTION_STRING"
+    )  # This has to be secure string
+    AZURE_COSMOSDB_MONGO_VCORE_DATABASE = os.environ.get(
+        "AZURE_COSMOSDB_MONGO_VCORE_DATABASE"
+    )
+    AZURE_COSMOSDB_MONGO_VCORE_CONTAINER = os.environ.get(
+        "AZURE_COSMOSDB_MONGO_VCORE_CONTAINER"
+    )
+    AZURE_COSMOSDB_MONGO_VCORE_INDEX = os.environ.get(
+        "AZURE_COSMOSDB_MONGO_VCORE_INDEX"
+    )
+    AZURE_COSMOSDB_MONGO_VCORE_TOP_K = os.environ.get(
+        "AZURE_COSMOSDB_MONGO_VCORE_TOP_K", AZURE_SEARCH_TOP_K
+    )
+    AZURE_COSMOSDB_MONGO_VCORE_STRICTNESS = os.environ.get(
+        "AZURE_COSMOSDB_MONGO_VCORE_STRICTNESS", AZURE_SEARCH_STRICTNESS
+    )
+    AZURE_COSMOSDB_MONGO_VCORE_ENABLE_IN_DOMAIN = os.environ.get(
+        "AZURE_COSMOSDB_MONGO_VCORE_ENABLE_IN_DOMAIN", AZURE_SEARCH_ENABLE_IN_DOMAIN
+    )
+    AZURE_COSMOSDB_MONGO_VCORE_CONTENT_COLUMNS = os.environ.get(
+        "AZURE_COSMOSDB_MONGO_VCORE_CONTENT_COLUMNS", ""
+    )
+    AZURE_COSMOSDB_MONGO_VCORE_FILENAME_COLUMN = os.environ.get(
+        "AZURE_COSMOSDB_MONGO_VCORE_FILENAME_COLUMN"
+    )
+    AZURE_COSMOSDB_MONGO_VCORE_TITLE_COLUMN = os.environ.get(
+        "AZURE_COSMOSDB_MONGO_VCORE_TITLE_COLUMN"
+    )
+    AZURE_COSMOSDB_MONGO_VCORE_URL_COLUMN = os.environ.get(
+        "AZURE_COSMOSDB_MONGO_VCORE_URL_COLUMN"
+    )
+    AZURE_COSMOSDB_MONGO_VCORE_VECTOR_COLUMNS = os.environ.get(
+        "AZURE_COSMOSDB_MONGO_VCORE_VECTOR_COLUMNS"
+    )
 
     # Elasticsearch Integration Settings
     ELASTICSEARCH_ENDPOINT = os.environ.get("ELASTICSEARCH_ENDPOINT")
@@ -89,14 +129,20 @@ class Orchestrator(ABC):
     ELASTICSEARCH_INDEX = os.environ.get("ELASTICSEARCH_INDEX")
     ELASTICSEARCH_QUERY_TYPE = os.environ.get("ELASTICSEARCH_QUERY_TYPE", "simple")
     ELASTICSEARCH_TOP_K = os.environ.get("ELASTICSEARCH_TOP_K", SEARCH_TOP_K)
-    ELASTICSEARCH_ENABLE_IN_DOMAIN = os.environ.get("ELASTICSEARCH_ENABLE_IN_DOMAIN", SEARCH_ENABLE_IN_DOMAIN)
+    ELASTICSEARCH_ENABLE_IN_DOMAIN = os.environ.get(
+        "ELASTICSEARCH_ENABLE_IN_DOMAIN", SEARCH_ENABLE_IN_DOMAIN
+    )
     ELASTICSEARCH_CONTENT_COLUMNS = os.environ.get("ELASTICSEARCH_CONTENT_COLUMNS")
     ELASTICSEARCH_FILENAME_COLUMN = os.environ.get("ELASTICSEARCH_FILENAME_COLUMN")
     ELASTICSEARCH_TITLE_COLUMN = os.environ.get("ELASTICSEARCH_TITLE_COLUMN")
     ELASTICSEARCH_URL_COLUMN = os.environ.get("ELASTICSEARCH_URL_COLUMN")
     ELASTICSEARCH_VECTOR_COLUMNS = os.environ.get("ELASTICSEARCH_VECTOR_COLUMNS")
-    ELASTICSEARCH_STRICTNESS = os.environ.get("ELASTICSEARCH_STRICTNESS", SEARCH_STRICTNESS)
-    ELASTICSEARCH_EMBEDDING_MODEL_ID = os.environ.get("ELASTICSEARCH_EMBEDDING_MODEL_ID")
+    ELASTICSEARCH_STRICTNESS = os.environ.get(
+        "ELASTICSEARCH_STRICTNESS", SEARCH_STRICTNESS
+    )
+    ELASTICSEARCH_EMBEDDING_MODEL_ID = os.environ.get(
+        "ELASTICSEARCH_EMBEDDING_MODEL_ID"
+    )
 
     SHOULD_STREAM = True if AZURE_OPENAI_STREAM.lower() == "true" else False
 
@@ -106,7 +152,7 @@ class Orchestrator(ABC):
         cosmosdb_endpoint=str(AZURE_COSMOSDB_ENDPOINT),
         credential=DefaultAzureCredential(),
         database_name=str(AZURE_COSMOSDB_DATABASE_NAME),
-        container_name=str(AZURE_COSMOSDB_CONTAINER_NAME)
+        container_name=str(AZURE_COSMOSDB_CONTAINER_NAME),
     )
 
     # methods to implement in orchestrator
@@ -115,29 +161,31 @@ class Orchestrator(ABC):
         if nextLink:
             endpoint = nextLink
         else:
-            endpoint = "https://graph.microsoft.com/v1.0/me/transitiveMemberOf?$select=id"
-        
-        headers = {
-            'Authorization': "bearer " + userToken
-        }
-        try :
+            endpoint = (
+                "https://graph.microsoft.com/v1.0/me/transitiveMemberOf?$select=id"
+            )
+
+        headers = {"Authorization": "bearer " + userToken}
+        try:
             r = requests.get(endpoint, headers=headers)
             if r.status_code != 200:
                 if self.DEBUG_LOGGING:
-                    logging.error(f"Error fetching user groups: {r.status_code} {r.text}")
+                    logging.error(
+                        f"Error fetching user groups: {r.status_code} {r.text}"
+                    )
                 return []
-            
+
             r = r.json()
             if "@odata.nextLink" in r:
                 nextLinkData = self.fetchUserGroups(userToken, r["@odata.nextLink"])
-                r['value'].extend(nextLinkData)
-            
-            return r['value']
+                r["value"].extend(nextLinkData)
+
+            return r["value"]
         except Exception as e:
             logging.error(f"Exception in fetchUserGroups: {e}")
             return []
 
-    # Filter for permitted user groups    
+    # Filter for permitted user groups
     def generateFilterString(self, userToken):
         # Get list of groups user is a member of
         userGroups = self.fetchUserGroups(self, userToken)
@@ -146,7 +194,7 @@ class Orchestrator(ABC):
         if not userGroups:
             logging.debug("No user groups found")
 
-        group_ids = ", ".join([obj['id'] for obj in userGroups])
+        group_ids = ", ".join([obj["id"] for obj in userGroups])
         return f"{self.AZURE_SEARCH_PERMITTED_GROUPS_COLUMN}/any(g:search.in(g, '{group_ids}'))"
 
     # Format response as newline delimited json
@@ -158,21 +206,24 @@ class Orchestrator(ABC):
             return columns.split("|")
         else:
             return columns.split(",")
-        
+
     def parse_file(self, file):
         res = ""
 
         # if file is palin text, return the text
         if file.content_type == "text/plain":
             res = file.read().decode("utf-8")
-        
+
         # if file is docx parse using docx
-        elif file.content_type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+        elif (
+            file.content_type
+            == "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        ):
             doc = Document(file)
             fullText = []
             for para in doc.paragraphs:
                 fullText.append(para.text)
-            res = '\n'.join(fullText)
+            res = "\n".join(fullText)
 
         # if file is pdf, parse using pdf
         elif file.content_type == "application/pdf":
@@ -181,37 +232,45 @@ class Orchestrator(ABC):
             for page_num in range(len(document)):
                 page = document[page_num]
                 res += page.get_text()
-       
+
         else:
             return "The user has provided a non supported file type"
-        
+
         # check if res is more than 50000 characters
         if len(res) > 50000:
-            return "The user has provided a file with more than the 1000 character limit"
-        
+            return (
+                "The user has provided a file with more than the 1000 character limit"
+            )
+
         return res
 
     # Format request body and headers with relevant info based on search type
     def prepare_body_headers_with_data(self, request, **kwargs):
-        messages_str = request.form.get('messages')
+        messages_str = request.form.get("messages")
         request_messages = json.loads(messages_str)
- 
-        file = request.files.get('file', None)
+
+        file = request.files.get("file", None)
         if file:
-            request_messages.append({
-                "role": "user",
-                "content": f"File: {parse_file(file)}",
-            })
-        key=kwargs.get('key', self.AZURE_OPENAI_KEY)
+            request_messages.append(
+                {
+                    "role": "user",
+                    "content": f"File: {parse_file(file)}",
+                }
+            )
+        key = kwargs.get("key", self.AZURE_OPENAI_KEY)
 
         body = {
             "messages": request_messages,
             "temperature": float(self.AZURE_OPENAI_TEMPERATURE),
             "max_tokens": int(self.AZURE_OPENAI_MAX_TOKENS),
             "top_p": float(self.AZURE_OPENAI_TOP_P),
-            "stop": self.AZURE_OPENAI_STOP_SEQUENCE.split("|") if self.AZURE_OPENAI_STOP_SEQUENCE else None,
+            "stop": (
+                self.AZURE_OPENAI_STOP_SEQUENCE.split("|")
+                if self.AZURE_OPENAI_STOP_SEQUENCE
+                else None
+            ),
             "stream": self.SHOULD_STREAM,
-            "dataSources": []
+            "dataSources": [],
         }
 
         if self.DATASOURCE_TYPE == "AzureCognitiveSearch":
@@ -219,16 +278,21 @@ class Orchestrator(ABC):
             query_type = "simple"
             if self.AZURE_SEARCH_QUERY_TYPE:
                 query_type = self.AZURE_SEARCH_QUERY_TYPE
-            elif self.AZURE_SEARCH_USE_SEMANTIC_SEARCH.lower() == "true" and self.AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG:
+            elif (
+                self.AZURE_SEARCH_USE_SEMANTIC_SEARCH.lower() == "true"
+                and self.AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG
+            ):
                 query_type = "semantic"
 
             # Set filter
             filter = None
             userToken = None
             if self.AZURE_SEARCH_PERMITTED_GROUPS_COLUMN:
-                userToken = request.headers.get('X-MS-TOKEN-AAD-ACCESS-TOKEN', "")
+                userToken = request.headers.get("X-MS-TOKEN-AAD-ACCESS-TOKEN", "")
                 if self.DEBUG_LOGGING:
-                    logging.debug(f"USER TOKEN is {'present' if userToken else 'not present'}")
+                    logging.debug(
+                        f"USER TOKEN is {'present' if userToken else 'not present'}"
+                    )
 
                 filter = self.generateFilterString(userToken)
                 if self.DEBUG_LOGGING:
@@ -242,21 +306,54 @@ class Orchestrator(ABC):
                         "key": self.AZURE_SEARCH_KEY,
                         "indexName": self.AZURE_SEARCH_INDEX,
                         "fieldsMapping": {
-                            "contentFields": self.parse_multi_columns(self.AZURE_SEARCH_CONTENT_COLUMNS) if self.AZURE_SEARCH_CONTENT_COLUMNS else [],
-                            "titleField": self.AZURE_SEARCH_TITLE_COLUMN if self.AZURE_SEARCH_TITLE_COLUMN else None,
-                            "urlField": self.AZURE_SEARCH_URL_COLUMN if self.AZURE_SEARCH_URL_COLUMN else None,
-                            "filepathField": self.AZURE_SEARCH_FILENAME_COLUMN if self.AZURE_SEARCH_FILENAME_COLUMN else None,
-                            "vectorFields": self.parse_multi_columns(self.AZURE_SEARCH_VECTOR_COLUMNS) if self.AZURE_SEARCH_VECTOR_COLUMNS else []
+                            "contentFields": (
+                                self.parse_multi_columns(
+                                    self.AZURE_SEARCH_CONTENT_COLUMNS
+                                )
+                                if self.AZURE_SEARCH_CONTENT_COLUMNS
+                                else []
+                            ),
+                            "titleField": (
+                                self.AZURE_SEARCH_TITLE_COLUMN
+                                if self.AZURE_SEARCH_TITLE_COLUMN
+                                else None
+                            ),
+                            "urlField": (
+                                self.AZURE_SEARCH_URL_COLUMN
+                                if self.AZURE_SEARCH_URL_COLUMN
+                                else None
+                            ),
+                            "filepathField": (
+                                self.AZURE_SEARCH_FILENAME_COLUMN
+                                if self.AZURE_SEARCH_FILENAME_COLUMN
+                                else None
+                            ),
+                            "vectorFields": (
+                                self.parse_multi_columns(
+                                    self.AZURE_SEARCH_VECTOR_COLUMNS
+                                )
+                                if self.AZURE_SEARCH_VECTOR_COLUMNS
+                                else []
+                            ),
                         },
-                        "inScope": True if self.AZURE_SEARCH_ENABLE_IN_DOMAIN.lower() == "true" else False,
+                        "inScope": (
+                            True
+                            if self.AZURE_SEARCH_ENABLE_IN_DOMAIN.lower() == "true"
+                            else False
+                        ),
                         "topNDocuments": int(self.AZURE_SEARCH_TOP_K),
                         "queryType": query_type,
-                        "semanticConfiguration": self.AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG if self.AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG else "",
+                        "semanticConfiguration": (
+                            self.AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG
+                            if self.AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG
+                            else ""
+                        ),
                         "roleInformation": self.AZURE_OPENAI_SYSTEM_MESSAGE,
                         "filter": filter,
-                        "strictness": int(self.AZURE_SEARCH_STRICTNESS)
-                    }
-                })
+                        "strictness": int(self.AZURE_SEARCH_STRICTNESS),
+                    },
+                }
+            )
         elif self.DATASOURCE_TYPE == "AzureCosmosDB":
             # Set query type
             query_type = "vector"
@@ -268,20 +365,49 @@ class Orchestrator(ABC):
                         "connectionString": self.AZURE_COSMOSDB_MONGO_VCORE_CONNECTION_STRING,
                         "indexName": self.AZURE_COSMOSDB_MONGO_VCORE_INDEX,
                         "databaseName": self.AZURE_COSMOSDB_MONGO_VCORE_DATABASE,
-                        "containerName": self.AZURE_COSMOSDB_MONGO_VCORE_CONTAINER,                    
+                        "containerName": self.AZURE_COSMOSDB_MONGO_VCORE_CONTAINER,
                         "fieldsMapping": {
-                            "contentFields": self.parse_multi_columns(self.AZURE_COSMOSDB_MONGO_VCORE_CONTENT_COLUMNS) if self.AZURE_COSMOSDB_MONGO_VCORE_CONTENT_COLUMNS else [],
-                            "titleField": self.AZURE_COSMOSDB_MONGO_VCORE_TITLE_COLUMN if self.AZURE_COSMOSDB_MONGO_VCORE_TITLE_COLUMN else None,
-                            "urlField": self.AZURE_COSMOSDB_MONGO_VCORE_URL_COLUMN if self.AZURE_COSMOSDB_MONGO_VCORE_URL_COLUMN else None,
-                            "filepathField": self.AZURE_COSMOSDB_MONGO_VCORE_FILENAME_COLUMN if self.AZURE_COSMOSDB_MONGO_VCORE_FILENAME_COLUMN else None,
-                            "vectorFields": self.parse_multi_columns(self.AZURE_COSMOSDB_MONGO_VCORE_VECTOR_COLUMNS) if self.AZURE_COSMOSDB_MONGO_VCORE_VECTOR_COLUMNS else []
+                            "contentFields": (
+                                self.parse_multi_columns(
+                                    self.AZURE_COSMOSDB_MONGO_VCORE_CONTENT_COLUMNS
+                                )
+                                if self.AZURE_COSMOSDB_MONGO_VCORE_CONTENT_COLUMNS
+                                else []
+                            ),
+                            "titleField": (
+                                self.AZURE_COSMOSDB_MONGO_VCORE_TITLE_COLUMN
+                                if self.AZURE_COSMOSDB_MONGO_VCORE_TITLE_COLUMN
+                                else None
+                            ),
+                            "urlField": (
+                                self.AZURE_COSMOSDB_MONGO_VCORE_URL_COLUMN
+                                if self.AZURE_COSMOSDB_MONGO_VCORE_URL_COLUMN
+                                else None
+                            ),
+                            "filepathField": (
+                                self.AZURE_COSMOSDB_MONGO_VCORE_FILENAME_COLUMN
+                                if self.AZURE_COSMOSDB_MONGO_VCORE_FILENAME_COLUMN
+                                else None
+                            ),
+                            "vectorFields": (
+                                self.parse_multi_columns(
+                                    self.AZURE_COSMOSDB_MONGO_VCORE_VECTOR_COLUMNS
+                                )
+                                if self.AZURE_COSMOSDB_MONGO_VCORE_VECTOR_COLUMNS
+                                else []
+                            ),
                         },
-                        "inScope": True if self.AZURE_COSMOSDB_MONGO_VCORE_ENABLE_IN_DOMAIN.lower() == "true" else False,
+                        "inScope": (
+                            True
+                            if self.AZURE_COSMOSDB_MONGO_VCORE_ENABLE_IN_DOMAIN.lower()
+                            == "true"
+                            else False
+                        ),
                         "topNDocuments": int(self.AZURE_COSMOSDB_MONGO_VCORE_TOP_K),
                         "strictness": int(self.AZURE_COSMOSDB_MONGO_VCORE_STRICTNESS),
                         "queryType": query_type,
-                        "roleInformation": self.AZURE_OPENAI_SYSTEM_MESSAGE
-                    }
+                        "roleInformation": self.AZURE_OPENAI_SYSTEM_MESSAGE,
+                    },
                 }
             )
 
@@ -292,7 +418,11 @@ class Orchestrator(ABC):
                     "temperature": float(self.AZURE_OPENAI_TEMPERATURE),
                     "max_tokens": int(self.AZURE_OPENAI_MAX_TOKENS),
                     "top_p": float(self.AZURE_OPENAI_TOP_P),
-                    "stop": self.AZURE_OPENAI_STOP_SEQUENCE.split("|") if self.AZURE_OPENAI_STOP_SEQUENCE else None,
+                    "stop": (
+                        self.AZURE_OPENAI_STOP_SEQUENCE.split("|")
+                        if self.AZURE_OPENAI_STOP_SEQUENCE
+                        else None
+                    ),
                     "stream": self.SHOULD_STREAM,
                     "dataSources": [
                         {
@@ -302,34 +432,71 @@ class Orchestrator(ABC):
                                 "encodedApiKey": self.ELASTICSEARCH_ENCODED_API_KEY,
                                 "indexName": self.ELASTICSEARCH_INDEX,
                                 "fieldsMapping": {
-                                    "contentFields": self.parse_multi_columns(self.ELASTICSEARCH_CONTENT_COLUMNS) if self.ELASTICSEARCH_CONTENT_COLUMNS else [],
-                                    "titleField": self.ELASTICSEARCH_TITLE_COLUMN if self.ELASTICSEARCH_TITLE_COLUMN else None,
-                                    "urlField": self.ELASTICSEARCH_URL_COLUMN if self.ELASTICSEARCH_URL_COLUMN else None,
-                                    "filepathField": self.ELASTICSEARCH_FILENAME_COLUMN if self.ELASTICSEARCH_FILENAME_COLUMN else None,
-                                    "vectorFields": self.parse_multi_columns(self.ELASTICSEARCH_VECTOR_COLUMNS) if self.ELASTICSEARCH_VECTOR_COLUMNS else []
+                                    "contentFields": (
+                                        self.parse_multi_columns(
+                                            self.ELASTICSEARCH_CONTENT_COLUMNS
+                                        )
+                                        if self.ELASTICSEARCH_CONTENT_COLUMNS
+                                        else []
+                                    ),
+                                    "titleField": (
+                                        self.ELASTICSEARCH_TITLE_COLUMN
+                                        if self.ELASTICSEARCH_TITLE_COLUMN
+                                        else None
+                                    ),
+                                    "urlField": (
+                                        self.ELASTICSEARCH_URL_COLUMN
+                                        if self.ELASTICSEARCH_URL_COLUMN
+                                        else None
+                                    ),
+                                    "filepathField": (
+                                        self.ELASTICSEARCH_FILENAME_COLUMN
+                                        if self.ELASTICSEARCH_FILENAME_COLUMN
+                                        else None
+                                    ),
+                                    "vectorFields": (
+                                        self.parse_multi_columns(
+                                            self.ELASTICSEARCH_VECTOR_COLUMNS
+                                        )
+                                        if self.ELASTICSEARCH_VECTOR_COLUMNS
+                                        else []
+                                    ),
                                 },
-                                "inScope": True if self.ELASTICSEARCH_ENABLE_IN_DOMAIN.lower() == "true" else False,
+                                "inScope": (
+                                    True
+                                    if self.ELASTICSEARCH_ENABLE_IN_DOMAIN.lower()
+                                    == "true"
+                                    else False
+                                ),
                                 "topNDocuments": int(self.ELASTICSEARCH_TOP_K),
                                 "queryType": self.ELASTICSEARCH_QUERY_TYPE,
                                 "roleInformation": self.AZURE_OPENAI_SYSTEM_MESSAGE,
                                 "embeddingEndpoint": self.AZURE_OPENAI_EMBEDDING_ENDPOINT,
                                 "embeddingKey": self.AZURE_OPENAI_EMBEDDING_KEY,
                                 "embeddingModelId": self.ELASTICSEARCH_EMBEDDING_MODEL_ID,
-                                "strictness": int(self.ELASTICSEARCH_STRICTNESS)
-                            }
+                                "strictness": int(self.ELASTICSEARCH_STRICTNESS),
+                            },
                         }
-                    ]
+                    ],
                 }
             )
         else:
-            raise Exception(f"DATASOURCE_TYPE is not configured or unknown: {self.DATASOURCE_TYPE}")
+            raise Exception(
+                f"DATASOURCE_TYPE is not configured or unknown: {self.DATASOURCE_TYPE}"
+            )
 
         if "vector" in query_type.lower():
             if self.AZURE_OPENAI_EMBEDDING_NAME:
-                body["dataSources"][0]["parameters"]["embeddingDeploymentName"] = self.AZURE_OPENAI_EMBEDDING_NAME
+                body["dataSources"][0]["parameters"][
+                    "embeddingDeploymentName"
+                ] = self.AZURE_OPENAI_EMBEDDING_NAME
             else:
-                body["dataSources"][0]["parameters"]["embeddingEndpoint"] = self.AZURE_OPENAI_EMBEDDING_ENDPOINT
-                body["dataSources"][0]["parameters"]["embeddingKey"] = self.AZURE_OPENAI_EMBEDDING_KEY
+                body["dataSources"][0]["parameters"][
+                    "embeddingEndpoint"
+                ] = self.AZURE_OPENAI_EMBEDDING_ENDPOINT
+                body["dataSources"][0]["parameters"][
+                    "embeddingKey"
+                ] = self.AZURE_OPENAI_EMBEDDING_KEY
 
         if self.DEBUG_LOGGING:
             body_clean = copy.deepcopy(body)
@@ -339,62 +506,62 @@ class Orchestrator(ABC):
                 body_clean["dataSources"][0]["parameters"]["connectionString"] = "*****"
             if body_clean["dataSources"][0]["parameters"].get("embeddingKey"):
                 body_clean["dataSources"][0]["parameters"]["embeddingKey"] = "*****"
-                
+
             logging.debug(f"REQUEST BODY: {json.dumps(body_clean, indent=4)}")
 
         headers = {
-            'Content-Type': 'application/json',
-            'api-key': key,
-            "x-ms-useragent": "GitHubSampleWebApp/PublicAPI/3.0.0"
+            "Content-Type": "application/json",
+            "api-key": key,
+            "x-ms-useragent": "GitHubSampleWebApp/PublicAPI/3.0.0",
         }
 
         return body, headers
 
     # Format chat response with no streaming output
     def formatApiResponseNoStreaming(self, rawResponse):
-        if 'error' in rawResponse:
+        if "error" in rawResponse:
             return {"error": rawResponse["error"]}
         response = {
             "id": rawResponse["id"],
             "model": rawResponse["model"],
             "created": rawResponse["created"],
             "object": rawResponse["object"],
-            "choices": [{
-                "messages": []
-            }],
+            "choices": [{"messages": []}],
         }
         toolMessage = {
             "role": "tool",
-            "content": rawResponse["choices"][0]["message"]["context"]["messages"][0]["content"]
+            "content": rawResponse["choices"][0]["message"]["context"]["messages"][0][
+                "content"
+            ],
         }
         assistantMessage = {
             "role": "assistant",
-            "content": rawResponse["choices"][0]["message"]["content"]
+            "content": rawResponse["choices"][0]["message"]["content"],
         }
         response["choices"][0]["messages"].append(toolMessage)
         response["choices"][0]["messages"].append(assistantMessage)
 
         return response
-    
+
     # Format chat response with streaming output
     def formatApiResponseStreaming(self, rawResponse):
-        if 'error' in rawResponse:
+        if "error" in rawResponse:
             return {"error": rawResponse["error"]}
         response = {
             "id": rawResponse["id"],
             "model": rawResponse["model"],
             "created": rawResponse["created"],
             "object": rawResponse["object"],
-            "choices": [{
-                "messages": []
-            }],
+            "choices": [{"messages": []}],
         }
 
         if rawResponse["choices"][0]["delta"].get("context"):
             messageObj = {
                 "delta": {
                     "role": "tool",
-                    "content": rawResponse["choices"][0]["delta"]["context"]["messages"][0]["content"]
+                    "content": rawResponse["choices"][0]["delta"]["context"][
+                        "messages"
+                    ][0]["content"],
                 }
             }
             response["choices"][0]["messages"].append(messageObj)
@@ -422,10 +589,12 @@ class Orchestrator(ABC):
                 response["choices"][0]["messages"].append(messageObj)
 
         return response
-        
+
     # Stream chat response with appropriate role referencing data source
-    @conversation_client.log_stream 
-    def stream_with_data(self, body, headers, endpoint, message_uuid, history_metadata={}):
+    @conversation_client.log_stream
+    def stream_with_data(
+        self, body, headers, endpoint, message_uuid, history_metadata={}
+    ):
         s = requests.Session()
         try:
             with s.post(endpoint, json=body, headers=headers, stream=True) as r:
@@ -435,50 +604,59 @@ class Orchestrator(ABC):
                         "model": "",
                         "created": 0,
                         "object": "",
-                        "choices": [{
-                            "messages": []
-                        }],
+                        "choices": [{"messages": []}],
                         "apim-request-id": "",
-                        'history_metadata': history_metadata
+                        "history_metadata": history_metadata,
                     }
                     if line:
-                        if self.AZURE_OPENAI_PREVIEW_API_VERSION == '2023-06-01-preview':
-                            lineJson = json.loads(line.lstrip(b'data:').decode('utf-8'))
+                        if (
+                            self.AZURE_OPENAI_PREVIEW_API_VERSION
+                            == "2023-06-01-preview"
+                        ):
+                            lineJson = json.loads(line.lstrip(b"data:").decode("utf-8"))
                         else:
                             try:
-                                rawResponse = json.loads(line.lstrip(b'data:').decode('utf-8'))
+                                rawResponse = json.loads(
+                                    line.lstrip(b"data:").decode("utf-8")
+                                )
                                 lineJson = self.formatApiResponseStreaming(rawResponse)
                             except json.decoder.JSONDecodeError:
                                 continue
 
-                        if 'error' in lineJson:
+                        if "error" in lineJson:
                             yield self.format_as_ndjson(lineJson)
                         response["id"] = message_uuid
                         response["model"] = lineJson["model"]
                         response["created"] = lineJson["created"]
                         response["object"] = lineJson["object"]
-                        response["apim-request-id"] = r.headers.get('apim-request-id')
+                        response["apim-request-id"] = r.headers.get("apim-request-id")
 
-                        role = lineJson["choices"][0]["messages"][0]["delta"].get("role")
+                        role = lineJson["choices"][0]["messages"][0]["delta"].get(
+                            "role"
+                        )
 
                         if role == "tool":
-                            response["choices"][0]["messages"].append(lineJson["choices"][0]["messages"][0]["delta"])
+                            response["choices"][0]["messages"].append(
+                                lineJson["choices"][0]["messages"][0]["delta"]
+                            )
                             yield self.format_as_ndjson(response)
-                        elif role == "assistant": 
-                            if response['apim-request-id'] and self.DEBUG_LOGGING: 
-                                logging.debug(f"RESPONSE apim-request-id: {response['apim-request-id']}")
-                            response["choices"][0]["messages"].append({
-                                "role": "assistant",
-                                "content": ""
-                            })
+                        elif role == "assistant":
+                            if response["apim-request-id"] and self.DEBUG_LOGGING:
+                                logging.debug(
+                                    f"RESPONSE apim-request-id: {response['apim-request-id']}"
+                                )
+                            response["choices"][0]["messages"].append(
+                                {"role": "assistant", "content": ""}
+                            )
                             yield self.format_as_ndjson(response)
                         else:
-                            deltaText = lineJson["choices"][0]["messages"][0]["delta"]["content"]
+                            deltaText = lineJson["choices"][0]["messages"][0]["delta"][
+                                "content"
+                            ]
                             if deltaText != "[DONE]":
-                                response["choices"][0]["messages"].append({
-                                    "role": "assistant",
-                                    "content": deltaText
-                                })
+                                response["choices"][0]["messages"].append(
+                                    {"role": "assistant", "content": deltaText}
+                                )
                                 yield self.format_as_ndjson(response)
         except Exception as e:
             yield self.format_as_ndjson({"error" + str(e)})
@@ -489,7 +667,7 @@ class Orchestrator(ABC):
         responseText = ""
         for line in response:
             if line["choices"]:
-                deltaText = line["choices"][0]["delta"].get('content')
+                deltaText = line["choices"][0]["delta"].get("content")
             else:
                 deltaText = ""
             if deltaText and deltaText != "[DONE]":
@@ -500,12 +678,9 @@ class Orchestrator(ABC):
                 "model": line["model"],
                 "created": line["created"],
                 "object": line["object"],
-                "choices": [{
-                    "messages": [{
-                        "role": "assistant",
-                        "content": responseText
-                    }]
-                }],
-                "history_metadata": history_metadata
+                "choices": [
+                    {"messages": [{"role": "assistant", "content": responseText}]}
+                ],
+                "history_metadata": history_metadata,
             }
             yield self.format_as_ndjson(response_obj)
