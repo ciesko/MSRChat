@@ -6,9 +6,17 @@ import time
 from typing import Any, Dict, Tuple
 from .Orchestrator import Orchestrator
 import flask
-from tnr_ai_tools.basic_chat import BasicChat
+from tnr_ai_tools.json_chat import JSONChat
 from semantic_kernel.contents.chat_history import ChatHistory
 from werkzeug.datastructures.file_storage import FileStorage
+from typing_extensions import Annotated, Doc
+from dataclasses import dataclass
+
+
+@dataclass
+class JSONChatResponse:
+    message: Annotated[str, Doc("The assistant's message content.")]
+    dynamic_form_data: Annotated[Dict[str, Any], Doc("The updated dynamic form data.")]
 
 
 class DynamicFormOrchestrator(Orchestrator):
@@ -27,10 +35,13 @@ class DynamicFormOrchestrator(Orchestrator):
         self.api_deployment = "gpt-4o"
 
         api_key = super().AZURE_OPENAI_KEY
-        use_ad_token_provider = api_key is None
+        if api_key in [None, ""]:
+            use_ad_token_provider = True
+            api_key = None
 
-        self.chat = BasicChat(
+        self.chat = JSONChat(
             prompt_template=prompt_template,
+            json_schema_class=JSONChatResponse,
             api_endpoint=api_endpoint,
             api_version="2023-08-01-preview",
             api_deployment=self.api_deployment,
@@ -111,7 +122,7 @@ class DynamicFormOrchestrator(Orchestrator):
         )
 
         # Send request to chat completion
-        response_message = self.chat.generate_response(input_text=prompt)
+        response = self.chat.generate_response(input_text=prompt)
         # TODO: timestamp from AOAI API call is more accurate, but this will do for now
         gen_timestamp = int(time.time())
 
@@ -126,11 +137,12 @@ class DynamicFormOrchestrator(Orchestrator):
                         "messages": [
                             {
                                 "role": "assistant",
-                                "content": response_message,
+                                "content": response["message"],
                             }
                         ]
                     }
                 ],
+                "dynamic_form_data": response["dynamic_form_data"],
                 "history_metadata": history_metadata,
             }
             self.conversation_client.log_non_stream(response_obj)
