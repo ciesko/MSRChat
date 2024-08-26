@@ -38,6 +38,8 @@ class DynamicFormOrchestrator(Orchestrator):
         if api_key in [None, ""]:
             use_ad_token_provider = True
             api_key = None
+        else:
+            use_ad_token_provider = False
 
         self.chat = JSONChat(
             prompt_template=prompt_template,
