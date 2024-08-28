@@ -3165,13 +3165,13 @@ reference = "tnrdev"
 
 [[package]]
 name = "tnr-ai-tools"
-version = "0.1.14"
+version = "0.1.15"
 description = "Tools for dealing with Azure and AI resources more efficiently, for the TNR team."
 optional = false
 python-versions = ">=3.11,<3.13"
 files = [
-    {file = "tnr_ai_tools-0.1.14-py3-none-any.whl", hash = "sha256:5fd4ceb0378c1ffe2a1aa78fa2e249e4428c6517fa359faf14da08fedea9854d"},
-    {file = "tnr_ai_tools-0.1.14.tar.gz", hash = "sha256:bf0f98c5f364a79db366c75ff0e4fa19b942ef2bae83c2220615e2a68553169d"},
+    {file = "tnr_ai_tools-0.1.15-py3-none-any.whl", hash = "sha256:e6dcc58e9d5a0158eca6ef10c3c0c71ed1cf7f510d45777164c65a689a2f0196"},
+    {file = "tnr_ai_tools-0.1.15.tar.gz", hash = "sha256:8650f3de5d009d0dcb7fa0b548d671df1829c63a5fd90e6153af77d087892412"},
 ]
 
 [package.dependencies]
@@ -3183,6 +3183,7 @@ azure-search-documents = ">=11.4.0,<12.0.0"
 nltk = ">=3.8.1,<4.0.0"
 openai = ">=1.33.0,<2.0.0"
 pandas = ">=2.2.2,<3.0.0"
+pydantic = ">=2.8.2,<3.0.0"
 semantic-kernel = ">=1.0.5,<2.0.0"
 tiktoken = ">=0.7.0,<0.8.0"
 typechat = "0.2.0"
@@ -3524,4 +3525,4 @@ reference = "tnrdev"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11, <3.13"
-content-hash = "99e0b7751560c099acea8629e0517d9864825731ed293b90a4755c7c412d5917"
+content-hash = "2d9946be27dbe21cca249911a51a45ee9d8c233e6f7eded2a98cfc3427f71b83"

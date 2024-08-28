@@ -2,10 +2,19 @@
 Updated the DefaultOrchestrator to use JSONChat / BasicChat from TNR AI Tools.
 """
 
+import logging
 import time
+from types import SimpleNamespace
+from pydantic import BaseModel, Field
+from flask import Response, request, jsonify
+import requests
 from typing import Any, Dict, Tuple
 from .Orchestrator import Orchestrator
 import flask
+from tnr_ai_tools.json_response_utils import (
+    get_format_instructions,
+    parse_json_str_into_validated_dict,
+)
 from tnr_ai_tools.json_chat import JSONChat
 from semantic_kernel.contents.chat_history import ChatHistory
 from werkzeug.datastructures.file_storage import FileStorage
@@ -17,6 +26,13 @@ from dataclasses import dataclass
 class JSONChatResponse:
     message: Annotated[str, Doc("The assistant's message content.")]
     dynamic_form_data: Annotated[Dict[str, Any], Doc("The updated dynamic form data.")]
+
+
+class ResponseModel(BaseModel):
+    message: str = Field(description="The assistant's message content.")
+    dynamic_form_data: Dict[str, Any] = Field(
+        description="The updated dynamic form data."
+    )
 
 
 class DynamicFormOrchestrator(Orchestrator):
@@ -153,5 +169,176 @@ class DynamicFormOrchestrator(Orchestrator):
         else:
             raise Exception("Streaming is not implemented yet")
 
-    def conversation_with_data(self, request_body, message_uuid):
-        raise NotImplementedError
+    def conversation_with_data(
+        self,
+        request_body: Dict[str, Any],
+        message_uuid: str,
+        file: FileStorage | None = None,
+    ) -> Tuple[flask.Response, int]:
+        """
+        Invoke an LM call with data source (e.g. Azure AI Search). Also optionally uses file attachment in the conversation context.
+        """
+        # Massage args into usable form
+        messages = request_body["messages"]
+        messages = [m for m in messages if m != {}]
+
+        # pre-inference step: Add format instructionshistory
+        format_instructions = get_format_instructions(ResponseModel)
+        messages.append(dict(role="system", content=format_instructions))
+
+        # TODO logic to choose data_source_type
+        data_source_config = get_data_source_config(
+            env_dict=self.env_params.__dict__,
+            data_source_type="AzureCognitiveSearch",
+        )
+
+        # TODO: create client in constructor
+
+        response = client.chat.completions.create(
+            model=deployment,
+            messages=messages,
+            extra_body=dict(data_sources=[data_source_config]),
+        )
+
+        # validate and parse response using tool
+        # massage response into returned objects
+
+
+ALLOWED_DATA_SOURCE_TYPES = ("AzureCognitiveSearch",)
+
+
+def get_data_source_config(
+    env_dict: Dict[str, Any],
+    data_source_type: str,
+) -> Dict[str, Any]:
+    """
+    Create a config dictionary intended to  be passed into the `extra_body` parameter  as a "data_source", used in the AzureOpenAI API call `client.chat.completions.create`.
+    """
+    e = SimpleNamespace(**env_dict)
+
+    if data_source_type == "AzureCognitiveSearch":
+        # Set query type
+        query_type = "simple"
+        if e.AZURE_SEARCH_QUERY_TYPE:
+            query_type = e.AZURE_SEARCH_QUERY_TYPE
+        elif (
+            e.AZURE_SEARCH_USE_SEMANTIC_SEARCH.lower() == "true"
+            and e.AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG
+        ):
+            query_type = "semantic"
+
+        # Set filter
+        filter_string = None
+        userToken = None
+        if e.AZURE_SEARCH_PERMITTED_GROUPS_COLUMN:
+            userToken = request.headers.get("X-MS-TOKEN-AAD-ACCESS-TOKEN", "")
+            if e.DEBUG_LOGGING:
+                logging.debug(
+                    f"USER TOKEN is {'present' if userToken else 'not present'}"
+                )
+
+            filter_string = generateFilterString(
+                userToken,
+                azure_search_permitted_groups_column=e.AZURE_SEARCH_PERMITTED_GROUPS_COLUMN,
+            )
+            if e.DEBUG_LOGGING:
+                logging.debug(f"FILTER: {filter_string}")
+
+        config = {
+            "type": "AzureCognitiveSearch",
+            "parameters": {
+                "endpoint": f"https://{e.AZURE_SEARCH_SERVICE}.search.windows.net",
+                "key": e.AZURE_SEARCH_KEY,
+                "indexName": e.AZURE_SEARCH_INDEX,
+                "fieldsMapping": {
+                    "contentFields": (
+                        parse_multi_columns(e.AZURE_SEARCH_CONTENT_COLUMNS)
+                        if e.AZURE_SEARCH_CONTENT_COLUMNS
+                        else []
+                    ),
+                    "titleField": (
+                        e.AZURE_SEARCH_TITLE_COLUMN
+                        if e.AZURE_SEARCH_TITLE_COLUMN
+                        else None
+                    ),
+                    "urlField": (
+                        e.AZURE_SEARCH_URL_COLUMN if e.AZURE_SEARCH_URL_COLUMN else None
+                    ),
+                    "filepathField": (
+                        e.AZURE_SEARCH_FILENAME_COLUMN
+                        if e.AZURE_SEARCH_FILENAME_COLUMN
+                        else None
+                    ),
+                    "vectorFields": (
+                        parse_multi_columns(e.AZURE_SEARCH_VECTOR_COLUMNS)
+                        if e.AZURE_SEARCH_VECTOR_COLUMNS
+                        else []
+                    ),
+                },
+                "inScope": (
+                    True if e.AZURE_SEARCH_ENABLE_IN_DOMAIN.lower() == "true" else False
+                ),
+                "topNDocuments": int(e.AZURE_SEARCH_TOP_K),
+                "queryType": query_type,
+                "semanticConfiguration": (
+                    e.AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG
+                    if e.AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG
+                    else ""
+                ),
+                "roleInformation": e.AZURE_OPENAI_SYSTEM_MESSAGE,
+                "filter": filter_string,
+                "strictness": int(e.AZURE_SEARCH_STRICTNESS),
+            },
+        }
+
+
+# TODO: deal with duplicate code in Orchestrator.py
+def parse_multi_columns(columns: str) -> list:
+    if "|" in columns:
+        return columns.split("|")
+    else:
+        return columns.split(",")
+
+
+# TODO: deal with duplicate code in Orchestrator.py
+def fetchUserGroups(userToken, nextLink=None, debug_logging: bool = True):
+    # Recursively fetch group membership
+    if nextLink:
+        endpoint = nextLink
+    else:
+        endpoint = "https://graph.microsoft.com/v1.0/me/transitiveMemberOf?$select=id"
+
+    headers = {"Authorization": "bearer " + userToken}
+    try:
+        r = requests.get(endpoint, headers=headers)
+        if r.status_code != 200:
+            if debug_logging:
+                logging.error(f"Error fetching user groups: {r.status_code} {r.text}")
+            return []
+
+        r = r.json()
+        if "@odata.nextLink" in r:
+            nextLinkData = fetchUserGroups(
+                userToken, r["@odata.nextLink"], debug_logging
+            )
+            r["value"].extend(nextLinkData)
+
+        return r["value"]
+    except Exception as e:
+        logging.error(f"Exception in fetchUserGroups: {e}")
+        return []
+
+
+# TODO: deal with duplicate code in Orchestrator.py
+def generateFilterString(
+    userToken, azure_search_permitted_groups_column: str, debug_logging: bool
+):
+    # Get list of groups user is a member of
+    userGroups = fetchUserGroups(userToken, debug_logging=debug_logging)
+
+    # Construct filter string
+    if not userGroups:
+        logging.debug("No user groups found")
+
+    group_ids = ", ".join([obj["id"] for obj in userGroups])
+    return f"{azure_search_permitted_groups_column}/any(g:search.in(g, '{group_ids}'))"
