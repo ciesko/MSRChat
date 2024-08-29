@@ -126,7 +126,10 @@ class DynamicFormOrchestrator(Orchestrator):
         # Construct prompt using chat history
         chat_history = ChatHistory()
         chat_history.add_message(
-            {"role": "system", "content": super().AZURE_OPENAI_SYSTEM_MESSAGE}
+            {
+                "role": "system",
+                "content": super().env_params.AZURE_OPENAI_SYSTEM_MESSAGE,
+            }
         )
         if file:
             chat_history.add_message(message_for_attachment)
@@ -149,9 +152,9 @@ class DynamicFormOrchestrator(Orchestrator):
         history_metadata = request_body.get("history_metadata", {})
         history_metadata = super().conversation_client.create_conversation_item(
             request_body,
-            super().AZURE_OPENAI_RESOURCE,
-            super().AZURE_OPENAI_MODEL,
-            super().AZURE_OPENAI_TEMPERATURE,
+            super().env_params.AZURE_OPENAI_RESOURCE,
+            super().env_params.AZURE_OPENAI_MODEL,
+            super().env_params.AZURE_OPENAI_TEMPERATURE,
             history_metadata,
         )
 
@@ -161,7 +164,7 @@ class DynamicFormOrchestrator(Orchestrator):
         gen_timestamp = int(time.time())
 
         # TODO: pull from env_params
-        if not super().SHOULD_STREAM:
+        if not super().env_params.SHOULD_STREAM:
             response_obj = {
                 "id": message_uuid,
                 "model": self.api_deployment,
@@ -199,6 +202,16 @@ class DynamicFormOrchestrator(Orchestrator):
         messages = request_body["messages"]
         messages = [m for m in messages if m != {}]
 
+        # Create conversation item in client
+        history_metadata = request_body.get("history_metadata", {})
+        history_metadata = super().conversation_client.create_conversation_item(
+            request_body,
+            super().env_params.AZURE_OPENAI_RESOURCE,
+            super().env_params.AZURE_OPENAI_MODEL,
+            super().env_params.AZURE_OPENAI_TEMPERATURE,
+            history_metadata,
+        )
+
         # pre-inference step: Add format instructionshistory
         format_instructions = get_format_instructions(ResponseModel)
         messages.append(dict(role="system", content=format_instructions))
@@ -213,38 +226,42 @@ class DynamicFormOrchestrator(Orchestrator):
             model=self.api_deployment,
             messages=messages,
             extra_body=dict(data_sources=[data_source_config]),
+            temperature=float(super().env_params.AZURE_OPENAI_TEMPERATURE),
+            max_tokens=int(super().env_params.AZURE_OPENAI_MAX_TOKENS),
+            top_p=float(super().env_params.AZURE_OPENAI_TOP_P),
         )
 
         # post-inference step: validate and parse response
-        # TODO get out response and timestamp and stuff from response
-        response_dict = parse_json_str_into_validated_dict(
-            json_str=response,
+        response_message_str = response.choices[0].message.content
+        structured_response_dict = parse_json_str_into_validated_dict(
+            json_str=response_message_str,
             model_cls=ResponseModel,
         )
 
         # massage data
         if super().env_params.SHOULD_STREAM:
-            # TODO: put in actual values for the response_obj
             response_obj = {
                 "id": message_uuid,
-                "model": self.api_deployment,
-                "created": gen_timestamp,
-                "object": "chat.completion",
+                "model": response.model,
+                "created": response.created,
+                "object": response.object,
                 "choices": [
                     {
                         "messages": [
                             {
                                 "role": "assistant",
-                                "content": response["message"],
+                                "content": structured_response_dict["message"],
                             }
                         ]
                     }
                 ],
-                "dynamic_form_data": response["dynamic_form_data"],
+                "dynamic_form_data": structured_response_dict["dynamic_form_data"],
                 "history_metadata": history_metadata,
             }
             self.conversation_client.log_non_stream(response_obj)
             return flask.jsonify(response_obj), 200
+        else:
+            raise Exception("Streaming is not implemented yet")
 
 
 ALLOWED_DATA_SOURCE_TYPES = ("AzureCognitiveSearch",)
