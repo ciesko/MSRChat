@@ -525,6 +525,33 @@ async def speech_issue_token():
     except Exception:
         logging.exception("Exception in /speech/issueToken")
         return jsonify({"error": "Azure Speech is not working."}), 500
+    
+@app.route("/mcr/search", methods=["GET"])
+async def mcr_search():
+    try:
+        authenticated_user = get_authenticated_user_details(request_headers=request.headers)
+        
+        if not authenticated_user:
+            return jsonify({"error": "No user provided"}), 401
+        
+        user_name = authenticated_user['user_name']
+
+        user_name_without_email = user_name.split('@')[0]
+
+        async with aiohttp.ClientSession() as session:
+            async with session.get(f"https://www.microsoft.com/en-us/research/wp-json/wp/v2/msr-researcher?user_email={user_name_without_email}") as response:
+                if response.status == 200:
+                    user = await response.json()
+                    if user:
+                        return jsonify(await response.json()), 200
+                    else:
+                        return jsonify({"error": "User not found"}), 404
+                else:
+                    return jsonify({"error": "User not found:"}), 404
+
+    except Exception:
+        logging.exception("Exception in /mcr/search")
+        return jsonify({"error": "Error finding user in MCR"}), 500
 
 def generate_title(conversation_messages):
     ## make sure the messages are sorted by _ts descending
@@ -552,7 +579,7 @@ def generate_title(conversation_messages):
         return messages[-2]['content']
 
 if __name__ == "__main__":
-    if DEBUG.lower() == "true":
+    if True:
         app.run(debug=True, use_debugger=True, use_reloader=True)
     else:
         app.run()
