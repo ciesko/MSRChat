@@ -3,6 +3,8 @@ Updated the DefaultOrchestrator to use JSONChat / BasicChat from TNR AI Tools.
 """
 
 import logging
+from azure.identity import DefaultAzureCredential, get_bearer_token_provider
+import openai
 import time
 from types import SimpleNamespace
 from pydantic import BaseModel, Field
@@ -16,6 +18,7 @@ from tnr_ai_tools.json_response_utils import (
     parse_json_str_into_validated_dict,
 )
 from tnr_ai_tools.json_chat import JSONChat
+from tnr_ai_tools.basic_chat import BasicChat
 from semantic_kernel.contents.chat_history import ChatHistory
 from werkzeug.datastructures.file_storage import FileStorage
 from typing_extensions import Annotated, Doc
@@ -42,32 +45,45 @@ class DynamicFormOrchestrator(Orchestrator):
         By default, it uses the api key is provided in AZURE_OPENAI_KEY env variable.
         Otherwise, it falls back to trying to grab a token credential from AD token provider, associated with your logged-in Azure account.
         """
-        prompt_template = r"{{$input_text}}"
         api_endpoint = (
-            super().AZURE_OPENAI_ENDPOINT
-            if super().AZURE_OPENAI_ENDPOINT
-            else f"https://{super().AZURE_OPENAI_RESOURCE}.openai.azure.com/"
+            super().env_params.AZURE_OPENAI_ENDPOINT
+            if super().env_params.AZURE_OPENAI_ENDPOINT
+            else f"https://{super().env_params.AZURE_OPENAI_RESOURCE}.openai.azure.com/"
         )
+        api_version = "2023-08-01-preview"
         self.api_deployment = "gpt-4o"
 
-        api_key = super().AZURE_OPENAI_KEY
+        api_key = super().env_params.AZURE_OPENAI_KEY
         if api_key in [None, ""]:
             use_ad_token_provider = True
             api_key = None
         else:
             use_ad_token_provider = False
 
-        self.chat = JSONChat(
+        prompt_template = "{{$input_text}}"
+        self.json_chat = JSONChat(
             prompt_template=prompt_template,
             json_schema_class=JSONChatResponse,
             api_endpoint=api_endpoint,
-            api_version="2023-08-01-preview",
+            api_version=api_version,
             api_deployment=self.api_deployment,
             use_ad_token_provider=use_ad_token_provider,
             api_key=api_key,
-            temperature=float(super().AZURE_OPENAI_TEMPERATURE),
-            max_tokens=int(super().AZURE_OPENAI_MAX_TOKENS),
-            top_p=float(super().AZURE_OPENAI_TOP_P),
+            temperature=float(super().env_params.AZURE_OPENAI_TEMPERATURE),
+            max_tokens=int(super().env_params.AZURE_OPENAI_MAX_TOKENS),
+            top_p=float(super().env_params.AZURE_OPENAI_TOP_P),
+        )
+
+        # AOAI chat completions client for `conversation_with_data` method. Need for calling LM with data source
+        azure_ad_token_provider = get_bearer_token_provider(
+            DefaultAzureCredential(),
+            "https://cognitiveservices.azure.com/.default",
+        )
+        self.aoai_client = openai.AzureOpenAI(
+            azure_endpoint=api_endpoint,
+            api_version=api_version,
+            api_key=api_key,
+            azure_ad_token_provider=azure_ad_token_provider,
         )
 
     def conversation_without_data(
@@ -140,10 +156,11 @@ class DynamicFormOrchestrator(Orchestrator):
         )
 
         # Send request to chat completion
-        response = self.chat.generate_response(input_text=prompt)
+        response = self.json_chat.generate_response(input_text=prompt)
         # TODO: timestamp from AOAI API call is more accurate, but this will do for now
         gen_timestamp = int(time.time())
 
+        # TODO: pull from env_params
         if not super().SHOULD_STREAM:
             response_obj = {
                 "id": message_uuid,
@@ -192,16 +209,42 @@ class DynamicFormOrchestrator(Orchestrator):
             data_source_type="AzureCognitiveSearch",
         )
 
-        # TODO: create client in constructor
-
-        response = client.chat.completions.create(
-            model=deployment,
+        response = self.aoai_client.chat.completions.create(
+            model=self.api_deployment,
             messages=messages,
             extra_body=dict(data_sources=[data_source_config]),
         )
 
-        # validate and parse response using tool
-        # massage response into returned objects
+        # post-inference step: validate and parse response
+        # TODO get out response and timestamp and stuff from response
+        response_dict = parse_json_str_into_validated_dict(
+            json_str=response,
+            model_cls=ResponseModel,
+        )
+
+        # massage data
+        if super().env_params.SHOULD_STREAM:
+            # TODO: put in actual values for the response_obj
+            response_obj = {
+                "id": message_uuid,
+                "model": self.api_deployment,
+                "created": gen_timestamp,
+                "object": "chat.completion",
+                "choices": [
+                    {
+                        "messages": [
+                            {
+                                "role": "assistant",
+                                "content": response["message"],
+                            }
+                        ]
+                    }
+                ],
+                "dynamic_form_data": response["dynamic_form_data"],
+                "history_metadata": history_metadata,
+            }
+            self.conversation_client.log_non_stream(response_obj)
+            return flask.jsonify(response_obj), 200
 
 
 ALLOWED_DATA_SOURCE_TYPES = ("AzureCognitiveSearch",)
