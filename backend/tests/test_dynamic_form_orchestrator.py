@@ -1,0 +1,57 @@
+"""
+Test DynamicFormOrchestrator
+"""
+
+import sys
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+from pathlib import Path
+
+# Hacky way to allow imports to  python modules in backend folder, in the scenario where this repo is not properly packaged as a python package
+sys.path.append(str(Path(__file__).parent.parent.parent.absolute()))
+
+from backend.orchestrators.DynamicFormOrchestrator import (
+    DynamicFormOrchestrator,
+    get_simple_azure_search_config,
+)
+from azure.identity import DefaultAzureCredential, get_bearer_token_provider
+import openai
+
+
+def test_get_simple_azure_search_config():
+    search_endpoint = f"https://msrchatss.search.windows.net"
+    search_index = "msrchatindex"
+    data_source_config = get_simple_azure_search_config(
+        azure_search_endpoint=search_endpoint,
+        azure_search_index=search_index,
+    )
+
+    # Construct  AOAI chat completion from scratch, then inject the data source config
+    azure_endpoint = "https://msrchat-aoai.openai.azure.com/"  # "https://msrip-openai-east.openai.azure.com/"
+    api_version = "2024-05-01-preview"
+    api_deployment = "gpt-4o"
+    azure_ad_token_provider = get_bearer_token_provider(
+        DefaultAzureCredential(),
+        "https://cognitiveservices.azure.com/.default",
+    )
+
+    aoai_client = openai.AzureOpenAI(
+        azure_endpoint=azure_endpoint,
+        api_version=api_version,
+        azure_ad_token_provider=azure_ad_token_provider,
+    )
+
+    response = aoai_client.chat.completions.create(
+        model=api_deployment,
+        messages=[
+            {
+                "role": "user",
+                "content": "Define an snail in 10 words. ",
+            },
+        ],
+        extra_body={"data_sources": [data_source_config]},
+    )
+    print()
+    print(response.choices[00].message.content)

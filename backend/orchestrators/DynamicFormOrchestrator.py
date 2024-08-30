@@ -287,6 +287,7 @@ def get_simple_azure_search_config(
             },
         },
     }
+    return config
 
 
 def get_data_source_config(
