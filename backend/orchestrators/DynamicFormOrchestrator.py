@@ -304,6 +304,7 @@ def get_data_source_config(
 
     e = SimpleNamespace(**env_dict)
 
+    config = None
     if data_source_type == "azure_search":
         # Set query type
         query_type = "simple"
@@ -333,53 +334,60 @@ def get_data_source_config(
                 logging.debug(f"FILTER: {filter_string}")
 
         config = {
-            "type": "AzureCognitiveSearch",
+            "type": "azure_search",
             "parameters": {
                 "endpoint": f"https://{e.AZURE_SEARCH_SERVICE}.search.windows.net",
-                "indexName": e.AZURE_SEARCH_INDEX,
+                "index_name": e.AZURE_SEARCH_INDEX,
                 "authentication": {
                     "type": "system_assigned_managed_identity",
                 },
-                "fieldsMapping": {
-                    "contentFields": (
+                "embedding_dependency": {
+                    "type": "deployment_name",
+                    "deployment_name": e.AZURE_OPENAI_EMBEDDING_NAME,
+                },
+                "fields_mapping": {
+                    "content_fields": (
                         parse_multi_columns(e.AZURE_SEARCH_CONTENT_COLUMNS)
                         if e.AZURE_SEARCH_CONTENT_COLUMNS
                         else []
                     ),
-                    "titleField": (
+                    "title_field": (
                         e.AZURE_SEARCH_TITLE_COLUMN
                         if e.AZURE_SEARCH_TITLE_COLUMN
                         else None
                     ),
-                    "urlField": (
+                    "url_field": (
                         e.AZURE_SEARCH_URL_COLUMN if e.AZURE_SEARCH_URL_COLUMN else None
                     ),
-                    "filepathField": (
+                    "filepath_field": (
                         e.AZURE_SEARCH_FILENAME_COLUMN
                         if e.AZURE_SEARCH_FILENAME_COLUMN
                         else None
                     ),
-                    "vectorFields": (
+                    "vector_fields": (
                         parse_multi_columns(e.AZURE_SEARCH_VECTOR_COLUMNS)
                         if e.AZURE_SEARCH_VECTOR_COLUMNS
                         else []
                     ),
                 },
-                "inScope": (
+                "in_scope": (
                     True if e.AZURE_SEARCH_ENABLE_IN_DOMAIN.lower() == "true" else False
                 ),
-                "topNDocuments": int(e.AZURE_SEARCH_TOP_K),
-                "queryType": query_type,
-                "semanticConfiguration": (
+                "top_n_documents": int(e.AZURE_SEARCH_TOP_K),
+                "query_type": query_type,
+                "semantic_configuration": (
                     e.AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG
                     if e.AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG
                     else ""
                 ),
-                "roleInformation": e.AZURE_OPENAI_SYSTEM_MESSAGE,
+                "role_information": e.AZURE_OPENAI_SYSTEM_MESSAGE,
                 "filter": filter_string,
                 "strictness": int(e.AZURE_SEARCH_STRICTNESS),
             },
         }
+
+    assert isinstance(config, dict)
+    return config
 
 
 # TODO: deal with duplicate code in Orchestrator.py

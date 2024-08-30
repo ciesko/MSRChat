@@ -15,7 +15,9 @@ sys.path.append(str(Path(__file__).parent.parent.parent.absolute()))
 from backend.orchestrators.DynamicFormOrchestrator import (
     DynamicFormOrchestrator,
     get_simple_azure_search_config,
+    get_data_source_config,
 )
+from backend.orchestrators.Orchestrator import extract_env_params_into_simple_namespace
 from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 import openai
 
@@ -23,7 +25,7 @@ import openai
 def basic_chat_completion(data_source_config):
     """Convenience function to use the data_source_config to feed into a fixed chat completion calling"""
     # Construct  AOAI chat completion from scratch, then inject the data source config
-    azure_endpoint = "https://msrchat-aoai.openai.azure.com/"  # "https://msrip-openai-east.openai.azure.com/"
+    azure_endpoint = "https://msrchat-aoai.openai.azure.com/"
     api_version = "2024-05-01-preview"
     api_deployment = "gpt-4o"
     azure_ad_token_provider = get_bearer_token_provider(
@@ -59,4 +61,18 @@ def test_get_simple_azure_search_config():
     )
     response = basic_chat_completion(data_source_config)
     print()
-    print(response.choices[00].message.content)
+    print(response.choices[0].message.content)
+
+
+def test_get_data_source_config():
+    env_namespace = extract_env_params_into_simple_namespace()
+    env_dict = env_namespace.__dict__
+
+    data_source_config = get_data_source_config(
+        data_source_type="azure_search",
+        env_dict=env_dict,
+    )
+
+    response = basic_chat_completion(data_source_config)
+    print()
+    print(response.choices[0].message.content)
