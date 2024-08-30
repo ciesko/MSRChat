@@ -75,6 +75,7 @@ class DynamicFormOrchestrator(Orchestrator):
         )
 
         # AOAI chat completions client for `conversation_with_data` method. Need for calling LM with data source
+        # TODO allow option to pass in api key
         azure_ad_token_provider = get_bearer_token_provider(
             DefaultAzureCredential(),
             "https://cognitiveservices.azure.com/.default",
@@ -225,7 +226,7 @@ class DynamicFormOrchestrator(Orchestrator):
         response = self.aoai_client.chat.completions.create(
             model=self.api_deployment,
             messages=messages,
-            extra_body=dict(data_sources=[data_source_config]),
+            extra_body={"data_sources": [data_source_config]},
             temperature=float(super().env_params.AZURE_OPENAI_TEMPERATURE),
             max_tokens=int(super().env_params.AZURE_OPENAI_MAX_TOKENS),
             top_p=float(super().env_params.AZURE_OPENAI_TOP_P),
@@ -265,6 +266,27 @@ class DynamicFormOrchestrator(Orchestrator):
 
 
 ALLOWED_DATA_SOURCE_TYPES = ("AzureCognitiveSearch",)
+
+
+def get_simple_azure_search_config(
+    azure_search_endpoint: str,
+    azure_search_index: str,
+) -> Dict[str, Any]:
+    """
+    Construct a data source config (intended to be ingested by AOAI chat completion inference with data source).
+    Simplest possible configuration, with least settings needed.
+    This is data source config of type "azure_search, and uses system assigned managed identity
+    """
+    config = {
+        "type": "azure_search",
+        "parameters": {
+            "endpoint": azure_search_endpoint,
+            "index_name": azure_search_index,
+            "authentication": {
+                "type": "system_assigned_managed_identity",
+            },
+        },
+    }
 
 
 def get_data_source_config(
