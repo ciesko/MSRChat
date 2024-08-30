@@ -9,6 +9,7 @@
     "watch": "tsc && vite build --watch"
   },
   "dependencies": {
+    "@fluentui/react-carousel-preview": "^0.2.2",
     "@fluentui/react-components": "^9.43.2",
     "@fluentui/react-hooks": "^8.6.29",
     "@fluentui/react-icons": "^2.0.195",

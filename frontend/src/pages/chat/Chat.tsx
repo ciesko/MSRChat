@@ -38,6 +38,7 @@ import { DynamicFormData } from "../../components/DynamicForm/DynamicFormData";
 import { DynamicFormParser } from "../../components/DynamicForm/DynamicFormParser";
 import { IDynamicFormField } from "../../components/DynamicForm/DynamicFormModels";
 import { LoadingDialog } from "../../components/LoadingDialog/LoadingDialog";
+import { ImportProfileDialog } from "../../components/ImportProfileDialog/ImportProfileDialog";
 
 const enum messageStatus {
     NotRunning = "Not Running",
@@ -65,6 +66,7 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
     const [ASSISTANT, TOOL, ERROR] = ["assistant", "tool", "error"]
     const [formData, setFormData] = useState<IDynamicFormField[]>([]);
     const [showImportingData, setShowImportingData] = useState<boolean>(false);
+    const [files, setFiles] = useState<File[]>([]);
 
     useEffect(() => {
         if (appStateContext?.state.isCosmosDBAvailable?.status === CosmosDBStatus.NotWorking && appStateContext.state.chatHistoryLoadingState === ChatHistoryLoadingState.Fail && hideErrorDialog) {
@@ -473,6 +475,14 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
         appStateContext?.state.audioService?.stopAudioPlayback();
     }
 
+    const sendWizardProfile = (message: string, profileFile: File | undefined) => {
+        makeApiRequestWithoutCosmosDB(message, undefined, profileFile);
+        // if file then add to files state
+        if (profileFile) {
+            setFiles([...files, profileFile]);
+        }
+    }
+
     useEffect(() => {
         if (appStateContext?.state.currentChat) {
             setMessages(appStateContext.state.currentChat.messages)
@@ -607,8 +617,10 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
                     <div className={embedDisplay ? styles.chatContainerEmbed : styles.chatContainer}>
                         <UploadedFiles
                             onFileUpload={(file) => {
-                                makeApiRequestWithoutCosmosDB("Fill out values on form based on this document.", undefined, file)
+                                makeApiRequestWithoutCosmosDB("Fill out values on form based on this document.", undefined, file);
+                                setFiles([...files, file]);
                             }}
+                            files={files}
                         />
                         {!messages || messages.length < 1 ? (
                             <div className={styles.chatEmptyState}>
@@ -643,11 +655,13 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
                                     <div key={`answer-${index}`}>
                                         {
                                             answer.role === "user" ? (
-                                                <div className={styles.questionDisplayRow}>
-                                                    <QuestionDisplay
-                                                        content={answer.content}
-                                                    />
-                                                </div>
+                                                  <></>
+                                                    // **** Hiding user questions sent to AI chat for profile UI     
+                                                    //<div className={styles.questionDisplayRow}>
+                                                    //     <QuestionDisplay
+                                                    //         content={answer.content}
+                                                    //     />
+                                                    // </div>
                                             ) : (
                                                 answer.role === "assistant" ? <div
                                                     style={{
@@ -677,23 +691,24 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
                                     </div>
                                 ))}
                                 {showLoadingMessage && (
-                                    <>
-                                        <div style={{
-                                            marginBottom: '12px',
-                                            maxWidth: '80%',
-                                            display: 'flex'
-                                        }}>
-                                            <Answer
-                                                answer={{
-                                                    message_id: "generating",
-                                                    answer: "Generating answer...",
-                                                    citations: []
-                                                }}
-                                                onCitationClicked={() => null}
-                                                isLastAnswer={true}
-                                            />
-                                        </div>
-                                    </>
+                                    <></>
+                                    // <>
+                                    //     <div style={{
+                                    //         marginBottom: '12px',
+                                    //         maxWidth: '80%',
+                                    //         display: 'flex'
+                                    //     }}>
+                                    //         <Answer
+                                    //             answer={{
+                                    //                 message_id: "generating",
+                                    //                 answer: "Generating answer...",
+                                    //                 citations: []
+                                    //             }}
+                                    //             onCitationClicked={() => null}
+                                    //             isLastAnswer={true}
+                                    //         />
+                                    //     </div>
+                                    // </>
                                 )}
                                 <div ref={chatMessageStreamEnd} />
                             </div>
@@ -763,12 +778,12 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
                             </div>
                         </div>
                     </div>
-                        <DynamicForm
-                            formTitle="User Profile Form"
-                            fields={formData}
-                            onClearAllClick={() => sendChatQuestion("Clear form.")}  
-                        />
-              
+                    <DynamicForm
+                        formTitle="User Profile Form"
+                        fields={formData}
+                        onClearAllClick={() => sendChatQuestion("Clear form.")}
+                    />
+
                     {/* Citation Panel */}
                     <CitationDetails
                         open={((messages && messages.length > 0) && (isCitationPanelOpen && activeCitation)) ? true : false}
@@ -798,10 +813,14 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
                     </DialogBody>
                 </DialogSurface>
             </Dialog>
-            <LoadingDialog 
+            <LoadingDialog
                 open={showImportingData || isLoading}
                 title={showImportingData ? "Importing file and building profile" : "Working on your request"}
                 subTitle={showImportingData ? "This may take a while." : "This shouldn't take long."}
+            />
+            <ImportProfileDialog 
+            onProfileFinish={sendWizardProfile}
+            open={true} 
             />
         </div>
     );

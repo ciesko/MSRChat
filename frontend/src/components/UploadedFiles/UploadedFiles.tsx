@@ -5,11 +5,12 @@ import { ArrowUpload16Regular } from '@fluentui/react-icons';
 
 export interface IUploadedFilesProps {
     onFileUpload: (file: File) => void;
+    files?: File[];
  }
 
 export const UploadedFiles: React.FunctionComponent<IUploadedFilesProps> = (props: React.PropsWithChildren<IUploadedFilesProps>) => {
     const styles = UploadedFilesStyles();
-    const [files, setFiles] = React.useState<File[]>([]);
+    const [files, setFiles] = React.useState<File[]>(props.files || []);
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files) {
@@ -22,6 +23,10 @@ export const UploadedFiles: React.FunctionComponent<IUploadedFilesProps> = (prop
         document.getElementById('fileInput')?.click();
     };
 
+    React.useEffect(() => {
+        setFiles(props.files || []);
+    }, [props.files]);
+    
     return (
         <Card className={styles.container}>
             <CardHeader
@@ -34,13 +39,10 @@ export const UploadedFiles: React.FunctionComponent<IUploadedFilesProps> = (prop
                             onClick={handleButtonClick}
                             icon={<ArrowUpload16Regular />}
                         >
-                            Upload
+                            Import
                         </Button>
                 }
-
             />
-
-
 
             <input
                 id="fileInput"

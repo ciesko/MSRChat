@@ -19,7 +19,7 @@ export const DynamicForm: React.FunctionComponent<IDynamicFormProps> = (props: R
   };
 
   const onSubmitClick = () => {
-    const fields = props.fields.map((field) => `${field.label}: ${field.value}`).join('\n');
+    const fields = props.fields.map((field) => `${field.label}: ${field.value}`).join('\n\n\n');
     const blob = new Blob([fields], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement
