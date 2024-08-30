@@ -20,14 +20,8 @@ from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 import openai
 
 
-def test_get_simple_azure_search_config():
-    search_endpoint = f"https://msrchatss.search.windows.net"
-    search_index = "msrchatindex"
-    data_source_config = get_simple_azure_search_config(
-        azure_search_endpoint=search_endpoint,
-        azure_search_index=search_index,
-    )
-
+def basic_chat_completion(data_source_config):
+    """Convenience function to use the data_source_config to feed into a fixed chat completion calling"""
     # Construct  AOAI chat completion from scratch, then inject the data source config
     azure_endpoint = "https://msrchat-aoai.openai.azure.com/"  # "https://msrip-openai-east.openai.azure.com/"
     api_version = "2024-05-01-preview"
@@ -48,10 +42,21 @@ def test_get_simple_azure_search_config():
         messages=[
             {
                 "role": "user",
-                "content": "Define an snail in 10 words. ",
+                "content": "Describe Microsoft research in 10 words. ",
             },
         ],
         extra_body={"data_sources": [data_source_config]},
     )
+    return response
+
+
+def test_get_simple_azure_search_config():
+    search_endpoint = f"https://msrchatss.search.windows.net"
+    search_index = "msrchatindex"
+    data_source_config = get_simple_azure_search_config(
+        azure_search_endpoint=search_endpoint,
+        azure_search_index=search_index,
+    )
+    response = basic_chat_completion(data_source_config)
     print()
     print(response.choices[00].message.content)

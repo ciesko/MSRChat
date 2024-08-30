@@ -265,9 +265,6 @@ class DynamicFormOrchestrator(Orchestrator):
             raise Exception("Streaming is not implemented yet")
 
 
-ALLOWED_DATA_SOURCE_TYPES = ("AzureCognitiveSearch",)
-
-
 def get_simple_azure_search_config(
     azure_search_endpoint: str,
     azure_search_index: str,
@@ -290,16 +287,24 @@ def get_simple_azure_search_config(
     return config
 
 
+ALLOWED_DATA_SOURCE_TYPES = ("azure_search", "azure_cosmos_db")
+
+
 def get_data_source_config(
-    env_dict: Dict[str, Any],
     data_source_type: str,
+    env_dict: Dict[str, Any],
 ) -> Dict[str, Any]:
     """
     Create a config dictionary intended to  be passed into the `extra_body` parameter  as a "data_source", used in the AzureOpenAI API call `client.chat.completions.create`.
     """
+    if data_source_type not in ALLOWED_DATA_SOURCE_TYPES:
+        raise ValueError(
+            f"Specified data_source_type must be one of {ALLOWED_DATA_SOURCE_TYPES}. The specified value was: {data_source_type}"
+        )
+
     e = SimpleNamespace(**env_dict)
 
-    if data_source_type == "AzureCognitiveSearch":
+    if data_source_type == "azure_search":
         # Set query type
         query_type = "simple"
         if e.AZURE_SEARCH_QUERY_TYPE:
@@ -331,8 +336,10 @@ def get_data_source_config(
             "type": "AzureCognitiveSearch",
             "parameters": {
                 "endpoint": f"https://{e.AZURE_SEARCH_SERVICE}.search.windows.net",
-                "key": e.AZURE_SEARCH_KEY,
                 "indexName": e.AZURE_SEARCH_INDEX,
+                "authentication": {
+                    "type": "system_assigned_managed_identity",
+                },
                 "fieldsMapping": {
                     "contentFields": (
                         parse_multi_columns(e.AZURE_SEARCH_CONTENT_COLUMNS)
