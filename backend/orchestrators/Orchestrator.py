@@ -168,11 +168,14 @@ class Orchestrator(ABC):
         
         # if file is docx parse using docx
         elif file.content_type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
-            doc = Document(file)
-            fullText = []
-            for para in doc.paragraphs:
-                fullText.append(para.text)
-            res = '\n'.join(fullText)
+            try:
+                doc = Document(file)
+                fullText = []
+                for para in doc.paragraphs:
+                    fullText.append(para.text)
+                res = '\n'.join(fullText)
+            except Exception as e:
+                return "There was an issue reading the provided docx file. Inform the user that the file could not be read and ask them to check the permissions on the document. Locked docx files cannot be read."
 
         # if file is pdf, parse using pdf
         elif file.content_type == "application/pdf":
