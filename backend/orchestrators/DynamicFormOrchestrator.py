@@ -3,6 +3,7 @@ Updated the DefaultOrchestrator to use JSONChat / BasicChat from TNR AI Tools.
 """
 
 import logging
+import pydantic
 from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 import openai
 import time
@@ -10,7 +11,7 @@ from types import SimpleNamespace
 from pydantic import BaseModel, Field
 from flask import Response, request, jsonify
 import requests
-from typing import Any, Dict, Tuple
+from typing import Any, Dict, List, Tuple
 from .Orchestrator import Orchestrator
 import flask
 from tnr_ai_tools.json_response_utils import (
@@ -33,9 +34,7 @@ class JSONChatResponse:
 
 class ResponseModel(BaseModel):
     message: str = Field(description="The assistant's message content.")
-    dynamic_form_data: Dict[str, Any] = Field(
-        description="The updated dynamic form data."
-    )
+    dynamic_form_data: Any = Field(description="The updated dynamic form data.")
 
 
 class DynamicFormOrchestrator(Orchestrator):
@@ -50,7 +49,7 @@ class DynamicFormOrchestrator(Orchestrator):
             if super().env_params.AZURE_OPENAI_ENDPOINT
             else f"https://{super().env_params.AZURE_OPENAI_RESOURCE}.openai.azure.com/"
         )
-        api_version = "2023-08-01-preview"
+        api_version = "2024-05-01-preview"
         self.api_deployment = "gpt-4o"
 
         api_key = super().env_params.AZURE_OPENAI_KEY
@@ -135,15 +134,8 @@ class DynamicFormOrchestrator(Orchestrator):
         if file:
             chat_history.add_message(message_for_attachment)
 
-        request_messages = request_body["messages"]
-        for request_message in request_messages:
-            if request_message:
-                chat_history.add_message(
-                    {
-                        "role": request_message["role"],
-                        "content": request_message["content"],
-                    }
-                )
+        request_messages = clean_up_messages(request_body["messages"])
+        [chat_history.add_message(m) for m in request_messages]
 
         if file:
             chat_history.add_message(message_for_context)
@@ -199,9 +191,19 @@ class DynamicFormOrchestrator(Orchestrator):
         """
         Invoke an LM call with data source (e.g. Azure AI Search). Also optionally uses file attachment in the conversation context.
         """
+        # TODO move to better place in code
+        format_instructions = get_format_instructions(ResponseModel)
+        # messages.append(dict(role="system", content=format_instructions))
+
         # Massage args into usable form
-        messages = request_body["messages"]
-        messages = [m for m in messages if m != {}]
+        messages = []
+        # messages.append(
+        #     {
+        #         "role": "system",
+        #         "content": f"{super().env_params.AZURE_OPENAI_SYSTEM_MESSAGE}\n\nOutput format instructions: {format_instructions}",
+        #     }
+        # )
+        messages.extend(clean_up_messages(request_body["messages"]))
 
         # Create conversation item in client
         history_metadata = request_body.get("history_metadata", {})
@@ -213,34 +215,100 @@ class DynamicFormOrchestrator(Orchestrator):
             history_metadata,
         )
 
-        # pre-inference step: Add format instructionshistory
-        format_instructions = get_format_instructions(ResponseModel)
-        messages.append(dict(role="system", content=format_instructions))
+        # pre-inference step: Add format instructions
+        # format_instructions = get_format_instructions(ResponseModel)
+        # messages.append(dict(role="system", content=format_instructions))
 
         # TODO logic to choose data_source_type
         data_source_config = get_data_source_config(
+            data_source_type="azure_search",
             env_dict=self.env_params.__dict__,
-            data_source_type="AzureCognitiveSearch",
+            system_message=f"{super().env_params.AZURE_OPENAI_SYSTEM_MESSAGE}\n\nOutput format instructions: {format_instructions}",
+        )
+
+        # TODO remove
+        print("dennis: messages")
+        print(messages)
+
+        # TODO remove
+        print("dennis params")
+        print(
+            dict(
+                model=self.api_deployment,
+                messages=messages,
+                extra_body={"data_sources": [data_source_config]},
+                response_format=dict(type="json_object"),
+                temperature=float(super().env_params.AZURE_OPENAI_TEMPERATURE),
+                max_tokens=int(super().env_params.AZURE_OPENAI_MAX_TOKENS),
+                top_p=float(super().env_params.AZURE_OPENAI_TOP_P),
+            )
         )
 
         response = self.aoai_client.chat.completions.create(
             model=self.api_deployment,
             messages=messages,
             extra_body={"data_sources": [data_source_config]},
+            # TODO put note here about json mode not working? probably leave it off
+            # response_format=dict(type="json_object"),
             temperature=float(super().env_params.AZURE_OPENAI_TEMPERATURE),
             max_tokens=int(super().env_params.AZURE_OPENAI_MAX_TOKENS),
             top_p=float(super().env_params.AZURE_OPENAI_TOP_P),
         )
-
+        # TODO remove
+        print("dennis: response choices")
+        print(response.choices)
         # post-inference step: validate and parse response
         response_message_str = response.choices[0].message.content
-        structured_response_dict = parse_json_str_into_validated_dict(
-            json_str=response_message_str,
-            model_cls=ResponseModel,
-        )
+        # Catch validation error: As of 2024/09/03, AOAI On Your Data does not seem to switch to JSON output mode even when setting `response_format=dict(type="json_object")` in the chat completion creation. Thus, we need to catch if the output is ever invalid and repair it.
+        # response_message_str = response_message_str.replace("```json", "")
+        # response_message_str = response_message_str.replace("```", "")
+
+        # TODO remove
+        print("dennis: repaired?")
+        print(response_message_str)
+        # import pdb
+
+        # pdb.set_trace()
+        # structured_response_dict = parse_json_str_into_validated_dict(
+        #     json_str=response_message_str,
+        #     model_cls=ResponseModel,
+        # )
+        try:
+            structured_response_dict = parse_json_str_into_validated_dict(
+                json_str=response_message_str,
+                model_cls=ResponseModel,
+            )
+        except pydantic.ValidationError as e:
+            logging.warn(
+                f"Attempting to repair the response that was caught with this error: {str(e)}"
+            )
+
+            # TODO remove
+            print("dennis repair attempt")
+            print(
+                f"Rewrite the following text into parsable JSON form:\n<text>{response_message_str}</text>"
+            )
+            repaired_response = self.aoai_client.chat.completions.create(
+                model=self.api_deployment,
+                messages=[
+                    dict(
+                        role="user",
+                        content=f"Rewrite the following text into parsable JSON form:\n\n<text>{response_message_str}</text>\n\n{format_instructions}",
+                    ),
+                ],
+                response_format=dict(type="json_object"),
+                temperature=float(super().env_params.AZURE_OPENAI_TEMPERATURE),
+                max_tokens=int(super().env_params.AZURE_OPENAI_MAX_TOKENS),
+                top_p=float(super().env_params.AZURE_OPENAI_TOP_P),
+            )
+            repaired_response_str = repaired_response.choices[0].message.content
+            structured_response_dict = parse_json_str_into_validated_dict(
+                json_str=repaired_response_str,
+                model_cls=ResponseModel,
+            )
 
         # massage data
-        if super().env_params.SHOULD_STREAM:
+        if not super().env_params.SHOULD_STREAM:
             response_obj = {
                 "id": message_uuid,
                 "model": response.model,
@@ -293,6 +361,7 @@ ALLOWED_DATA_SOURCE_TYPES = ("azure_search", "azure_cosmos_db")
 def get_data_source_config(
     data_source_type: str,
     env_dict: Dict[str, Any],
+    system_message: str,
 ) -> Dict[str, Any]:
     """
     Create a config dictionary intended to  be passed into the `extra_body` parameter  as a "data_source", used in the AzureOpenAI API call `client.chat.completions.create`.
@@ -380,12 +449,13 @@ def get_data_source_config(
                     if e.AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG
                     else ""
                 ),
-                "role_information": e.AZURE_OPENAI_SYSTEM_MESSAGE,
+                "role_information": system_message,
                 "filter": filter_string,
                 "strictness": int(e.AZURE_SEARCH_STRICTNESS),
             },
         }
-
+    elif data_source_type == "azure_cosmos_db":
+        raise NotImplementedError
     assert isinstance(config, dict)
     return config
 
@@ -440,3 +510,20 @@ def generateFilterString(
 
     group_ids = ", ".join([obj["id"] for obj in userGroups])
     return f"{azure_search_permitted_groups_column}/any(g:search.in(g, '{group_ids}'))"
+
+
+def clean_up_messages(messages: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """
+    Given a messages list where each message might have fields beyond "role" and "content", or might be empty dicts themselves, clean up the messages such that each message exactly only has "role" and "content".
+    This is so the messages are clean enough to feed to an inference.
+    """
+    non_empty_messages = [m for m in messages if m != {}]
+
+    new_messages = []
+    for m in non_empty_messages:
+        new_message = dict(
+            role=m["role"],
+            content=m["content"],
+        )
+        new_messages.append(new_message)
+    return new_messages

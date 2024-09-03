@@ -22,7 +22,7 @@ from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 import openai
 
 
-def basic_chat_completion(data_source_config):
+def simple_chat_completion(data_source_config):
     """Convenience function to use the data_source_config to feed into a fixed chat completion calling"""
     # Construct  AOAI chat completion from scratch, then inject the data source config
     azure_endpoint = "https://msrchat-aoai.openai.azure.com/"
@@ -59,7 +59,7 @@ def test_get_simple_azure_search_config():
         azure_search_endpoint=search_endpoint,
         azure_search_index=search_index,
     )
-    response = basic_chat_completion(data_source_config)
+    response = simple_chat_completion(data_source_config)
     print()
     print(response.choices[0].message.content)
 
@@ -73,6 +73,6 @@ def test_get_data_source_config():
         env_dict=env_dict,
     )
 
-    response = basic_chat_completion(data_source_config)
+    response = simple_chat_completion(data_source_config)
     print()
     print(response.choices[0].message.content)
