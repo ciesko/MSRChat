@@ -543,7 +543,12 @@ async def mcr_search():
                 if response.status == 200:
                     user = await response.json()
                     if user:
-                        return jsonify(await response.json()), 200
+                        print(user[0]['email'])
+                        print(user_name)
+                        if(user[0]['email'] == user_name or user[0]['email_override'] == user_name):
+                            return jsonify(await response.json()), 200
+                        else:
+                            return jsonify({"error": "User not found"}), 404
                     else:
                         return jsonify({"error": "User not found"}), 404
                 else:
