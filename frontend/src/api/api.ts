@@ -1,6 +1,7 @@
 import { UserInfo, ConversationRequest, Conversation, ChatMessage, CosmosDBHealth, CosmosDBStatus, SpeechAuth } from "./models";
 import { chatHistorySampleData } from "../constants/chatHistory";
 import { SpeechConfig, AutoDetectSourceLanguageConfig, AudioConfig, SpeechRecognizer, ResultReason } from "microsoft-cognitiveservices-speech-sdk";
+import { IUserProfile } from "../components/ImportProfileDialog/IUserProfile";
 
 export async function conversationApi(options: ConversationRequest, abortSignal: AbortSignal, file?: File): Promise<Response> {
     console.log("conversationApi", options, file);
@@ -361,4 +362,34 @@ export const historyMessageFeedback = async (messageId: string, feedback: string
             return errRes;
         })
     return response;
+}
+
+export const getMCRProfile = async (): Promise<IUserProfile | undefined> => {
+    try {
+        const response = await fetch("/mcr/search", {
+            method: "GET",
+        })
+        let responseData = await response.json();
+        responseData = responseData[0];
+        if (!responseData.ID) {
+            console.error("There was an issue fetching your data.");
+            return undefined;
+        }
+        
+        // _profileImage is the last element in the researcher_avatar array.  
+        const profileImageUrl = responseData.researcher_avatar[responseData.researcher_avatar.length - 1];
+
+        let profile: IUserProfile = {
+            about: responseData.about,
+            first_name: responseData.first_name,
+            last_name: responseData.last_name,
+            title: responseData.title,
+            profileImageUrl: profileImageUrl
+        }
+        return profile;
+    }
+    catch (error) {
+        console.error("There was an issue fetching your data.");
+        return undefined;
+    }
 }
