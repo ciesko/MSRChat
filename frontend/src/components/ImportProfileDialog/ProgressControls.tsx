@@ -18,7 +18,8 @@ export const ProgressControls: React.FunctionComponent<IProgressControlsProps> =
 
     return (
         <div className={styles.container}>
-            <Button>Skip</Button>
+
+            <Button onClick={props.onNextClick} disabled={currentIndex === props.steps - 1}>Skip</Button>
             <div className={styles.progressRow}>
                 {
                     Array.from({ length: props.steps }).map((_, index) => (

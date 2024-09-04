@@ -98,12 +98,12 @@ export const ImportProfileDialog: React.FunctionComponent<IImportProfileDialogPr
                     <DialogContent>
                         {
                             searchingProfile &&
-                            <div className={styles.centeredContent}>
+                            <div className={styles.centeredContentloading}>
                                 <Spinner size='large'>Searching for your profile...</Spinner>
                             </div>
                         }
                         {
-                            mSRprofile ?
+                            mSRprofile && !searchingProfile ?
                                 <>
                                     <Subtitle1>Import your data from microsoft.com/research?</Subtitle1>
                                     <p>We’d like to import your profile and project data from microsoft.com/research to help us improve your suggestions. Is this you?</p>
@@ -117,7 +117,7 @@ export const ImportProfileDialog: React.FunctionComponent<IImportProfileDialogPr
                                     </div>
                                 </>
                                 :
-                                <div className={styles.centeredContent}>
+                                <div className={styles.centeredContentloading}>
                                     <div>We did not find a Microsoft.com/research profile</div>
                                 </div>
                         }

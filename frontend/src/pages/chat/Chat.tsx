@@ -29,12 +29,10 @@ import { AppStateContext } from "../../state/AppProvider";
 import { useBoolean } from "@fluentui/react-hooks";
 import { Button, Link, Dialog, DialogSurface, DialogBody, DialogTitle, DialogContent, DialogActions, DialogTrigger, Title1, Subtitle2, Image, Caption1, Subtitle1 } from "@fluentui/react-components";
 import { ChatStyles } from "./ChatStyles";
-import { QuestionDisplay } from "../../components/QuestionDisplay/QuestionDisplay";
 import { CitationDetails } from "../../components/CitationDetails/CitationDetails";
 import { SuggestionButtons } from "../../components/SuggestionButtons/SuggestionButtons";
 import { UploadedFiles } from "../../components/UploadedFiles/UploadedFiles";
 import { DynamicForm } from "../../components/DynamicForm/DynamicForm";
-import { DynamicFormData } from "../../components/DynamicForm/DynamicFormData";
 import { DynamicFormParser } from "../../components/DynamicForm/DynamicFormParser";
 import { IDynamicFormField } from "../../components/DynamicForm/DynamicFormModels";
 import { LoadingDialog } from "../../components/LoadingDialog/LoadingDialog";
@@ -120,12 +118,26 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
         }
     }
 
+    const createFormDataString = (formData: IDynamicFormField[]) => {
+        let formDataString = "** Start Current Form State **\n";
+        formData.forEach((field) => {
+            formDataString += field.label + ": " + field.value + "\n";
+        });
+        formDataString += "** End Current Form State ** \n";
+        return formDataString
+    }
+
     const makeApiRequestWithoutCosmosDB = async (question: string, conversationId?: string, file?: File) => {
         setIsLoading(true);
         setShowLoadingMessage(true);
         // if file then set loading dialog
         if (file) {
             setShowImportingData(true);
+        }
+
+        // If formData then add to question
+        if (formData.length > 0) {
+            question += createFormDataString(formData);
         }
 
         const abortController = new AbortController();
@@ -617,7 +629,7 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
                     <div className={embedDisplay ? styles.chatContainerEmbed : styles.chatContainer}>
                         <UploadedFiles
                             onFileUpload={(file) => {
-                                makeApiRequestWithoutCosmosDB("Fill out values on form based on this document.", undefined, file);
+                                makeApiRequestWithoutCosmosDB("Fill out values on form based on this document.", appStateContext?.state.currentChat?.id, file);
                                 setFiles([...files, file]);
                             }}
                             files={files}
@@ -761,13 +773,7 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
                                                     aria-label="start a new chat button"
                                                 />
                                             )
-                                        }
-                                        <Button
-                                            icon={<Broom16Regular />}
-                                            onClick={appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured ? clearChat : newChat}
-                                            disabled={disabledButton()}
-                                            aria-label="clear chat button"
-                                        />
+                                        }                                      
                                     </div>
                                     <QuestionInput
                                         clearOnSend

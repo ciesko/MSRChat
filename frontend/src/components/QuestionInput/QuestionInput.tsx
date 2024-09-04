@@ -65,7 +65,7 @@ export const QuestionInput = ({ onSend, disabled, placeholder, clearOnSend, conv
             <div className={Newstyles.form}>
                 <Textarea
                     className={Newstyles.textInput}
-                    placeholder={placeholder}
+                    placeholder={placeholder || "Send a message"}
                     rows={5}
                     value={question}
                     onChange={onQuestionChange}
@@ -93,10 +93,6 @@ export const QuestionInput = ({ onSend, disabled, placeholder, clearOnSend, conv
                         disabled={sendQuestionDisabled || microphoneActive}
                     />
                 </div>
-            </div>
-            <div className={Newstyles.footer}>
-                <Caption1 className={Newstyles.footerText}><i>AI may generate incorrect answers, please check citations for accuracy.</i></Caption1>
-                <ComplianceMessage />
             </div>
         </div>
     );

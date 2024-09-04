@@ -17,6 +17,8 @@ export const UploadedFiles: React.FunctionComponent<IUploadedFilesProps> = (prop
         if (event.target.files) {
             setFiles([...files, ...Array.from(event.target.files)]);
             props.onFileUpload(event.target.files[0]);
+            // clear selection from file input
+            event.target.value = '';
         }
     };
 

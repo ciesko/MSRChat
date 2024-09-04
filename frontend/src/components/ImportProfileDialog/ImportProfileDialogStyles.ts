@@ -3,7 +3,7 @@ import { makeStyles, shorthands, tokens } from "@fluentui/react-components";
 export const ImportProfileDialogStyles = makeStyles({
     dialog: {
         maxWidth: '600px',
-        minHeight: '400px',
+        minHeight: '525px',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between',
@@ -35,6 +35,15 @@ export const ImportProfileDialogStyles = makeStyles({
         ...shorthands.gap(tokens.spacingHorizontalL),
         marginTop: tokens.spacingVerticalL,
         marginBottom: tokens.spacingVerticalL,
+    },
+    centeredContentloading: {
+        width: '100%',
+        // Center content row and column
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        ...shorthands.gap(tokens.spacingHorizontalL),
     },
     importCommandRow: {
         width: '100%',
