@@ -38,47 +38,51 @@ export const UploadedFiles: React.FunctionComponent<IUploadedFilesProps> = (prop
     }, [props.files]);
 
     return (
-        <Card className={styles.container}>
-            <CardHeader
-                className={styles.header}
-                header={
-                    <Subtitle2Stronger>Documents and links</Subtitle2Stronger>
-                }
-                action={
-                    <Button
-                        onClick={handleButtonClick}
-                        icon={<ArrowUpload16Regular />}
-                    >
-                        Import
-                    </Button>
-                }
-            />
-
-            <input
-                id="fileInput"
-                type="file"
-                aria-label='File input'
-                onChange={handleFileChange}
-                className={styles.fileUploadControl}
-            />
-            <div>
-                {files.map((file, index) => (
-                    <div className={styles.fileRow} key={index}>
+        <div className={styles.container}>
+            <Card className={styles.card}>
+                <CardHeader
+                    className={styles.header}
+                    header={
+                        <Subtitle2Stronger>Documents and links</Subtitle2Stronger>
+                    }
+                    action={
                         <Button
-                            title="Remove file"
-                            size='small'
-                            icon={
-                                <Dismiss16Regular />
-                            }
-                            appearance='subtle'
-                            onClick={() => handleRemoveFile(index)} 
-                        />
-                        <Link>
-                            {file.name}
-                        </Link>
-                    </div>
-                ))}
-            </div>
-        </Card>
+                            onClick={handleButtonClick}
+                            icon={<ArrowUpload16Regular />}
+                        >
+                            Import
+                        </Button>
+                    }
+                />
+
+                <input
+                    id="fileInput"
+                    type="file"
+                    aria-label='File input'
+                    onChange={handleFileChange}
+                    className={styles.fileUploadControl}
+                />
+                <div>
+                    {files.map((file, index) => (
+                        <div className={styles.fileRow} key={index}>
+
+                            <Link>
+                                <Button
+                                    title="Remove file"
+                                    size='small'
+                                    icon={
+                                        <Dismiss16Regular />
+                                    }
+                                    appearance='subtle'
+                                    onClick={() => handleRemoveFile(index)}
+                                /> 
+                                {file.name}
+                            </Link>
+                        </div>
+                    ))}
+                </div>
+            </Card>
+            <div className={styles.uploadSeparator}></div>
+        </div>
     );
 };

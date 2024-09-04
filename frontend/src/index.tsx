@@ -22,7 +22,8 @@ export default function App() {
     }
     // Set embedDisplay state to true if embed=true is in query string
     React.useEffect(() => {
-        setEmbedDisplay(getEmbedDisplay());
+        // This is set to true to hide the outer layout to match the figma design
+        setEmbedDisplay(true);
     }, []);
     // Create instance of themeservice 
     const themeService = new ThemeService();

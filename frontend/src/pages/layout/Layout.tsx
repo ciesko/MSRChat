@@ -6,8 +6,10 @@ import { AppStateContext } from "../../state/AppProvider";
 import { Header } from "../../components/Header/Header";
 import { LayoutStyles } from "./LayoutStyles";
 import Footer from "../../components/Footer/Footer";
+import { Button, Subtitle1, Title2, Title3 } from "@fluentui/react-components";
+import { Home24Regular } from "@fluentui/react-icons";
 
-const Layout = ({ isDarkTheme, embedDisplay }: { isDarkTheme: boolean, embedDisplay: boolean  }) => {
+const Layout = ({ isDarkTheme, embedDisplay }: { isDarkTheme: boolean, embedDisplay: boolean }) => {
     const styles = LayoutStyles();
     const [isSharePanelOpen, setIsSharePanelOpen] = useState<boolean>(false);
     const [copyClicked, setCopyClicked] = useState<boolean>(false);
@@ -15,12 +17,12 @@ const Layout = ({ isDarkTheme, embedDisplay }: { isDarkTheme: boolean, embedDisp
     const appStateContext = useContext(AppStateContext);
     const [LogoImage, setLogoImage] = useState<string>(isDarkTheme ? MSFTLogoWhite : MSFTLogoGrey);
 
-    
+
     const handleShareClick = () => {
         setIsSharePanelOpen(true);
     };
 
-     const handleHistoryClick = () => {
+    const handleHistoryClick = () => {
         appStateContext?.dispatch({ type: 'TOGGLE_CHAT_HISTORY' })
     };
 
@@ -33,19 +35,14 @@ const Layout = ({ isDarkTheme, embedDisplay }: { isDarkTheme: boolean, embedDisp
     useEffect(() => { }, [appStateContext?.state.isCosmosDBAvailable.status]);
 
     return (
-        <div className={ embedDisplay ? styles.containerEmbed : styles.container}>
-            {
-                !embedDisplay && <Header
-                azureImageUrl={LogoImage}
-                onShareClick={handleShareClick}
-                onHistoryClick={handleHistoryClick}
-                appStateContext={appStateContext}
-            />
-            }
-            <Outlet />
-            {
-                !embedDisplay && <Footer />
-            }
+        <div className={styles.page}>
+            <div className={styles.coffeeHeader}>
+                <Button className={styles.homeButton} appearance='transparent' icon={<Home24Regular />} onClick={() => window.location.href = '/'} />
+                <Subtitle1>Coffee Connections</Subtitle1>
+            </div>
+            <div className={styles.containerEmbed}>
+                <Outlet />
+            </div>
         </div>
     );
 };

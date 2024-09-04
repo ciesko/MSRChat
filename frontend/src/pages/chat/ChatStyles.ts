@@ -6,12 +6,17 @@ export const ChatStyles = makeStyles({
         flexDirection: 'column',
     },
     containerWithForm: {
+       // display in row and contain all elements in screen size
         display: 'flex',
         flexDirection: 'row',
+        justifyContent: 'center',
+        height: '90vh',
+
+
         '@media (max-width: 600px)': {
             flexDirection: 'column',
         },
-        ...shorthands.gap('20px'),
+        columnGap: '20px',
     },
     chatContainer: {
         minWidth: '450px',
@@ -34,13 +39,13 @@ export const ChatStyles = makeStyles({
     },
 
     chatContainerEmbed: {
+        width: '450px',
+        height: '100%',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: 'space-between',
-        ...shorthands.padding('30px'),
-        height: '100vh',
-        backgroundColor: tokens.colorNeutralBackground4,
+        overflowY: 'hidden',
+        overflowX: 'hidden',
         '@media (max-width: 400px)': {
             ...shorthands.padding('15px'),
             height: 'calc(100vh - 130px)',
@@ -103,8 +108,10 @@ export const ChatStyles = makeStyles({
     chatInput: {
         display: 'flex',
         width: '100%',
-        maxWidth: '1080px',
         flexDirection: 'row',
+        // this should show at the bottom of the component
+        justifyContent: 'center',
+        alignItems: 'center',
     },
 
     chatButtonsLeftContainer: {
@@ -140,14 +147,13 @@ export const ChatStyles = makeStyles({
         // display vertically and 10px gap
         display: 'flex',
         flexDirection: 'column',
-        ...shorthands.gap('10px'),
         width: '100%',
-        maxWidth: '1080px',
         overflowY: 'auto',
-        ...shorthands.padding('10px'),
         boxSizing: 'border-box',
-    },
-    chatInputContainer: {
+        height: '100%',
+        ...shorthands.gap('10px'),
+        },
+        chatInputContainer: {
         // display vertically and centered  
         display: 'flex',
         flexDirection: 'column',

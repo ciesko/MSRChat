@@ -627,7 +627,7 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
                 </div>
             ) : (
                 <div className={styles.containerWithForm}>
-                    <div className={embedDisplay ? styles.chatContainerEmbed : styles.chatContainer}>
+                    <div className={styles.chatContainerEmbed}>
                         <UploadedFiles
                             onFileUpload={(file) => {
                                 makeApiRequestWithoutCosmosDB("Fill out values on form based on this document.", appStateContext?.state.currentChat?.id, file, true);
@@ -731,20 +731,6 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
                         <div className={styles.bottomSection}>
                             <div className={styles.stopGeneratingContainer}>
                                 {
-                                    // isLoading show Stop Generating button
-                                    (isLoading && messages && messages.length > 0) && (
-                                        <Button
-                                            icon={<Stop24Regular />}
-                                            aria-label="Stop generating"
-                                            tabIndex={0}
-                                            onClick={stopGenerating}
-                                            onKeyDown={e => e.key === "Enter" || e.key === " " ? stopGenerating() : null}
-                                        >
-                                            Stop generating
-                                        </Button>
-                                    )
-                                }
-                                {
                                     // If audio is enabled, show speaker icon for mute/unmute
                                     SPEECH_ENABLED && (
                                         <Button
@@ -782,7 +768,6 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
                                         conversationId={appStateContext?.state.currentChat?.id ? appStateContext?.state.currentChat?.id : undefined}
                                         speechEnabled={SPEECH_ENABLED ? true : false}
                                     />
-
                                 </div>
                             </div>
                         </div>
