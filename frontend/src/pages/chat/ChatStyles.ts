@@ -5,16 +5,24 @@ export const ChatStyles = makeStyles({
         display: 'flex',
         flexDirection: 'column',
     },
-
+    containerWithForm: {
+        display: 'flex',
+        flexDirection: 'row',
+        '@media (max-width: 600px)': {
+            flexDirection: 'column',
+        },
+        ...shorthands.gap('20px'),
+    },
     chatContainer: {
+        minWidth: '450px',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'space-between',
-        //background: 'radial-gradient(108.78% 108.78% at 50.02% 19.78%, #FFFFFF 57.29%, #EEF6FE 100%)',
         boxShadow: tokens.shadow8,
         ...shorthands.borderRadius(tokens.borderRadiusXLarge),
         overflowY: 'auto',
+        overflowX: 'hidden',
         height: 'calc(100vh - 90px)',
         ...shorthands.padding('30px'),
         boxSizing: 'border-box',

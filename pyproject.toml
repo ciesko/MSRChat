@@ -1,0 +1,35 @@
+[tool.poetry]
+name = "msrchat"
+version = "0.1.0"
+description = "MSR chatbot powered by AOAI"
+authors = ["MSRx Team"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11, <3.13"
+azure-identity = ">=1.16.0,<2.0.0"
+flask = {version = "2.3.2", extras = ["async"]}
+openai = ">=1.33.0,<2.0.0"
+azure-search-documents = ">=11.4.0,<12.0.0"
+azure-storage-blob = "12.17.0"
+python-dotenv = "1.0.0"
+azure-cosmos = ">=4.7.0,<5.0.0"
+applicationinsights = "0.11.10"
+aiohttp = "3.9.2"
+azure-cognitiveservices-speech = "1.38.0"
+tnr-ai-tools = "0.1.15"
+python-docx = "^1.1.2"
+pymupdf = "^1.24.9"
+
+[[tool.poetry.source]]
+name = "tnrdev"
+url = "https://pkgs.dev.azure.com/tnrdev/_packaging/tnrdev/pypi/simple/"
+priority = "primary"
+
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
