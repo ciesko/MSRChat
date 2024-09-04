@@ -191,18 +191,8 @@ class DynamicFormOrchestrator(Orchestrator):
         """
         Invoke an LM call with data source (e.g. Azure AI Search). Also optionally uses file attachment in the conversation context.
         """
-        # TODO move to better place in code
-        format_instructions = get_format_instructions(ResponseModel)
-        # messages.append(dict(role="system", content=format_instructions))
-
         # Massage args into usable form
         messages = []
-        # messages.append(
-        #     {
-        #         "role": "system",
-        #         "content": f"{super().env_params.AZURE_OPENAI_SYSTEM_MESSAGE}\n\nOutput format instructions: {format_instructions}",
-        #     }
-        # )
         messages.extend(clean_up_messages(request_body["messages"]))
 
         # Create conversation item in client
@@ -216,63 +206,31 @@ class DynamicFormOrchestrator(Orchestrator):
         )
 
         # pre-inference step: Add format instructions
-        # format_instructions = get_format_instructions(ResponseModel)
-        # messages.append(dict(role="system", content=format_instructions))
+        format_instructions = get_format_instructions(ResponseModel)
+        system_message = f"{super().env_params.AZURE_OPENAI_SYSTEM_MESSAGE}\n\nOutput format instructions: {format_instructions}"
 
-        # TODO logic to choose data_source_type
+        # TODO: Implement logic to choose data source type; currently it's hardcoded to azure search
         data_source_config = get_data_source_config(
             data_source_type="azure_search",
             env_dict=self.env_params.__dict__,
-            system_message=f"{super().env_params.AZURE_OPENAI_SYSTEM_MESSAGE}\n\nOutput format instructions: {format_instructions}",
-        )
-
-        # TODO remove
-        print("dennis: messages")
-        print(messages)
-
-        # TODO remove
-        print("dennis params")
-        print(
-            dict(
-                model=self.api_deployment,
-                messages=messages,
-                extra_body={"data_sources": [data_source_config]},
-                response_format=dict(type="json_object"),
-                temperature=float(super().env_params.AZURE_OPENAI_TEMPERATURE),
-                max_tokens=int(super().env_params.AZURE_OPENAI_MAX_TOKENS),
-                top_p=float(super().env_params.AZURE_OPENAI_TOP_P),
-            )
+            system_message=system_message,
         )
 
         response = self.aoai_client.chat.completions.create(
             model=self.api_deployment,
             messages=messages,
             extra_body={"data_sources": [data_source_config]},
-            # TODO put note here about json mode not working? probably leave it off
-            # response_format=dict(type="json_object"),
+            # Note: When using AOAI On Your Data (i.e. using data source), this param `response_format` does not seem to be honored as of 2024/09/03, as seen from quick testing. Regardless, I left it set here to "json_object" because it can't hurt, even though I think it is ignored in the code logic.
+            response_format=dict(type="json_object"),
             temperature=float(super().env_params.AZURE_OPENAI_TEMPERATURE),
             max_tokens=int(super().env_params.AZURE_OPENAI_MAX_TOKENS),
             top_p=float(super().env_params.AZURE_OPENAI_TOP_P),
         )
-        # TODO remove
-        print("dennis: response choices")
-        print(response.choices)
+
         # post-inference step: validate and parse response
         response_message_str = response.choices[0].message.content
-        # Catch validation error: As of 2024/09/03, AOAI On Your Data does not seem to switch to JSON output mode even when setting `response_format=dict(type="json_object")` in the chat completion creation. Thus, we need to catch if the output is ever invalid and repair it.
-        # response_message_str = response_message_str.replace("```json", "")
-        # response_message_str = response_message_str.replace("```", "")
-
-        # TODO remove
-        print("dennis: repaired?")
-        print(response_message_str)
-        # import pdb
-
-        # pdb.set_trace()
-        # structured_response_dict = parse_json_str_into_validated_dict(
-        #     json_str=response_message_str,
-        #     model_cls=ResponseModel,
-        # )
+        # Note: As of 2024/09/03, AOAI On Your Data does not seem to switch to JSON output mode even when setting `response_format=dict(type="json_object")` in the chat completion creation. Thus, we need to catch if the output is ever invalid and repair it.
+        # TODO: One suggestion to do a programmatic json cleanup step (does not require LM call) is to remove the '```json' and '```' delimiters if they exist and any text outside of them. Hopefully this would fix the json output enough sometimes so the repair attempt LM call would not be needed.
         try:
             structured_response_dict = parse_json_str_into_validated_dict(
                 json_str=response_message_str,
@@ -283,11 +241,6 @@ class DynamicFormOrchestrator(Orchestrator):
                 f"Attempting to repair the response that was caught with this error: {str(e)}"
             )
 
-            # TODO remove
-            print("dennis repair attempt")
-            print(
-                f"Rewrite the following text into parsable JSON form:\n<text>{response_message_str}</text>"
-            )
             repaired_response = self.aoai_client.chat.completions.create(
                 model=self.api_deployment,
                 messages=[
