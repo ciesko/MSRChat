@@ -37,6 +37,7 @@ import { DynamicFormParser } from "../../components/DynamicForm/DynamicFormParse
 import { IDynamicFormField } from "../../components/DynamicForm/DynamicFormModels";
 import { LoadingDialog } from "../../components/LoadingDialog/LoadingDialog";
 import { ImportProfileDialog } from "../../components/ImportProfileDialog/ImportProfileDialog";
+import { QuestionDisplay } from "../../components/QuestionDisplay/QuestionDisplay";
 
 const enum messageStatus {
     NotRunning = "Not Running",
@@ -127,7 +128,7 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
         return formDataString
     }
 
-    const makeApiRequestWithoutCosmosDB = async (question: string, conversationId?: string, file?: File) => {
+    const makeApiRequestWithoutCosmosDB = async (question: string, conversationId?: string, file?: File, hideQuestion?: boolean) => {
         setIsLoading(true);
         setShowLoadingMessage(true);
         // if file then set loading dialog
@@ -145,7 +146,7 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
 
         const userMessage: ChatMessage = {
             id: uuid(),
-            role: "user",
+            role: hideQuestion ? "system" : "user",
             content: question,
             date: new Date().toISOString(),
         };
@@ -488,7 +489,7 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
     }
 
     const sendWizardProfile = (message: string, profileFile: File | undefined) => {
-        makeApiRequestWithoutCosmosDB(message, undefined, profileFile);
+        makeApiRequestWithoutCosmosDB(message, undefined, profileFile, true);
         // if file then add to files state
         if (profileFile) {
             setFiles([...files, profileFile]);
@@ -629,12 +630,12 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
                     <div className={embedDisplay ? styles.chatContainerEmbed : styles.chatContainer}>
                         <UploadedFiles
                             onFileUpload={(file) => {
-                                makeApiRequestWithoutCosmosDB("Fill out values on form based on this document.", appStateContext?.state.currentChat?.id, file);
+                                makeApiRequestWithoutCosmosDB("Fill out values on form based on this document.", appStateContext?.state.currentChat?.id, file, true);
                                 setFiles([...files, file]);
                             }}
                             files={files}
                             onFileRemove={(file) => {
-                                makeApiRequestWithCosmosDB("Remove file from form.", undefined);
+                                makeApiRequestWithoutCosmosDB("Remove file from form.", appStateContext?.state.currentChat?.id, undefined, true);
                             }
                             }
                         />
@@ -671,13 +672,11 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
                                     <div key={`answer-${index}`}>
                                         {
                                             answer.role === "user" ? (
-                                                <></>
-                                                // **** Hiding user questions sent to AI chat for profile UI     
-                                                //<div className={styles.questionDisplayRow}>
-                                                //     <QuestionDisplay
-                                                //         content={answer.content}
-                                                //     />
-                                                // </div>
+                                                <div className={styles.questionDisplayRow}>
+                                                    <QuestionDisplay
+                                                        content={answer.content}
+                                                    />
+                                                </div>
                                             ) : (
                                                 answer.role === "assistant" ? <div
                                                     style={{
@@ -773,7 +772,7 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
                                                     aria-label="start a new chat button"
                                                 />
                                             )
-                                        }                                      
+                                        }
                                     </div>
                                     <QuestionInput
                                         clearOnSend
@@ -791,9 +790,8 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
                     <DynamicForm
                         formTitle="User Profile Form"
                         fields={formData}
-                        onClearAllClick={() => sendChatQuestion("Clear form.")}
+                        onClearAllClick={() =>  makeApiRequestWithoutCosmosDB("Clear all of the following form data.", appStateContext?.state.currentChat?.id, undefined, true)}
                     />
-
                     {/* Citation Panel */}
                     <CitationDetails
                         open={((messages && messages.length > 0) && (isCitationPanelOpen && activeCitation)) ? true : false}
