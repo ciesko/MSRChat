@@ -3,7 +3,11 @@ import { makeStyles, shorthands, tokens } from "@fluentui/react-components";
 export const ImportProfileDialogStyles = makeStyles({
     dialog: {
         maxWidth: '600px',
-        minHeight: '400px'
+        minHeight: '400px',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+
     },
     dialogContent: {
         // Display flex column at start but space between vertical
@@ -56,9 +60,21 @@ export const ImportProfileDialogStyles = makeStyles({
         display: 'flex',
         flexDirection: 'row',
         justifyContent: 'flex-end',
+        alignSelf: 'flex-end',
     },
     fileInput: {
         display: 'none',
+    },
+    list: {
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'start',
+        ...shorthands.gap(tokens.spacingVerticalL),
+    },
+    firstPageContent: {
+        marginTop: tokens.spacingVerticalL,
+        marginBottom: '30px',
     },
     
 });

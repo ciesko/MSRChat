@@ -19,4 +19,12 @@ export const UploadedFilesStyles = makeStyles({
         display: 'flex',
         justifyContent: 'space-between',
     },
+    fileRow: {
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'start',
+        alignItems: 'center',
+        ...shorthands.gap('3px'),
+    },
 });

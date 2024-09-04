@@ -1,12 +1,13 @@
 import * as React from 'react';
 import { UploadedFilesStyles } from './UploadedFilesStyles';
-import { Button, Card, CardHeader, Subtitle2Stronger } from '@fluentui/react-components';
-import { ArrowUpload16Regular } from '@fluentui/react-icons';
+import { Button, Card, CardHeader, Link, Subtitle2Stronger } from '@fluentui/react-components';
+import { ArrowUpload16Regular, Dismiss16Regular } from '@fluentui/react-icons';
 
 export interface IUploadedFilesProps {
     onFileUpload: (file: File) => void;
+    onFileRemove: (file: File) => void;
     files?: File[];
- }
+}
 
 export const UploadedFiles: React.FunctionComponent<IUploadedFilesProps> = (props: React.PropsWithChildren<IUploadedFilesProps>) => {
     const styles = UploadedFilesStyles();
@@ -23,24 +24,31 @@ export const UploadedFiles: React.FunctionComponent<IUploadedFilesProps> = (prop
         document.getElementById('fileInput')?.click();
     };
 
+    const handleRemoveFile = (index: number) => {
+        props.onFileRemove(files[index]);
+        const newFiles = [...files];
+        newFiles.splice(index, 1);
+        setFiles(newFiles);
+    };
+
     React.useEffect(() => {
         setFiles(props.files || []);
     }, [props.files]);
-    
+
     return (
         <Card className={styles.container}>
             <CardHeader
-            className={styles.header}
+                className={styles.header}
                 header={
                     <Subtitle2Stronger>Documents and links</Subtitle2Stronger>
                 }
                 action={
-                        <Button
-                            onClick={handleButtonClick}
-                            icon={<ArrowUpload16Regular />}
-                        >
-                            Import
-                        </Button>
+                    <Button
+                        onClick={handleButtonClick}
+                        icon={<ArrowUpload16Regular />}
+                    >
+                        Import
+                    </Button>
                 }
             />
 
@@ -51,11 +59,24 @@ export const UploadedFiles: React.FunctionComponent<IUploadedFilesProps> = (prop
                 onChange={handleFileChange}
                 className={styles.fileUploadControl}
             />
-            <ul>
+            <div>
                 {files.map((file, index) => (
-                    <li key={index}>{file.name}</li>
+                    <div className={styles.fileRow} key={index}>
+                        <Button
+                            title="Remove file"
+                            size='small'
+                            icon={
+                                <Dismiss16Regular />
+                            }
+                            appearance='subtle'
+                            onClick={() => handleRemoveFile(index)} 
+                        />
+                        <Link>
+                            {file.name}
+                        </Link>
+                    </div>
                 ))}
-            </ul>
+            </div>
         </Card>
     );
 };

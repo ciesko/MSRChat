@@ -621,6 +621,10 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
                                 setFiles([...files, file]);
                             }}
                             files={files}
+                            onFileRemove={(file) => {
+                                makeApiRequestWithCosmosDB("Remove file from form.", undefined);
+                            }
+                            }
                         />
                         {!messages || messages.length < 1 ? (
                             <div className={styles.chatEmptyState}>
@@ -655,13 +659,13 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
                                     <div key={`answer-${index}`}>
                                         {
                                             answer.role === "user" ? (
-                                                  <></>
-                                                    // **** Hiding user questions sent to AI chat for profile UI     
-                                                    //<div className={styles.questionDisplayRow}>
-                                                    //     <QuestionDisplay
-                                                    //         content={answer.content}
-                                                    //     />
-                                                    // </div>
+                                                <></>
+                                                // **** Hiding user questions sent to AI chat for profile UI     
+                                                //<div className={styles.questionDisplayRow}>
+                                                //     <QuestionDisplay
+                                                //         content={answer.content}
+                                                //     />
+                                                // </div>
                                             ) : (
                                                 answer.role === "assistant" ? <div
                                                     style={{
@@ -818,9 +822,9 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
                 title={showImportingData ? "Importing file and building profile" : "Working on your request"}
                 subTitle={showImportingData ? "This may take a while." : "This shouldn't take long."}
             />
-            <ImportProfileDialog 
-            onProfileFinish={sendWizardProfile}
-            open={true} 
+            <ImportProfileDialog
+                onProfileFinish={sendWizardProfile}
+                open={true}
             />
         </div>
     );

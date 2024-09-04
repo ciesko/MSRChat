@@ -49,10 +49,10 @@ export const ImportProfileDialog: React.FunctionComponent<IImportProfileDialogPr
         if (file) {
             message += ' with file';
         }
-        if(mSRprofile) {
-           // create text string to add to message from msrprofile
-              message += mSRprofile.first_name + ' ' + mSRprofile.last_name + ' ' + mSRprofile.title;
-              message += ' about: ' + mSRprofile.about;
+        if (mSRprofile) {
+            // create text string to add to message from msrprofile
+            message += mSRprofile.first_name + ' ' + mSRprofile.last_name + ' ' + mSRprofile.title;
+            message += ' about: ' + mSRprofile.about;
         }
         // Submit the profile
         props.onProfileFinish(message, file);
@@ -86,9 +86,11 @@ export const ImportProfileDialog: React.FunctionComponent<IImportProfileDialogPr
                             className={styles.titleImage}
                             fit='cover'
                         />
-                        <Subtitle1>Coffee Connections</Subtitle1>
-                        <p>Thank you for testing our new Coffee Connections agent. </p>
-                        <p>Using the power of AI to help you connect with like minded people within MSRx.</p>
+                        <div className={styles.firstPageContent}>
+                            <Subtitle1>Coffee Connections</Subtitle1>
+                            <p>Thank you for testing our new Coffee Connections agent. </p>
+                            <p>Using the power of AI to help you connect with like minded people within MSRx.</p>
+                        </div>
                     </DialogContent>
                 );
             case 1:
@@ -127,12 +129,12 @@ export const ImportProfileDialog: React.FunctionComponent<IImportProfileDialogPr
                         <Subtitle1>Import your data from LinkedIn?</Subtitle1>
                         <p>Please follow the steps below to download a PDF of your profile, and then use the import button below to share your data with us.</p>
                         <p>We’d like to import your profile from LinkedIn to help us improve your suggestions.</p>
-                        <ol>
+                        <ol className={styles.list}>
                             <li>Click the <PersonCircleRegular fontSize={20} style={{ verticalAlign: 'top' }} /> Me icon at the top of your LinkedIn homepage.</li>
                             <li>Click the the <Button shape='circular' size='small'>More</Button> button in the introduction section.</li>
                             <li>Select <b><ArrowDownload16Regular style={{ verticalAlign: 'middle' }} /> Save to PDF </b>from the dropdown.</li>
-                            <li>Once you have your file click import below.</li>
                         </ol>
+                        <p>Once you have your file click import below.</p>
                         {
                             !file &&
                             <div className={styles.importCommandRow}>
