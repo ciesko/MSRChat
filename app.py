@@ -210,9 +210,6 @@ def conversation():
             request_body[key] = json.loads(request.form[key])
         except json.JSONDecodeError:
             request_body[key] = request.form[key]
-    print("request_body")
-    print(request_body)
-    print(file)    
     return conversation_internal(request_body, message_uuid, file)
 
 def conversation_internal(request_body, message_uuid, file=None):
