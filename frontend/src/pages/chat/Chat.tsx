@@ -788,7 +788,7 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
                         </div>
                     </div>
                     <DynamicForm
-                        formTitle="User Profile Form"
+                        formTitle="Your form"
                         fields={formData}
                         onClearAllClick={() =>  makeApiRequestWithoutCosmosDB("Clear all of the following form data.", appStateContext?.state.currentChat?.id, undefined, true)}
                     />

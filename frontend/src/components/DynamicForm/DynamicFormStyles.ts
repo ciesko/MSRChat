@@ -14,7 +14,18 @@ export const DynamicFormStyles = makeStyles({
         width: '100%',
         display: 'flex',
         flexDirection: 'row',
-        justifyContent: 'flex-end',
+        justifyContent: 'flex-end',        alignSelf: 'flex-end',
         ...shorthands.gap(tokens.spacingHorizontalM),
+    },
+    validationMessage: {
+        width: '100%',
+        color: tokens.colorPaletteRedForeground1,
+    },
+    titleRow: {
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginTop: '10px',
     },
 });

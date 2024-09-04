@@ -2,7 +2,7 @@ import * as React from 'react';
 import { DynamicFormStyles } from './DynamicFormStyles';
 import { IDynamicFormField } from './DynamicFormModels';
 import { DynamicFormField } from './DynamicFormField';
-import { Button, Card, Title3 } from '@fluentui/react-components';
+import { Button, Caption1, Card, Subtitle1, Subtitle2, Title3 } from '@fluentui/react-components';
 
 
 export interface IDynamicFormProps {
@@ -13,10 +13,21 @@ export interface IDynamicFormProps {
 
 export const DynamicForm: React.FunctionComponent<IDynamicFormProps> = (props: React.PropsWithChildren<IDynamicFormProps>) => {
   const styles = DynamicFormStyles();
+  const [fields, setFields] = React.useState<IDynamicFormField[]>(props.fields);
 
   const onFieldChange = (value: string, field: IDynamicFormField) => {
-    field.value = value;
+    const updatedFields = fields.map((_field) => {
+      if (_field.name === field.name) {
+        return { ..._field, value: value };
+      }
+      return _field;
+    });
+    setFields(updatedFields);
   };
+
+  const formIsValid = (_fields: IDynamicFormField[]) => {
+    return _fields.filter((field) => field.required && (field.value === undefined || field.value === '')).length === 0;
+  }
 
   const onSubmitClick = () => {
     const fields = props.fields.map((field) => `${field.label}: ${field.value}`).join('\n\n\n');
@@ -33,11 +44,21 @@ export const DynamicForm: React.FunctionComponent<IDynamicFormProps> = (props: R
     URL.revokeObjectURL(url);
   }
 
+  React.useEffect(() => {
+    setFields(props.fields);
+  }, [props.fields]);
+
   return (
     <Card className={styles.container}>
-      <Title3>{props.formTitle}</Title3>
+      <div className={styles.titleRow}>
+        <Subtitle1>{props.formTitle}</Subtitle1>
+        <Caption1><i>AI generated content may be incorrect</i></Caption1>
+      </div>
+    <p>
+    This form will dynamically update based on the chat to the left and any data you import. You can also make edits directly. When you are happy with the content click save.
+    </p>
       {
-        props.fields
+        fields
           .sort((a, b) => (a.order !== undefined && b.order !== undefined) ? a.order - b.order : 0)
           .map((field: IDynamicFormField) => (
             <DynamicFormField
@@ -47,10 +68,21 @@ export const DynamicForm: React.FunctionComponent<IDynamicFormProps> = (props: R
             />
           ))
       }
-      <div className={styles.footerActionRow}>
-        <Button onClick={props.onClearAllClick}>Clear all</Button>
-        <Button appearance='primary' onClick={onSubmitClick}>Submit</Button>
-      </div>
+      {
+        !formIsValid(fields) && (
+          <div className={styles.validationMessage}>
+            *Please fill in all required fields
+          </div>
+        )
+      }
+      {
+        fields.length > 0 && (
+          <div className={styles.footerActionRow}>
+            <Button onClick={props.onClearAllClick}>Clear all</Button>
+            <Button appearance='primary' onClick={onSubmitClick} disabled={!formIsValid(fields)}>Submit</Button>
+          </div>
+        )
+      }
     </Card>
   );
 };
