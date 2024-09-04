@@ -71,6 +71,7 @@ def test_get_data_source_config():
     data_source_config = get_data_source_config(
         data_source_type="azure_search",
         env_dict=env_dict,
+        system_message="",
     )
 
     response = simple_chat_completion(data_source_config)

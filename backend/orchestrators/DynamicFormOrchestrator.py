@@ -27,12 +27,12 @@ from dataclasses import dataclass
 
 
 @dataclass
-class JSONChatResponse:
+class ResponseDataclass:
     message: Annotated[str, Doc("The assistant's message content.")]
     dynamic_form_data: Annotated[Dict[str, Any], Doc("The updated dynamic form data.")]
 
 
-class ResponseModel(BaseModel):
+class ResponsePydantic(BaseModel):
     message: str = Field(description="The assistant's message content.")
     dynamic_form_data: Any = Field(description="The updated dynamic form data.")
 
@@ -62,7 +62,7 @@ class DynamicFormOrchestrator(Orchestrator):
         prompt_template = "{{$input_text}}"
         self.json_chat = JSONChat(
             prompt_template=prompt_template,
-            json_schema_class=JSONChatResponse,
+            json_schema_class=ResponseDataclass,
             api_endpoint=api_endpoint,
             api_version=api_version,
             api_deployment=self.api_deployment,
@@ -73,7 +73,7 @@ class DynamicFormOrchestrator(Orchestrator):
             top_p=float(super().env_params.AZURE_OPENAI_TOP_P),
         )
 
-        # AOAI chat completions client for `conversation_with_data` method. Need for calling LM with data source
+        # For AOAI On Your Data (OYD), i.e. LM inference with data source, we cannot use JSONChat because it abstracts away the AOAI call. Thus, we use the bare-bones AOAI chat completions client for this purpose.
         # TODO allow option to pass in api key
         azure_ad_token_provider = get_bearer_token_provider(
             DefaultAzureCredential(),
@@ -94,7 +94,7 @@ class DynamicFormOrchestrator(Orchestrator):
     ) -> Tuple[flask.Response, int]:
         """
         Invokes LM call using the messages from the request_body, and returns a flask Response (with application/json mimetype) and a status code 200.
-        Optionally can take in a file  that was attached to the message.
+        Optionally can take in a file that was attached to the message.
 
         Example of `request_body`:
         {'messages':
@@ -156,7 +156,6 @@ class DynamicFormOrchestrator(Orchestrator):
         # TODO: timestamp from AOAI API call is more accurate, but this will do for now
         gen_timestamp = int(time.time())
 
-        # TODO: pull from env_params
         if not super().env_params.SHOULD_STREAM:
             response_obj = {
                 "id": message_uuid,
@@ -189,9 +188,9 @@ class DynamicFormOrchestrator(Orchestrator):
         file: FileStorage | None = None,
     ) -> Tuple[flask.Response, int]:
         """
-        Invoke an LM call with data source (e.g. Azure AI Search). Also optionally uses file attachment in the conversation context.
+        Invoke AOAI On Your Data (OYD), i.e. an LM call with data source (e.g. Azure AI Search). Also optionally uses file attachment in the conversation context.
         """
-        # TODO: include file in system messages if provided
+        # TODO: include file in system messages if file is provided
         if file is not None:
             raise NotImplementedError
 
@@ -210,7 +209,7 @@ class DynamicFormOrchestrator(Orchestrator):
         )
 
         # pre-inference step: Add format instructions
-        format_instructions = get_format_instructions(ResponseModel)
+        format_instructions = get_format_instructions(ResponsePydantic)
         system_message = f"{super().env_params.AZURE_OPENAI_SYSTEM_MESSAGE}\n\nOutput format instructions: {format_instructions}"
 
         # TODO: Implement logic to choose data source type; currently it's hardcoded to azure search
@@ -238,7 +237,7 @@ class DynamicFormOrchestrator(Orchestrator):
         try:
             structured_response_dict = parse_json_str_into_validated_dict(
                 json_str=response_message_str,
-                model_cls=ResponseModel,
+                model_cls=ResponsePydantic,
             )
         except pydantic.ValidationError as e:
             logging.warn(
@@ -261,7 +260,7 @@ class DynamicFormOrchestrator(Orchestrator):
             repaired_response_str = repaired_response.choices[0].message.content
             structured_response_dict = parse_json_str_into_validated_dict(
                 json_str=repaired_response_str,
-                model_cls=ResponseModel,
+                model_cls=ResponsePydantic,
             )
 
         # massage data
@@ -289,6 +288,21 @@ class DynamicFormOrchestrator(Orchestrator):
         else:
             raise Exception("Streaming is not implemented yet")
 
+def clean_up_messages(messages: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """
+    Given a messages list where each message might have fields beyond "role" and "content", or might be empty dicts themselves, clean up the messages such that each message exactly only has "role" and "content".
+    This is so the messages are clean enough to feed to an inference.
+    """
+    non_empty_messages = [m for m in messages if m != {}]
+
+    new_messages = []
+    for m in non_empty_messages:
+        new_message = dict(
+            role=m["role"],
+            content=m["content"],
+        )
+        new_messages.append(new_message)
+    return new_messages
 
 def get_simple_azure_search_config(
     azure_search_endpoint: str,
@@ -314,7 +328,7 @@ def get_simple_azure_search_config(
 
 ALLOWED_DATA_SOURCE_TYPES = ("azure_search", "azure_cosmos_db")
 
-
+# TODO: Most of the code logic here was copy-pasted from 'prepare_body_headers_with_data' method of Orchestrator.py, but I felt it would be cleaner code to de-couple it from the Orchestrator class and instead be a standalone function. This way, it's easier to use and to test. Need to figure out if there's a better file to house this code.
 def get_data_source_config(
     data_source_type: str,
     env_dict: Dict[str, Any],
@@ -469,18 +483,4 @@ def generateFilterString(
     return f"{azure_search_permitted_groups_column}/any(g:search.in(g, '{group_ids}'))"
 
 
-def clean_up_messages(messages: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    """
-    Given a messages list where each message might have fields beyond "role" and "content", or might be empty dicts themselves, clean up the messages such that each message exactly only has "role" and "content".
-    This is so the messages are clean enough to feed to an inference.
-    """
-    non_empty_messages = [m for m in messages if m != {}]
 
-    new_messages = []
-    for m in non_empty_messages:
-        new_message = dict(
-            role=m["role"],
-            content=m["content"],
-        )
-        new_messages.append(new_message)
-    return new_messages
