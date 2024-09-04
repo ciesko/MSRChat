@@ -191,6 +191,10 @@ class DynamicFormOrchestrator(Orchestrator):
         """
         Invoke an LM call with data source (e.g. Azure AI Search). Also optionally uses file attachment in the conversation context.
         """
+        # TODO: include file in system messages if provided
+        if file is not None:
+            raise NotImplementedError
+
         # Massage args into usable form
         messages = []
         messages.extend(clean_up_messages(request_body["messages"]))
