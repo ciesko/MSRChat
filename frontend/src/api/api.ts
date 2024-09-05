@@ -1,10 +1,8 @@
 import { UserInfo, ConversationRequest, Conversation, ChatMessage, CosmosDBHealth, CosmosDBStatus, SpeechAuth } from "./models";
 import { chatHistorySampleData } from "../constants/chatHistory";
-import { SpeechConfig, AutoDetectSourceLanguageConfig, AudioConfig, SpeechRecognizer, ResultReason } from "microsoft-cognitiveservices-speech-sdk";
 import { IUserProfile } from "../components/ImportProfileDialog/IUserProfile";
 
 export async function conversationApi(options: ConversationRequest, abortSignal: AbortSignal, file?: File): Promise<Response> {
-    console.log("conversationApi", options, file);
     const formData = new FormData();
 
     if (file) {

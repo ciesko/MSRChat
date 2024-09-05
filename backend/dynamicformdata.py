@@ -22,13 +22,12 @@ class DynamicFormDataClient():
 
     def __init__(self, cosmosdb_endpoint: str, credential: any, database_name: str, container_name: str, enabled: bool = True):
         self.enabled = os.environ.get("MSR_AZURE_COSMOSDB_FORMDATA_ENABLED", "false").lower() == "true"
-        _credential = DefaultAzureCredential()
         if self.enabled:
             self.cosmosdb_endpoint = cosmosdb_endpoint
-            self.credential = _credential
+            self.credential = credential
             self.database_name = database_name
             self.container_name = container_name
-            self.cosmosdb_client = CosmosClient(self.cosmosdb_endpoint, credential=_credential)
+            self.cosmosdb_client = CosmosClient(self.cosmosdb_endpoint, credential=credential)
             self.database_client = self.cosmosdb_client.get_database_client(database_name)
             self.container_client = self.database_client.get_container_client(container_name)
 

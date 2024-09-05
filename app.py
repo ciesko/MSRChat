@@ -185,11 +185,11 @@ if MSR_AZURE_COSMOSDB_ACCOUNT and MSR_AZURE_COSMOSDB_DATABASE:
 
 # Initialize MSR CosmosDB client for posting user data
 msr_cosmos_db_client_formdata = None
-if MSR_AZURE_COSMOSDB_ACCOUNT and MSR_AZURE_COSMOSDB_ACCOUNT_KEY and MSR_AZURE_COSMOSDB_DATABASE and MSR_AZURE_COSMOSDB_FORMDATA_CONTAINER and MSR_AZURE_COSMOSDB_FORMDATA_ENABLED:
+if MSR_AZURE_COSMOSDB_ACCOUNT and MSR_AZURE_COSMOSDB_DATABASE and MSR_AZURE_COSMOSDB_FORMDATA_CONTAINER and MSR_AZURE_COSMOSDB_FORMDATA_ENABLED:
     try:
         msr_cosmos_db_client_formdata = DynamicFormDataClient(
             cosmosdb_endpoint=f'https://{MSR_AZURE_COSMOSDB_ACCOUNT}.documents.azure.com:443/', 
-            credential=MSR_AZURE_COSMOSDB_ACCOUNT_KEY, 
+            credential=DefaultAzureCredential(), 
             database_name=MSR_AZURE_COSMOSDB_DATABASE,
             container_name=MSR_AZURE_COSMOSDB_FORMDATA_CONTAINER
         )
