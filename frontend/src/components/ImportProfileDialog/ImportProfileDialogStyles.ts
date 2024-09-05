@@ -85,5 +85,8 @@ export const ImportProfileDialogStyles = makeStyles({
         marginTop: tokens.spacingVerticalL,
         marginBottom: '30px',
     },
+    notFoundCard: {
+        width: '275px',
+    },
     
 });

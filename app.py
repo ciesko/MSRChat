@@ -2,6 +2,7 @@ import json
 import os
 import logging
 from backend.conversationtelemetry import ConversationTelemetryClient
+from backend.dynamicformdata import DynamicFormDataClient
 import openai
 import uuid
 import aiohttp
@@ -81,9 +82,13 @@ AZURE_COSMOSDB_MONGO_VCORE_INDEX = os.environ.get("AZURE_COSMOSDB_MONGO_VCORE_IN
 
 # MSR CosmosDB Settings
 MSR_AZURE_COSMOSDB_ACCOUNT = os.environ.get("MSR_AZURE_COSMOSDB_ACCOUNT")
-MSR_AZURE_COSMOSDB_FEEDBACK_CONTAINER="feedback"
+MSR_AZURE_COSMOSDB_ACCOUNT_KEY = os.environ.get("MSR_AZURE_COSMOSDB_ACCOUNT_KEY")
+MSR_AZURE_COSMOSDB_FEEDBACK_CONTAINER = os.environ.get("MSR_AZURE_COSMOSDB_FEEDBACK_CONTAINER")
 MSR_AZURE_COSMOSDB_DATABASE=os.environ.get("MSR_AZURE_COSMOSDB_DATABASE")
 MSR_AZURE_COSMOSDB_FEEDBACK_ENABLED = os.environ.get("MSR_AZURE_COSMOSDB_FEEDBACK_ENABLED", "false").lower() == "true"
+MSR_ENABLE_CONVERSATION_TELEMETRY = os.environ.get("MSR_ENABLE_CONVERSATION_TELEMETRY", "false").lower() == "true"
+MSR_AZURE_COSMOSDB_FORMDATA_CONTAINER = os.environ.get("MSR_AZURE_COSMOSDB_FORMDATA_CONTAINER")
+MSR_AZURE_COSMOSDB_FORMDATA_ENABLED = os.environ.get("MSR_AZURE_COSMOSDB_FORMDATA_ENABLED", "false").lower() == "true"
 
 # Chat History CosmosDB Integration Settings
 AZURE_COSMOSDB_DATABASE = os.environ.get("AZURE_COSMOSDB_DATABASE")
@@ -178,6 +183,19 @@ if MSR_AZURE_COSMOSDB_ACCOUNT and MSR_AZURE_COSMOSDB_DATABASE:
         logging.exception("Exception in MSR CosmosDB initialization", e)
         msr_cosmos_db_client = None
 
+# Initialize MSR CosmosDB client for posting user data
+msr_cosmos_db_client_formdata = None
+if MSR_AZURE_COSMOSDB_ACCOUNT and MSR_AZURE_COSMOSDB_ACCOUNT_KEY and MSR_AZURE_COSMOSDB_DATABASE and MSR_AZURE_COSMOSDB_FORMDATA_CONTAINER and MSR_AZURE_COSMOSDB_FORMDATA_ENABLED:
+    try:
+        msr_cosmos_db_client_formdata = DynamicFormDataClient(
+            cosmosdb_endpoint=f'https://{MSR_AZURE_COSMOSDB_ACCOUNT}.documents.azure.com:443/', 
+            credential=MSR_AZURE_COSMOSDB_ACCOUNT_KEY, 
+            database_name=MSR_AZURE_COSMOSDB_DATABASE,
+            container_name=MSR_AZURE_COSMOSDB_FORMDATA_CONTAINER
+        )
+    except Exception as e:
+        logging.exception("Exception in MSR CosmosDB FORMDATA initialization", e)
+        msr_cosmos_db_client_formdata = None
 
 def is_chat_model():
     if 'gpt-4' in AZURE_OPENAI_MODEL_NAME.lower() or AZURE_OPENAI_MODEL_NAME.lower() in ['gpt-35-turbo-4k', 'gpt-35-turbo-16k']:
@@ -558,6 +576,31 @@ async def mcr_search():
         logging.exception("Exception in /mcr/search")
         return jsonify({"error": "Error finding user in MCR"}), 500
 
+@app.route("/post_form_data", methods=["POST"])
+def post_form_data():
+    authenticated_user = get_authenticated_user_details(request_headers=request.headers)
+    user_id = authenticated_user['user_principal_id']
+    user_alias = authenticated_user['user_name']
+
+    ## check request for message_id
+    message_id = request.json.get("message_id", None)
+    form_data = request.json.get("form_data", None)
+
+    try:
+        if not message_id:
+            return jsonify({"error": "message_id is required"}), 400
+
+        if not form_data:
+            return jsonify({"error": "user_data is required"}), 400
+
+
+        msr_cosmos_db_client_formdata.upsert_form_data(user_id, user_alias, message_id, form_data)
+        return jsonify({"message": f"Successfully added user data {message_id} in MSR CosmosDB"}), 200
+
+    except Exception as e:
+        logging.exception("Exception in /history/post_user_data")
+        return jsonify({"error": str(e)}), 500
+    
 def generate_title(conversation_messages):
     ## make sure the messages are sorted by _ts descending
     title_prompt = 'Summarize the conversation so far into a 4-word or less title. Do not use any quotation marks or punctuation. Respond with a json object in the format {{"title": string}}. Do not include any other commentary or description.'

@@ -5,6 +5,7 @@ import { set } from 'lodash';
 
 export interface IDynamicFormFieldProps {
     field: IDynamicFormField;
+    disabled?: boolean;
     onChange?: (value: string) => void;
 }
 
@@ -30,6 +31,7 @@ export const DynamicFormField: React.FunctionComponent<IDynamicFormFieldProps> =
                                     setValue(data?.value);
                                 }
                             }}
+                            disabled={props.disabled}
                         />
                     </Field>
                 );
@@ -89,6 +91,7 @@ export const DynamicFormField: React.FunctionComponent<IDynamicFormFieldProps> =
                                 }
                             }}
                             rows={4}
+                            disabled={props.disabled}
                         />
                     </Field>
                 );
