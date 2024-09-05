@@ -37,7 +37,6 @@ const Layout = ({ isDarkTheme, embedDisplay }: { isDarkTheme: boolean, embedDisp
     return (
         <div className={styles.page}>
             <div className={styles.coffeeHeader}>
-                <Button className={styles.homeButton} appearance='transparent' icon={<Home24Regular />} onClick={() => window.location.href = '/'} />
                 <Subtitle1>Coffee Connections</Subtitle1>
             </div>
             <div className={styles.containerEmbed}>

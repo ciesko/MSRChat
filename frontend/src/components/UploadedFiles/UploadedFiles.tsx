@@ -43,7 +43,7 @@ export const UploadedFiles: React.FunctionComponent<IUploadedFilesProps> = (prop
                 <CardHeader
                     className={styles.header}
                     header={
-                        <Subtitle2Stronger>Documents and links</Subtitle2Stronger>
+                        <Subtitle2Stronger>Imported data</Subtitle2Stronger>
                     }
                     action={
                         <Button
@@ -54,7 +54,6 @@ export const UploadedFiles: React.FunctionComponent<IUploadedFilesProps> = (prop
                         </Button>
                     }
                 />
-
                 <input
                     id="fileInput"
                     type="file"

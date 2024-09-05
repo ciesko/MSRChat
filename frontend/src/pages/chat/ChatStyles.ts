@@ -11,15 +11,16 @@ export const ChatStyles = makeStyles({
         flexDirection: 'row',
         justifyContent: 'center',
         height: '90vh',
-
-
+        maxWidth: '1080px',
+        marginLeft: 'auto',
+        marginRight: 'auto',
         '@media (max-width: 600px)': {
             flexDirection: 'column',
         },
         columnGap: '20px',
     },
     chatContainer: {
-        minWidth: '450px',
+        minWidth: '600px',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -39,7 +40,7 @@ export const ChatStyles = makeStyles({
     },
 
     chatContainerEmbed: {
-        width: '450px',
+        width: '600px',
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
