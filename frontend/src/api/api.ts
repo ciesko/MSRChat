@@ -28,7 +28,30 @@ export async function getUserInfo(): Promise<UserInfo[]> {
     }
 
     const payload = await response.json();
+    console.log("User info: ", payload);
     return payload;
+}
+
+export async function getUserFullName(): Promise<string | undefined> {
+    try {
+        const response = await fetch('/.auth/me');
+        if (!response.ok) {
+            console.log("No identity provider found. Access to chat will be blocked.")
+            return undefined;
+        }
+
+        const payload = await response.json();
+        const userProfile = payload[0];
+        // name is the first element in the user_claims array where typ is name and val is the name
+        const name = userProfile.user_claims.find((claim: any) => claim.typ === "name")?.val;
+        
+        return name ? name : undefined;
+
+    } catch (error) {
+        console.error("There was an issue fetching the user profile.");
+        return undefined;
+    }
+
 }
 
 // export const fetchChatHistoryInit = async (): Promise<Conversation[] | null> => {

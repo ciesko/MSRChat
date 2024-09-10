@@ -2,7 +2,7 @@ import { Button, Card, Dialog, DialogActions, DialogContent, DialogSurface, Imag
 import * as React from 'react';
 import { ImportProfileDialogStyles } from './ImportProfileDialogStyles';
 import CoffeeImage from '../../assets/coffee.png';
-import { getMCRProfile } from '../../api';
+import { getMCRProfile, getUserFullName } from '../../api';
 import { ProgressControls } from './ProgressControls';
 import { AvatarCard } from '../AvatarCard/AvatarCard';
 import { ArrowDownload16Regular, ArrowUpload16Regular, Dismiss16Regular, PersonCircleRegular } from '@fluentui/react-icons';
@@ -20,6 +20,7 @@ export const ImportProfileDialog: React.FunctionComponent<IImportProfileDialogPr
     const [file, setFile] = React.useState<File | undefined>(undefined);
     const [mSRprofile, setMSRProfile] = React.useState<IUserProfile | undefined>(undefined);
     const [searchingProfile, setSearchingProfile] = React.useState(false);
+    const [currentUserFullName, setCurrentUserFullName] = React.useState<string | undefined>(undefined);
 
     const onImportClick = () => {
         document.getElementById('fileInputDialog')?.click();
@@ -47,7 +48,8 @@ export const ImportProfileDialog: React.FunctionComponent<IImportProfileDialogPr
 
         const submitProfile = () => {
             // Create message to send to AI.  If profile then add profile message to the message
-            let message = 'Hello, I would like to submit some information about myself to help build my profile.';
+            const fullNameMessage = currentUserFullName ? `My name is ${currentUserFullName} and` : '';
+            let message = `Hello, ${fullNameMessage} I would like to submit some information about myself to help build my profile. `;
             if (file) {
                 message += ' with file';
             }
@@ -76,6 +78,13 @@ export const ImportProfileDialog: React.FunctionComponent<IImportProfileDialogPr
                 submitProfile();
             }
         }, [currentIndex]);
+
+        React.useEffect(() => {
+            // get and set users full name
+            getUserFullName().then((name) => {
+                setCurrentUserFullName(name);
+            }   );
+        }, []);
 
         const getIndexContent = (index: number) => {
             switch (index) {
