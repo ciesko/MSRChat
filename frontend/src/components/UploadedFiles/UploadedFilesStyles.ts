@@ -3,17 +3,17 @@ import { makeStyles, shorthands, tokens } from "@fluentui/react-components";
 export const UploadedFilesStyles = makeStyles({
     container: {
         width: '100%',
+        marginBottom: '15px',
     },
     card: {
         width: '100%',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'start',
-        minHeight: '140px',
+        height: '140px',
         marginBottom: '20px',
-        overflowY: 'auto',
+        overflowY: 'hidden',
         ...shorthands.gap('10px'),
-        ...shorthands.overflow('auto'), // Add this line to enable scrolling if content exceeds container height
     },
     fileUploadControl: {
         display: 'none',
@@ -22,6 +22,12 @@ export const UploadedFilesStyles = makeStyles({
         width: '100%',
         display: 'flex',
         justifyContent: 'space-between',
+    },
+    files: {
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        overflowY: 'auto',
     },
     fileRow: {
         width: '100%',

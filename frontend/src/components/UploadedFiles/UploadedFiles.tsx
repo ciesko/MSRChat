@@ -61,7 +61,7 @@ export const UploadedFiles: React.FunctionComponent<IUploadedFilesProps> = (prop
                     onChange={handleFileChange}
                     className={styles.fileUploadControl}
                 />
-                <div>
+                <div className={styles.files}>
                     {files.map((file, index) => (
                         <div className={styles.fileRow} key={index}>
 

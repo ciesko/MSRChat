@@ -2,10 +2,11 @@ import * as React from 'react';
 import { DynamicFormStyles } from './DynamicFormStyles';
 import { IDynamicFormField } from './DynamicFormModels';
 import { DynamicFormField } from './DynamicFormField';
-import { Button, Caption1, Card, Dialog, DialogActions, DialogBody, DialogContent, DialogSurface, DialogTitle, DialogTrigger, Link, MessageBar, MessageBarBody, MessageBarTitle, Subtitle1, Subtitle2, Title3 } from '@fluentui/react-components';
+import { Button, Caption1, Card, Dialog, DialogActions, DialogBody, DialogContent, DialogSurface, DialogTitle, DialogTrigger, Link, MessageBar, MessageBarBody, Subtitle2 } from '@fluentui/react-components';
 import { post_form_data } from '../../api/dynamicFormApi';
 import _ from 'lodash';
-
+import { SubmitDialog } from './SubmitDialog';
+import { SuccessDialog } from './SuccessDialog';
 
 export interface IDynamicFormProps {
   formTitle: string;
@@ -20,10 +21,28 @@ export enum FormState {
   Error
 }
 
+const generateValidationMessage = (fields: IDynamicFormField[]): string => {
+  // Empty fields will be any undefined, empty string
+  const emptyFields = fields.filter((field) => field.required && (field.value === undefined || field.value === ''));
+  if (emptyFields.length === 0) {
+    return 'Are you sure you want to submit?';
+  } else if (emptyFields.length === 1) {
+    return `Filling in more information in the ${emptyFields[0].label} will help improve the accuracy of the AI generated content.`;
+  } else if (emptyFields.length === 2) {
+    return `Filling in more information in the ${emptyFields.map((field) => field.label).join(' and ')} will help improve the accuracy of the AI generated content.`;
+  } else if (emptyFields.length === 3) {
+    return `Filling in more information in the ${emptyFields.map((field) => field.label).join(', ')} will help improve the accuracy of the AI generated content.`;
+  } else if (emptyFields.length > 3) {
+    return `Filling in more information in the ${emptyFields.map((field) => field.label).join(', ')} will help improve the accuracy of the AI generated content.`;
+  }
+  return '';
+}
+
 export const DynamicForm: React.FunctionComponent<IDynamicFormProps> = (props: React.PropsWithChildren<IDynamicFormProps>) => {
   const styles = DynamicFormStyles();
   const [fields, setFields] = React.useState<IDynamicFormField[]>(props.fields);
   const [formState, setFormState] = React.useState<FormState>(FormState.Edit);
+  const [showSubmitDialog, setShowSubmitDialog] = React.useState(false);
 
   const onFieldChange = (value: string, field: IDynamicFormField) => {
     const updatedFields = fields.map((_field) => {
@@ -72,7 +91,7 @@ export const DynamicForm: React.FunctionComponent<IDynamicFormProps> = (props: R
     <>
       <Card className={styles.container}>
         <div className={styles.titleRow}>
-          <Subtitle1>{props.formTitle}</Subtitle1>
+          <Subtitle2>{props.formTitle}</Subtitle2>
           <Caption1><i>AI generated content may be incorrect</i></Caption1>
         </div>
         <p>
@@ -109,15 +128,6 @@ export const DynamicForm: React.FunctionComponent<IDynamicFormProps> = (props: R
                   </MessageBar>
                 )
               }
-              {
-                formState === FormState.Success && (
-                  <MessageBar intent='success'>
-                    <MessageBarBody>
-                      Your{" "}<Link as='button' onClick={downloadProfile}>profile</Link>{" "}was submitted successfully.
-                    </MessageBarBody>
-                  </MessageBar>
-                )
-              }
               <Dialog modalType='alert'>
                 <DialogTrigger disableButtonEnhancement>
                   <Button disabled={!formIsValid(fields) || formState === FormState.Success}>Clear all</Button>
@@ -137,10 +147,20 @@ export const DynamicForm: React.FunctionComponent<IDynamicFormProps> = (props: R
                   </DialogBody>
                 </DialogSurface>
               </Dialog>
-              <Button appearance='primary' onClick={submitForm} disabled={!formIsValid(fields) || formState === FormState.Success || formState === FormState.Loading } >Submit</Button>
+              <Button appearance='primary' onClick={() => setShowSubmitDialog(true)} disabled={!formIsValid(fields) || formState === FormState.Success || formState === FormState.Loading} >Submit</Button>
             </div>
           )
         }
+        <SubmitDialog
+          show={showSubmitDialog}
+          ondialogClose={() => setShowSubmitDialog(false)}
+          onSubmit={submitForm}
+          validationMessage={generateValidationMessage(fields)}
+        />
+        <SuccessDialog
+          open={formState === FormState.Success}
+          onDownloadClick={downloadProfile}
+        />
       </Card>
     </>
   );

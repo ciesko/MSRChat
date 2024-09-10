@@ -40,7 +40,8 @@ export const ChatStyles = makeStyles({
     },
 
     chatContainerEmbed: {
-        width: '600px',
+        minWidth: '540px',
+        width: '50%',
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
@@ -81,6 +82,7 @@ export const ChatStyles = makeStyles({
         display: 'flex',
         flexDirection: 'row',
         justifyContent: 'flex-end',
+        paddingRight: '10px',
     },
 
     chatEmptyState: {
