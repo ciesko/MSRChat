@@ -32,6 +32,7 @@ export const DynamicFormField: React.FunctionComponent<IDynamicFormFieldProps> =
                                 }
                             }}
                             disabled={props.disabled}
+                            placeholder={field.placeholder}
                         />
                     </Field>
                 );
@@ -92,6 +93,7 @@ export const DynamicFormField: React.FunctionComponent<IDynamicFormFieldProps> =
                             }}
                             rows={4}
                             disabled={props.disabled}
+                            placeholder={field.placeholder}
                         />
                     </Field>
                 );

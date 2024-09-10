@@ -16,4 +16,5 @@ export interface IDynamicFormField {
     required?: boolean;
     value?: string | number | boolean | Date | string[];
     order?: number;
+    placeholder?: string;
 };
