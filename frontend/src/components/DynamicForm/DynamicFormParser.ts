@@ -22,6 +22,7 @@ export const DynamicFormParser = (answer: string): { trimmedAnswer: string, form
             required: field.required,
             value: field.value,
             order: field.order,
+            placeholder: field.placeholder
         };
     }
     );
