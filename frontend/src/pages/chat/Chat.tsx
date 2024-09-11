@@ -211,7 +211,9 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
                     });
                 }
                 const formData = DynamicFormParser(assistantMessage.content);
-                setFormData(formData.formData);
+                if (formData.formData) {
+                    setFormData(formData.formData);
+                }
                 assistantMessage.content = formData.trimmedAnswer;
                 conversation.messages.push(toolMessage, assistantMessage)
                 appStateContext?.dispatch({ type: 'UPDATE_CURRENT_CHAT', payload: conversation });
@@ -775,7 +777,7 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
                     <DynamicForm
                         formTitle="Your form"
                         fields={formData}
-                        onClearAllClick={() =>  makeApiRequestWithoutCosmosDB("Clear all of the following form data.", appStateContext?.state.currentChat?.id, undefined, true)}
+                        onClearAllClick={() => makeApiRequestWithoutCosmosDB("Clear all of the following form data.", appStateContext?.state.currentChat?.id, undefined, true)}
                     />
                     {/* Citation Panel */}
                     <CitationDetails

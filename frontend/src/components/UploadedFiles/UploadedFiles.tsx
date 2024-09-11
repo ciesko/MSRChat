@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { UploadedFilesStyles } from './UploadedFilesStyles';
-import { Button, Card, CardHeader, Link, Subtitle2Stronger } from '@fluentui/react-components';
+import { Button, Card, CardHeader, InfoLabel, Link, Subtitle2Stronger } from '@fluentui/react-components';
 import { ArrowUpload16Regular, Dismiss16Regular } from '@fluentui/react-icons';
 
 export interface IUploadedFilesProps {
@@ -43,7 +43,16 @@ export const UploadedFiles: React.FunctionComponent<IUploadedFilesProps> = (prop
                 <CardHeader
                     className={styles.header}
                     header={
-                        <Subtitle2Stronger>Imported data</Subtitle2Stronger>
+                        <Subtitle2Stronger>
+                            Imported data
+                            <InfoLabel
+                                info={
+                                    <>
+                                        Sharing documents like Word files, text files, and PDFs can enhance your profile. Examples include meeting transcripts, social media profiles, and research papers, showcasing your expertise and achievements.
+                                    </>
+                                }
+                            />
+                        </Subtitle2Stronger>
                     }
                     action={
                         <Button
@@ -74,7 +83,7 @@ export const UploadedFiles: React.FunctionComponent<IUploadedFilesProps> = (prop
                                     }
                                     appearance='subtle'
                                     onClick={() => handleRemoveFile(index)}
-                                /> 
+                                />
                                 {file.name}
                             </Link>
                         </div>

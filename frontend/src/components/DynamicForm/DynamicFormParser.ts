@@ -1,6 +1,6 @@
 import { IDynamicFormField } from "./DynamicFormModels";
 
-export const DynamicFormParser = (answer: string): { trimmedAnswer: string, formData: IDynamicFormField[] } => {
+export const DynamicFormParser = (answer: string): { trimmedAnswer: string, formData: IDynamicFormField[] | undefined } => {
     // formDataString will be the content between the instance of --Start State-- and --End State--
     const formDataString = answer.substring(answer.indexOf("--START STATE--") + "--START STATE--".length, answer.indexOf("--END STATE--"));
 
@@ -10,22 +10,25 @@ export const DynamicFormParser = (answer: string): { trimmedAnswer: string, form
         answerObjectJson = JSON.parse(formDataString);
     } catch (e) {
         console.error("Failed to parse JSON", e);
-        throw new Error("Failed to parse JSON");
+        answerObjectJson = undefined;
     }
-    // Create a new array of IDynamicFormField objects from formdataJson
-    const formData: IDynamicFormField[] = answerObjectJson.formData?.map((field: any) => {
-        return {
-            name: field.name,
-            label: field.label,
-            type: field.type,
-            options: field.options,
-            required: field.required,
-            value: field.value,
-            order: field.order,
-            placeholder: field.placeholder
-        };
+    let formData: IDynamicFormField[] | undefined;
+    if (answerObjectJson) {
+        formData = answerObjectJson.formData?.map((field: any) => {
+            return {
+                name: field.name,
+                label: field.label,
+                type: field.type,
+                options: field.options,
+                required: field.required,
+                value: field.value,
+                order: field.order,
+                placeholder: field.placeholder
+            };
+        }
+        );
     }
-    );
+
     // trimmed answer is the answer with removal of everything between --Start State-- and --End State-- the placeholder for the form data
     const trimmedAnswer = answer.substring(0, answer.indexOf("--START STATE--")) + answer.substring(answer.indexOf("--END STATE--") + "--END STATE--".length);
 
