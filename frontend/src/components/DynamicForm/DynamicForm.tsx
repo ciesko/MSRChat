@@ -23,7 +23,7 @@ export enum FormState {
 
 const generateValidationMessage = (fields: IDynamicFormField[]): string => {
   // Empty fields will be any undefined, empty string
-  const emptyFields = fields.filter((field) => field.required && (field.value === undefined || field.value === ''));
+  const emptyFields = fields.filter((field) => (field.value === undefined || field.value === ''));
   if (emptyFields.length === 0) {
     return 'Are you sure you want to submit?';
   } else if (emptyFields.length === 1) {
