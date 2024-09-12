@@ -1,6 +1,5 @@
 import { Button, Dialog, DialogActions, DialogBody, DialogContent, DialogSurface, DialogTitle } from '@fluentui/react-components';
 import * as React from 'react';
-import { FormState } from './DynamicForm';
 
 export interface ISubmitDialogProps {
     show: boolean;

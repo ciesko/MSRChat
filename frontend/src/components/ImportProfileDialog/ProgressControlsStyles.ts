@@ -22,6 +22,9 @@ export const ProgressControlsStyles = makeStyles({
         borderRadius: tokens.borderRadiusCircular,
         opacity: 0.3,
         backgroundColor: tokens.colorCompoundBrandBackground
+    },
+    skipPlaceholder: {
+        width: '134px',
     }
 
 });

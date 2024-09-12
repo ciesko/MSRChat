@@ -25,7 +25,7 @@ const generateValidationMessage = (fields: IDynamicFormField[]): string => {
   // Empty fields will be any undefined, empty string
   const emptyFields = fields.filter((field) => (field.value === undefined || field.value === ''));
   if (emptyFields.length === 0) {
-    return 'Are you sure you want to submit?';
+    return 'Nice work! Your profile is ready to be submitted.';
   } else if (emptyFields.length === 1) {
     return `Filling in more information in the ${emptyFields[0].label} will help improve the accuracy of the AI generated content.`;
   } else if (emptyFields.length === 2) {

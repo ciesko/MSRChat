@@ -192,7 +192,7 @@ if MSR_AZURE_COSMOSDB_FORMDATA_ACCOUNT and MSR_AZURE_COSMOSDB_FORMDATA_DATABASE 
     try:
         msr_cosmos_db_client_formdata = DynamicFormDataClient(
             cosmosdb_endpoint=f'https://{MSR_AZURE_COSMOSDB_FORMDATA_ACCOUNT}.documents.azure.com:443/', 
-            credential=DefaultAzureCredential(), 
+            credential=credential, 
             database_name=MSR_AZURE_COSMOSDB_FORMDATA_DATABASE,
             container_name=MSR_AZURE_COSMOSDB_FORMDATA_CONTAINER
         )
