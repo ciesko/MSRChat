@@ -598,6 +598,15 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
         appStateContext?.state.audioService?.toggleMute();
     }
 
+    const onClearAllClick = () => {
+        /// go through each form field and clear value
+        let updatedFields = formData.map((field) => {
+            return { ...field, value: "" };
+        });
+        setFormData(updatedFields);
+        makeApiRequestWithoutCosmosDB("Clear all form values and start over.", appStateContext?.state.currentChat?.id, undefined, true);
+    }
+
     useEffect(() => {
         if (appStateContext?.state.chatHistoryLoadingState !== ChatHistoryLoadingState.Loading) {
             try {
@@ -776,7 +785,10 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
                     <DynamicForm
                         formTitle="Your form"
                         fields={formData}
-                        onClearAllClick={() => makeApiRequestWithoutCosmosDB("Clear all of the following form data.", appStateContext?.state.currentChat?.id, undefined, true)}
+                        onFieldChange={(fields) => {
+                            setFormData(fields);
+                        }}
+                        onClearAllClick={onClearAllClick}
                     />
                     {/* Citation Panel */}
                     <CitationDetails

@@ -12,6 +12,7 @@ export interface IDynamicFormProps {
   formTitle: string;
   fields: IDynamicFormField[];
   onClearAllClick?: () => void;
+  onFieldChange: (fields: IDynamicFormField[]) => void;
 }
 
 export enum FormState {
@@ -52,6 +53,7 @@ export const DynamicForm: React.FunctionComponent<IDynamicFormProps> = (props: R
       return _field;
     });
     setFields(updatedFields);
+    props.onFieldChange(updatedFields);
   };
 
   const formIsValid = (_fields: IDynamicFormField[]) => {
@@ -97,18 +99,20 @@ export const DynamicForm: React.FunctionComponent<IDynamicFormProps> = (props: R
         <p>
           This form will dynamically update based on the chat to the left and any data you import. You can also make edits directly. When you are happy with the content click save.
         </p>
-        {
-          fields
-            .sort((a, b) => (a.order !== undefined && b.order !== undefined) ? a.order - b.order : 0)
-            .map((field: IDynamicFormField) => (
-              <DynamicFormField
-                key={field.name}
-                field={field}
-                onChange={(value: string) => onFieldChange(value, field)}
-                disabled={formState === FormState.Loading || formState === FormState.Success}
-              />
-            ))
-        }
+        <div className={styles.formFieldsContainer}>
+          {
+            fields
+              .sort((a, b) => (a.order !== undefined && b.order !== undefined) ? a.order - b.order : 0)
+              .map((field: IDynamicFormField) => (
+                <DynamicFormField
+                  key={field.name}
+                  field={field}
+                  onChange={(value: string) => onFieldChange(value, field)}
+                  disabled={formState === FormState.Loading || formState === FormState.Success}
+                />
+              ))
+          }
+        </div>
         {
           !formIsValid(fields) && (
             <div className={styles.validationMessage}>
