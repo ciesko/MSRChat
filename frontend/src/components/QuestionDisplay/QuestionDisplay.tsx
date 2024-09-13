@@ -10,7 +10,7 @@ export const QuestionDisplay: React.FunctionComponent<IQuestionDisplayProps> = (
     const styles = QuestionDisplayStyles();
     const parseContent = (content: string) => {
         // Anything after the string, including the string, "** Start Current Form State" remove from content 
-        const startIndex = content.indexOf('** Start Current Form State');
+        const startIndex = content.indexOf('--START STATE--');
         if (startIndex > -1) {
             content = content.substring(0, startIndex);
         }
