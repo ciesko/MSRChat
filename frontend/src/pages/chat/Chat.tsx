@@ -123,7 +123,7 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
         let formDataString = "";
         // parse the formdata to string 
         try{
-            formDataString = "Current form values from frontend --START STATE-- ";
+            formDataString = " --START STATE-- ";
             formDataString += JSON.stringify({ formData: formData });
             formDataString += " --END STATE--";
         } catch (e) {
