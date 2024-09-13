@@ -119,12 +119,18 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
         }
     }
 
-    const createFormDataString = (formData: IDynamicFormField[]) => {
-        let formDataString = "** Start Current Form State **\n";
-        formData.forEach((field) => {
-            formDataString += field.label + ": " + field.value + "\n";
-        });
-        formDataString += "** End Current Form State ** \n";
+    const createFormDataString = (formData: IDynamicFormField[]): string => {
+        let formDataString = "";
+        // parse the formdata to string 
+        try{
+            formDataString = "Current form values from frontend --START STATE-- ";
+            formDataString += JSON.stringify({ formData: formData });
+            formDataString += " --END STATE--";
+        } catch (e) {
+            console.error("Failed to parse JSON", e);
+            return "";
+        }
+        
         return formDataString
     }
 
@@ -449,28 +455,6 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
         return abortController.abort();
 
     }
-
-    const clearChat = async () => {
-        appStateContext?.state.audioService?.stopAudioPlayback();
-        setClearingChat(true)
-        if (appStateContext?.state.currentChat?.id && appStateContext?.state.isCosmosDBAvailable.cosmosDB) {
-            let response = await historyClear(appStateContext?.state.currentChat.id)
-            if (!response.ok) {
-                setErrorMsg({
-                    title: "Error clearing current chat",
-                    subtitle: "Please try again. If the problem persists, please contact the site administrator.",
-                })
-                toggleErrorDialog();
-            } else {
-                appStateContext?.dispatch({ type: 'DELETE_CURRENT_CHAT_MESSAGES', payload: appStateContext?.state.currentChat.id });
-                appStateContext?.dispatch({ type: 'UPDATE_CHAT_HISTORY', payload: appStateContext?.state.currentChat });
-                setActiveCitation(undefined);
-                setIsCitationPanelOpen(false);
-                setMessages([])
-            }
-        }
-        setClearingChat(false)
-    };
 
     const newChat = () => {
         appStateContext?.state.audioService?.stopAudioPlayback();
