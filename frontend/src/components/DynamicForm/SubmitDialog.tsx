@@ -1,4 +1,4 @@
-import { Button, Dialog, DialogActions, DialogBody, DialogContent, DialogSurface, DialogTitle } from '@fluentui/react-components';
+import { Button, Dialog, DialogActions, DialogBody, DialogContent, DialogSurface, DialogTitle, Spinner } from '@fluentui/react-components';
 import * as React from 'react';
 
 export interface ISubmitDialogProps {
@@ -10,6 +10,11 @@ export interface ISubmitDialogProps {
 
 export const SubmitDialog: React.FunctionComponent<ISubmitDialogProps> = (props: React.PropsWithChildren<ISubmitDialogProps>) => {
     const [show, setShow] = React.useState(true);
+    const [loading, setLoading] = React.useState(false);
+    const onSubmit = () => {
+        setLoading(true);
+        props.onSubmit();
+    };
 
     React.useEffect(() => {
         console.log('props.show', props.show);
@@ -25,8 +30,13 @@ export const SubmitDialog: React.FunctionComponent<ISubmitDialogProps> = (props:
                         <p>{props.validationMessage}</p>
                     </DialogContent>
                     <DialogActions>
-                        <Button onClick={props.ondialogClose}>Cancel</Button>
-                        <Button appearance='primary' onClick={props.onSubmit}>Submit</Button>
+                        <Button onClick={props.ondialogClose} disabled={loading}>Cancel</Button>
+                        {
+                            !loading ? 
+                            <Button appearance='primary' onClick={onSubmit}>Submit</Button>
+                            :
+                            <Spinner />
+                        } 
                     </DialogActions>
                 </DialogBody>
             </DialogSurface>
