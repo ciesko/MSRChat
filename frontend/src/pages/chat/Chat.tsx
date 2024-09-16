@@ -181,8 +181,10 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
         appStateContext?.dispatch({ type: 'UPDATE_CURRENT_CHAT', payload: conversation });
         setMessages(conversation.messages)
 
+        // Variable that ony contains the last 3 messages in conversation.messages
+        const lastThreeMessages = conversation.messages.slice(-3).filter((answer) => answer.role !== ERROR);
         const request: ConversationRequest = {
-            messages: [...conversation.messages.filter((answer) => answer.role !== ERROR)]
+            messages: [...lastThreeMessages]
         };
 
         let result = {} as ChatResponse;
