@@ -121,7 +121,7 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
     const createFormDataString = (formData: IDynamicFormField[]): string => {
         let formDataString = "";
         // parse the formdata to string 
-        try{
+        try {
             formDataString = " --START STATE-- ";
             formDataString += JSON.stringify({ formData: formData });
             formDataString += " --END STATE--";
@@ -129,7 +129,7 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
             console.error("Failed to parse JSON", e);
             return "";
         }
-        
+
         return formDataString
     }
 
@@ -631,7 +631,7 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
                             }}
                             files={files}
                             onFileRemove={(file) => {
-                                setFiles([]);
+                                setFiles(files.filter(f => f !== file));
                                 makeApiRequestWithoutCosmosDB("Remove the following information from form. ", appStateContext?.state.currentChat?.id, undefined, true);
                             }
                             }
