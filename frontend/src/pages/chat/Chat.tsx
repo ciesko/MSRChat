@@ -631,6 +631,7 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
                             }}
                             files={files}
                             onFileRemove={(file) => {
+                                setFiles([]);
                                 makeApiRequestWithoutCosmosDB("Remove the following information from form. ", appStateContext?.state.currentChat?.id, undefined, true);
                             }
                             }
