@@ -17,7 +17,6 @@ import {
     Conversation,
     historyGenerate,
     historyUpdate,
-    historyClear,
     ChatHistoryLoadingState,
     CosmosDBStatus,
     ErrorMessage
@@ -590,7 +589,7 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
             return { ...field, value: "" };
         });
         setFormData(updatedFields);
-        makeApiRequestWithoutCosmosDB("Clear all form values and start over.", appStateContext?.state.currentChat?.id, undefined, true);
+        makeApiRequestWithoutCosmosDB("Clear all form values except for my name and start over.", appStateContext?.state.currentChat?.id, undefined, true);
     }
 
     useEffect(() => {
@@ -627,12 +626,12 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
                     <div className={styles.chatContainerEmbed}>
                         <UploadedFiles
                             onFileUpload={(file) => {
-                                makeApiRequestWithoutCosmosDB("Fill out values on form based on this document.", appStateContext?.state.currentChat?.id, file, true);
+                                makeApiRequestWithoutCosmosDB("Update and append to form values based on the following information. ", appStateContext?.state.currentChat?.id, file, true);
                                 setFiles([...files, file]);
                             }}
                             files={files}
                             onFileRemove={(file) => {
-                                makeApiRequestWithoutCosmosDB("Remove file from form.", appStateContext?.state.currentChat?.id, undefined, true);
+                                makeApiRequestWithoutCosmosDB("Remove the following information from form. ", appStateContext?.state.currentChat?.id, undefined, true);
                             }
                             }
                         />
