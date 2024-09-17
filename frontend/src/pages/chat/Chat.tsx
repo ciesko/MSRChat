@@ -65,6 +65,7 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
     const [formData, setFormData] = useState<IDynamicFormField[]>([]);
     const [showImportingData, setShowImportingData] = useState<boolean>(false);
     const [files, setFiles] = useState<File[]>([]);
+    const [formSuccess, setFormSuccess] = useState<boolean>(false);
 
     useEffect(() => {
         if (appStateContext?.state.isCosmosDBAvailable?.status === CosmosDBStatus.NotWorking && appStateContext.state.chatHistoryLoadingState === ChatHistoryLoadingState.Fail && hideErrorDialog) {
@@ -632,9 +633,9 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
                             files={files}
                             onFileRemove={(file) => {
                                 setFiles(files.filter(f => f !== file));
-                                makeApiRequestWithoutCosmosDB("Remove the following information from form. ", appStateContext?.state.currentChat?.id, undefined, true);
                             }
                             }
+                            disabled={isLoading || formSuccess}
                         />
                         {!messages || messages.length < 1 ? (
                             <div className={styles.chatEmptyState}>
@@ -759,7 +760,7 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
                                     <QuestionInput
                                         clearOnSend
                                         placeholder={appStateContext?.state.frontendSettings?.input_placeholder}
-                                        disabled={isLoading}
+                                        disabled={isLoading || formSuccess}
                                         onSend={sendChatQuestion}
                                         conversationId={appStateContext?.state.currentChat?.id ? appStateContext?.state.currentChat?.id : undefined}
                                         speechEnabled={SPEECH_ENABLED ? true : false}
@@ -769,12 +770,15 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
                         </div>
                     </div>
                     <DynamicForm
-                        formTitle="Your form"
+                        formTitle="Your profile"
                         fields={formData}
                         onFieldChange={(fields) => {
                             setFormData(fields);
                         }}
                         onClearAllClick={onClearAllClick}
+                        onSuccessfulSubmit={() => {
+                            setFormSuccess(true);
+                        }}
                     />
                     {/* Citation Panel */}
                     <CitationDetails

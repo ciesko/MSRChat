@@ -6,6 +6,7 @@ import { ArrowUpload16Regular, Dismiss16Regular } from '@fluentui/react-icons';
 export interface IUploadedFilesProps {
     onFileUpload: (file: File) => void;
     onFileRemove: (file: File) => void;
+    disabled?: boolean;
     files?: File[];
 }
 
@@ -58,6 +59,7 @@ export const UploadedFiles: React.FunctionComponent<IUploadedFilesProps> = (prop
                         <Button
                             onClick={handleButtonClick}
                             icon={<ArrowUpload16Regular />}
+                            disabled={props.disabled}
                         >
                             Import
                         </Button>

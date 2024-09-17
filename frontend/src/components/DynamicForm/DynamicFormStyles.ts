@@ -36,4 +36,21 @@ export const DynamicFormStyles = makeStyles({
         paddingRight: '5px',
         ...shorthands.gap(tokens.spacingVerticalM),
     },
+    successContainer: {
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '20px',
+        ...shorthands.gap('15px')
+    },
+    icon: {
+        // set icon size
+        fontSize: '124px',
+        color: tokens.colorPaletteGreenForeground1,
+    },
+    messageTitle: {
+        color: tokens.colorPaletteGreenForeground1,
+    },
 });

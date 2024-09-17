@@ -2,17 +2,17 @@ import * as React from 'react';
 import { DynamicFormStyles } from './DynamicFormStyles';
 import { IDynamicFormField } from './DynamicFormModels';
 import { DynamicFormField } from './DynamicFormField';
-import { Button, Caption1, Card, Dialog, DialogActions, DialogBody, DialogContent, DialogSurface, DialogTitle, DialogTrigger, Link, MessageBar, MessageBarBody, Subtitle2 } from '@fluentui/react-components';
+import { Button, Caption1, Card, Dialog, DialogActions, DialogBody, DialogContent, DialogSurface, DialogTitle, DialogTrigger, Link, MessageBar, MessageBarBody, Subtitle2, Title3 } from '@fluentui/react-components';
 import { post_form_data } from '../../api/dynamicFormApi';
-import _ from 'lodash';
 import { SubmitDialog } from './SubmitDialog';
-import { SuccessDialog } from './SuccessDialog';
+import { CheckmarkCircleRegular } from '@fluentui/react-icons';
 
 export interface IDynamicFormProps {
   formTitle: string;
   fields: IDynamicFormField[];
   onClearAllClick?: () => void;
   onFieldChange: (fields: IDynamicFormField[]) => void;
+  onSuccessfulSubmit?: () => void;
 }
 
 export enum FormState {
@@ -61,11 +61,14 @@ export const DynamicForm: React.FunctionComponent<IDynamicFormProps> = (props: R
   }
 
   const submitForm = async () => {
+    setShowSubmitDialog(false);
+
     setFormState(FormState.Loading);
     try {
       const _response = await post_form_data('messageId', fields);
       if (_response.ok) {
         setFormState(FormState.Success);
+        props.onSuccessfulSubmit?.();
       } else {
         setFormState(FormState.Error);
       }
@@ -96,23 +99,40 @@ export const DynamicForm: React.FunctionComponent<IDynamicFormProps> = (props: R
           <Subtitle2>{props.formTitle}</Subtitle2>
           <Caption1><i>AI generated content may be incorrect</i></Caption1>
         </div>
-        <p>
-          This form will dynamically update based on the chat to the left and any data you import. You can also make edits directly. When you are happy with the content click save.
-        </p>
-        <div className={styles.formFieldsContainer}>
-          {
-            fields
-              .sort((a, b) => (a.order !== undefined && b.order !== undefined) ? a.order - b.order : 0)
-              .map((field: IDynamicFormField) => (
-                <DynamicFormField
-                  key={field.name}
-                  field={field}
-                  onChange={(value: string) => onFieldChange(value, field)}
-                  disabled={formState === FormState.Loading || formState === FormState.Success}
-                />
-              ))
-          }
-        </div>
+        {
+          formState !== FormState.Success && (
+            <p>
+              This form will dynamically update based on the chat to the left and any data you import. You can also make edits directly. When you are happy with the content click submit.
+            </p>
+          )
+        }
+        {
+          formState === FormState.Success && (
+            <div className={styles.successContainer}>
+              <CheckmarkCircleRegular className={styles.icon} title='Success' />
+              <Title3 className={styles.messageTitle}>Success!</Title3>
+              <Subtitle2>Thank you for submitting your profile!</Subtitle2>
+              <p><Link as='button' onClick={downloadProfile}>Click here</Link> to download a copy.</p>
+            </div>
+          )
+        }
+        {
+          formState !== FormState.Success &&
+          <div className={styles.formFieldsContainer}>
+            {
+              fields
+                .sort((a, b) => (a.order !== undefined && b.order !== undefined) ? a.order - b.order : 0)
+                .map((field: IDynamicFormField) => (
+                  <DynamicFormField
+                    key={field.name}
+                    field={field}
+                    onChange={(value: string) => onFieldChange(value, field)}
+                    disabled={formState === FormState.Loading}
+                  />
+                ))
+            }
+          </div>
+        }
         {
           !formIsValid(fields) && (
             <div className={styles.validationMessage}>
@@ -121,20 +141,20 @@ export const DynamicForm: React.FunctionComponent<IDynamicFormProps> = (props: R
           )
         }
         {
-          fields.length > 0 && (
+          fields.length > 0 && formState !== FormState.Success && (
             <div className={styles.footerActionRow}>
               {
                 formState === FormState.Error && (
                   <MessageBar intent='error'>
                     <MessageBarBody>
-                      There was an error submitting your{" "}<Link as='button' onClick={downloadProfile}>profile</Link>.
+                      Error submitting your{" "}<Link as='button' onClick={downloadProfile}>profile</Link>.
                     </MessageBarBody>
                   </MessageBar>
                 )
               }
               <Dialog modalType='alert'>
                 <DialogTrigger disableButtonEnhancement>
-                  <Button disabled={!formIsValid(fields) || formState === FormState.Success}>Clear all</Button>
+                  <Button disabled={!formIsValid(fields)}>Clear all</Button>
                 </DialogTrigger>
                 <DialogSurface>
                   <DialogBody>
@@ -151,7 +171,7 @@ export const DynamicForm: React.FunctionComponent<IDynamicFormProps> = (props: R
                   </DialogBody>
                 </DialogSurface>
               </Dialog>
-              <Button appearance='primary' onClick={() => setShowSubmitDialog(true)} disabled={!formIsValid(fields) || formState === FormState.Success || formState === FormState.Loading} >Submit</Button>
+              <Button appearance='primary' onClick={() => setShowSubmitDialog(true)} disabled={!formIsValid(fields) || formState === FormState.Loading} >Submit</Button>
             </div>
           )
         }
@@ -160,10 +180,6 @@ export const DynamicForm: React.FunctionComponent<IDynamicFormProps> = (props: R
           ondialogClose={() => setShowSubmitDialog(false)}
           onSubmit={submitForm}
           validationMessage={generateValidationMessage(fields)}
-        />
-        <SuccessDialog
-          open={formState === FormState.Success}
-          onDownloadClick={downloadProfile}
         />
       </Card>
     </>
