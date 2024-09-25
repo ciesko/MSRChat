@@ -3,11 +3,15 @@ import { IDynamicFormField } from "./DynamicFormModels";
 export const DynamicFormParser = (answer: string): { trimmedAnswer: string, formData: IDynamicFormField[] | undefined } => {
     // find the index of --Start State-- and --End State-- and if they exist then extract the form data to a JSON object
     let formDataString = "";
+    
     const startStateIndex = answer.indexOf("--START STATE--");
     const endStateIndex = answer.indexOf("--END STATE--", startStateIndex + "--START STATE--".length);
 
     if (startStateIndex !== -1 && endStateIndex !== -1) {
         formDataString = answer.substring(startStateIndex + "--START STATE--".length, endStateIndex);
+        // Remove ```json string and ``` string from formDataString
+        formDataString = formDataString.replace("```json", "");
+        formDataString = formDataString.replace("```", "");
     }
 
     // formDataJson will be the JSON object parsed from formDataString use a try
