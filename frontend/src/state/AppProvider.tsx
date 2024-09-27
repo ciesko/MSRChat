@@ -47,8 +47,8 @@ const initialState: AppState = {
     },
     frontendSettings: null,
     feedbackState: {},
-    speech_enabled: undefined,
-    audioService: new AudioService(),
+    speech_enabled: false,
+    audioService: null,
     audioMuted: true,
 };
 

@@ -17,7 +17,6 @@ export const SubmitDialog: React.FunctionComponent<ISubmitDialogProps> = (props:
     };
 
     React.useEffect(() => {
-        console.log('props.show', props.show);
         setShow(props.show);
     }, [props.show]);
 

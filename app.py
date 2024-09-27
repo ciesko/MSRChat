@@ -137,7 +137,7 @@ except:
 frontend_settings = { 
     "auth_enabled": AUTH_ENABLED, 
     "feedback_enabled": AZURE_COSMOSDB_ENABLE_FEEDBACK and AZURE_COSMOSDB_DATABASE not in [None, ""],
-    "speech_enabled": SPEECH_ENABLED,
+    "speech_enabled": False,
     "msr_feedback_enabled": MSR_AZURE_COSMOSDB_FEEDBACK_ENABLED,
     "site_title": REACT_APP_SITE_TITLE,
     "frontpage_heading": REACT_APP_FRONTPAGE_HEADING,
