@@ -6,6 +6,8 @@ import { Button, Caption1, Card, Dialog, DialogActions, DialogBody, DialogConten
 import { post_form_data } from '../../api/dynamicFormApi';
 import { SubmitDialog } from './SubmitDialog';
 import { CheckmarkCircleRegular } from '@fluentui/react-icons';
+import { AppStateContext } from '../../state/AppProvider';
+import { useContext } from 'react';
 
 export interface IDynamicFormProps {
   formTitle: string;
@@ -41,6 +43,7 @@ const generateValidationMessage = (fields: IDynamicFormField[]): string => {
 
 export const DynamicForm: React.FunctionComponent<IDynamicFormProps> = (props: React.PropsWithChildren<IDynamicFormProps>) => {
   const styles = DynamicFormStyles();
+  const appStateContext = useContext(AppStateContext);
   const [fields, setFields] = React.useState<IDynamicFormField[]>(props.fields);
   const [formState, setFormState] = React.useState<FormState>(FormState.Edit);
   const [showSubmitDialog, setShowSubmitDialog] = React.useState(false);
@@ -62,10 +65,14 @@ export const DynamicForm: React.FunctionComponent<IDynamicFormProps> = (props: R
 
   const submitForm = async () => {
     setShowSubmitDialog(false);
+    const fieldsAndChat = {
+      chatLog: appStateContext?.state?.currentChat,
+      formValues: fields
+    };
 
     setFormState(FormState.Loading);
     try {
-      const _response = await post_form_data('messageId', fields);
+      const _response = await post_form_data('messageId', fieldsAndChat);
       if (_response.ok) {
         setFormState(FormState.Success);
         props.onSuccessfulSubmit?.();
