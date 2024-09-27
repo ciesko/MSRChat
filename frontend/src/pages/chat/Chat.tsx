@@ -575,8 +575,8 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
         return isLoading || (messages && messages.length === 0) || clearingChat || appStateContext?.state.chatHistoryLoadingState === ChatHistoryLoadingState.Loading
     }
 
-    const sendChatQuestion = (question: string, id?: string | undefined) => {
-        appStateContext?.state.isCosmosDBAvailable?.cosmosDB ? makeApiRequestWithCosmosDB(question, id) : makeApiRequestWithoutCosmosDB(question, id)
+    const sendChatQuestion = async(question: string, id?: string | undefined) => {
+        appStateContext?.state.isCosmosDBAvailable?.cosmosDB ? await makeApiRequestWithCosmosDB(question, id) : await makeApiRequestWithoutCosmosDB(question, id)
     }
 
     const toggleAudioMute = () => {

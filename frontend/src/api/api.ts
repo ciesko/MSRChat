@@ -28,7 +28,6 @@ export async function getUserInfo(): Promise<UserInfo[]> {
     }
 
     const payload = await response.json();
-    console.log("User info: ", payload);
     return payload;
 }
 

@@ -8,7 +8,7 @@ import React from "react";
 import { AppStateContext } from "../../state/AppProvider";
 
 interface Props {
-    onSend: (question: string, id?: string) => void;
+    onSend: (question: string, id?: string) => Promise<void>;
     disabled: boolean;
     placeholder?: string;
     clearOnSend?: boolean;
@@ -21,23 +21,35 @@ export const QuestionInput = ({ onSend, disabled, placeholder, clearOnSend, conv
     const Newstyles = QuestionInputStyles();
     const [question, setQuestion] = useState<string>("");
     const [microphoneActive, setMicrophoneActive] = useState<boolean>(false);
+    const inputRef = React.useRef<HTMLTextAreaElement>(null);
 
-    const sendQuestion = () => {
+    const sendQuestion = async() => {
         appStateContext?.state.audioService?.stopAudioPlayback();
         if (disabled || !question.trim()) {
             return;
         }
 
         if (conversationId) {
-            onSend(question, conversationId);
+            await onSend(question, conversationId);
+
         } else {
-            onSend(question);
+            await onSend(question);
+
         }
 
         if (clearOnSend) {
             setQuestion("");
         }
+        focusInput();
     };
+
+    const focusInput = async() => {
+        // pause for a split second to allow the input to be focused. 
+        await new Promise(r => setTimeout(r, 200));
+        if (inputRef.current) {
+            inputRef.current.focus();
+        }
+    }
 
     const sendQuestionFromMicrophone = (questionText: string) => {
         if (disabled || !questionText.trim()) {
@@ -71,6 +83,7 @@ export const QuestionInput = ({ onSend, disabled, placeholder, clearOnSend, conv
                     onChange={onQuestionChange}
                     onKeyDown={onEnterPress}
                     disabled={disabled || microphoneActive}
+                    ref={inputRef}
                 />
                 <div className={speechEnabled ? Newstyles.twoButtonContainer : Newstyles.oneButtonContainer }>
                     {speechEnabled &&
