@@ -86,6 +86,10 @@ export const ImportProfileDialog: React.FunctionComponent<IImportProfileDialogPr
             }   );
         }, []);
 
+        React.useEffect(() => {
+            setOpen(props.open);
+        }, [props.open]);
+
         const getIndexContent = (index: number) => {
             switch (index) {
                 case 0:

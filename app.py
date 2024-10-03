@@ -604,6 +604,22 @@ def post_form_data():
         logging.exception("Exception in /history/post_user_data")
         return jsonify({"error": str(e)}), 500
     
+@app.route("/get_user_form_data", methods=["GET"])
+def get_user_form_data():
+    authenticated_user = get_authenticated_user_details(request_headers=request.headers)
+    user_alias = authenticated_user['user_name']
+
+    try:
+        form_data = msr_cosmos_db_client_formdata.get_user_form_data(user_alias)
+        if not form_data:
+            return jsonify({}), 200
+
+        return jsonify(form_data), 200
+    
+    except Exception as e:
+        logging.exception("Exception in /history/get_user_form_data")
+        return jsonify({"error": str(e)}), 500
+    
 def generate_title(conversation_messages):
     ## make sure the messages are sorted by _ts descending
     title_prompt = 'Summarize the conversation so far into a 4-word or less title. Do not use any quotation marks or punctuation. Respond with a json object in the format {{"title": string}}. Do not include any other commentary or description.'

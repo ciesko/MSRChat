@@ -2,7 +2,7 @@ import { useRef, useState, useEffect, useContext, useLayoutEffect } from "react"
 import { ShieldLock48Regular, ErrorCircleRegular, Broom16Regular, Add16Regular, Stop24Regular, Speaker024Regular, SpeakerMuteRegular, Speaker224Regular } from "@fluentui/react-icons";
 
 import uuid from 'react-uuid';
-import { isEmpty, set } from "lodash-es";
+import { get, isEmpty, set } from "lodash-es";
 
 import LogoImage from "../../assets/chatIcon.svg";
 
@@ -37,6 +37,7 @@ import { IDynamicFormField } from "../../components/DynamicForm/DynamicFormModel
 import { LoadingDialog } from "../../components/LoadingDialog/LoadingDialog";
 import { ImportProfileDialog } from "../../components/ImportProfileDialog/ImportProfileDialog";
 import { QuestionDisplay } from "../../components/QuestionDisplay/QuestionDisplay";
+import { get_user_form_data } from "../../api/dynamicFormApi";
 
 const enum messageStatus {
     NotRunning = "Not Running",
@@ -66,6 +67,7 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
     const [showImportingData, setShowImportingData] = useState<boolean>(false);
     const [files, setFiles] = useState<File[]>([]);
     const [formSuccess, setFormSuccess] = useState<boolean>(false);
+    const [showImportProfileDialog, setShowImportProfileDialog] = useState<boolean>(false);
 
     useEffect(() => {
         if (appStateContext?.state.isCosmosDBAvailable?.status === CosmosDBStatus.NotWorking && appStateContext.state.chatHistoryLoadingState === ChatHistoryLoadingState.Fail && hideErrorDialog) {
@@ -575,7 +577,7 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
         return isLoading || (messages && messages.length === 0) || clearingChat || appStateContext?.state.chatHistoryLoadingState === ChatHistoryLoadingState.Loading
     }
 
-    const sendChatQuestion = async(question: string, id?: string | undefined) => {
+    const sendChatQuestion = async (question: string, id?: string | undefined) => {
         appStateContext?.state.isCosmosDBAvailable?.cosmosDB ? await makeApiRequestWithCosmosDB(question, id) : await makeApiRequestWithoutCosmosDB(question, id)
     }
 
@@ -607,219 +609,234 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
         }
     }, [appStateContext?.state.chatHistoryLoadingState]);
 
-    return (
-        <div className={styles.container} role="main">
-            {showAuthMessage ? (
-                <div className={styles.chatEmptyState}>
-                    <ShieldLock48Regular />
-                    <Title1 align="center">Authentication Not Configured</Title1>
-                    <Subtitle1 align="center">
-                        This app does not have authentication configured. Please add an identity provider by finding your app in the
-                        <Link href="https://portal.azure.com/" target="_blank"> Azure Portal </Link>
-                        and following
-                        <Link href="https://learn.microsoft.com/en-us/azure/app-service/scenario-secure-app-authentication-app-service#3-configure-authentication-and-authorization" target="_blank"> these instructions</Link>.
-                    </Subtitle1>
-                    <Subtitle1 align="center">Authentication configuration takes a few minutes to apply.</Subtitle1>
-                    <Subtitle1 align="center">If you deployed in the last 10 minutes, please wait and reload the page after 10 minutes.</Subtitle1>
-                </div>
-            ) : (
-                <div className={styles.containerWithForm}>
-                    <div className={styles.chatContainerEmbed}>
-                        <UploadedFiles
-                            onFileUpload={(file) => {
-                                makeApiRequestWithoutCosmosDB("Update and append to form values based on the following information. ", appStateContext?.state.currentChat?.id, file, true);
-                                setFiles([...files, file]);
-                            }}
-                            files={files}
-                            onFileRemove={(file) => {
-                                setFiles(files.filter(f => f !== file));
-                            }
-                            }
-                            disabled={isLoading || formSuccess}
-                        />
-                        {!messages || messages.length < 1 ? (
-                            <div className={styles.chatEmptyState}>
-                                {
-                                    appStateContext?.state.frontendSettings?.frontpage_show_image && (
-                                        <Image
-                                            src={appStateContext?.state.frontendSettings?.frontpage_image_url ? appStateContext?.state.frontendSettings?.frontpage_image_url : LogoImage}
-                                            height={120}
-                                            width={120}
-                                            aria-hidden="true"
-                                        />
-                                    )
+    const getUserFormData = async () => {
+        const formData = await get_user_form_data();
+        if (formData) {
+            setFormData(formData);
+            makeApiRequestWithoutCosmosDB("I'm back. Let's continue where we left off. Welcome me back by saying welcome back.", undefined, undefined, true);
+        } else {
+            setShowImportProfileDialog(true);
+            console.log(formData);
+        };
+    }
+
+    useEffect(() => {
+        getUserFormData();
+    }, []);
+
+        return (
+            <div className={styles.container} role="main">
+                {showAuthMessage ? (
+                    <div className={styles.chatEmptyState}>
+                        <ShieldLock48Regular />
+                        <Title1 align="center">Authentication Not Configured</Title1>
+                        <Subtitle1 align="center">
+                            This app does not have authentication configured. Please add an identity provider by finding your app in the
+                            <Link href="https://portal.azure.com/" target="_blank"> Azure Portal </Link>
+                            and following
+                            <Link href="https://learn.microsoft.com/en-us/azure/app-service/scenario-secure-app-authentication-app-service#3-configure-authentication-and-authorization" target="_blank"> these instructions</Link>.
+                        </Subtitle1>
+                        <Subtitle1 align="center">Authentication configuration takes a few minutes to apply.</Subtitle1>
+                        <Subtitle1 align="center">If you deployed in the last 10 minutes, please wait and reload the page after 10 minutes.</Subtitle1>
+                    </div>
+                ) : (
+                    <div className={styles.containerWithForm}>
+                        <div className={styles.chatContainerEmbed}>
+                            <UploadedFiles
+                                onFileUpload={(file) => {
+                                    makeApiRequestWithoutCosmosDB("Update and append to form values based on the following information. ", appStateContext?.state.currentChat?.id, file, true);
+                                    setFiles([...files, file]);
+                                }}
+                                files={files}
+                                onFileRemove={(file) => {
+                                    setFiles(files.filter(f => f !== file));
                                 }
-                                {
-                                    appStateContext?.state.frontendSettings?.frontpage_subheading && (
-                                        <p className={styles.subtitle}>{appStateContext?.state.frontendSettings?.frontpage_subheading}</p>
-                                    )
                                 }
-                                {
-                                    appStateContext?.state.frontendSettings?.frontpage_links?.map((link, index) => (
-                                        <Link key={index} href={link.url} target="_blank">{link.text}</Link>
-                                    ))
-                                }
-                                <SuggestionButtons
-                                    onButtonClick={sendChatQuestion}
-                                />
-                            </div>
-                        ) : (
-                            <div className={styles.chatMessageStream} role="log">
-                                {messages.map((answer, index) => (
-                                    <div key={`answer-${index}`}>
-                                        {
-                                            answer.role === "user" ? (
-                                                <div className={styles.questionDisplayRow}>
-                                                    <QuestionDisplay
-                                                        content={answer.content}
-                                                    />
-                                                </div>
-                                            ) : (
-                                                answer.role === "assistant" ? <div
-                                                    style={{
-                                                        marginBottom: '12px',
-                                                        maxWidth: '80%',
-                                                        display: 'flex'
-                                                    }}>
-                                                    <Answer
-                                                        answer={{
-                                                            answer: answer.content,
-                                                            citations: parseCitationFromMessage(messages[index - 1]),
-                                                            message_id: answer.id,
-                                                            feedback: answer.feedback
-                                                        }}
-                                                        onCitationClicked={c => onShowCitation(c)}
-                                                        isLastAnswer={index === messages.length - 1}
-                                                    />
-                                                </div> : answer.role === ERROR ? <div className={styles.chatMessageError}>
-                                                    <div className={styles.chatMessageErrorContent}>
-                                                        <ErrorCircleRegular />
-                                                        <span>Error</span>
-                                                    </div>
-                                                    <span className={styles.chatMessageErrorContent}>{answer.content}</span>
-                                                </div> : null
-                                            )
-                                        }
-                                    </div>
-                                ))}
-                                {showLoadingMessage && (
-                                    <></>
-                                    // <>
-                                    //     <div style={{
-                                    //         marginBottom: '12px',
-                                    //         maxWidth: '80%',
-                                    //         display: 'flex'
-                                    //     }}>
-                                    //         <Answer
-                                    //             answer={{
-                                    //                 message_id: "generating",
-                                    //                 answer: "Generating answer...",
-                                    //                 citations: []
-                                    //             }}
-                                    //             onCitationClicked={() => null}
-                                    //             isLastAnswer={true}
-                                    //         />
-                                    //     </div>
-                                    // </>
-                                )}
-                                <div ref={chatMessageStreamEnd} />
-                            </div>
-                        )}
-                        <div className={styles.bottomSection}>
-                            <div className={styles.stopGeneratingContainer}>
-                                {
-                                    // If audio is enabled, show speaker icon for mute/unmute
-                                    SPEECH_ENABLED && (
-                                        <Button
-                                            appearance="transparent"
-                                            size="large"
-                                            icon={appStateContext?.state.audioMuted ? <SpeakerMuteRegular /> : <Speaker224Regular />}
-                                            aria-label={appStateContext?.state.audioMuted ? "Unmute" : "Mute"}
-                                            tabIndex={0}
-                                            onClick={toggleAudioMute}
-                                            onKeyDown={e => e.key === "Enter" || e.key === " " ? toggleAudioMute() : null}
-                                            title={appStateContext?.state.audioMuted ? "Unmute" : "Mute"}
-                                        />
-                                    )
-                                }
-                            </div>
-                            <div className={styles.chatInputContainer}>
-                                <div className={styles.chatInput}>
-                                    <div className={styles.chatButtonsLeftContainer}>
-                                        {
-                                            appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured && (
-                                                <Button
-                                                    icon={<Add16Regular />}
-                                                    onClick={newChat}
-                                                    disabled={disabledButton()}
-                                                    aria-label="start a new chat button"
-                                                />
-                                            )
-                                        }
-                                    </div>
-                                    <QuestionInput
-                                        clearOnSend
-                                        placeholder={appStateContext?.state.frontendSettings?.input_placeholder}
-                                        disabled={isLoading || formSuccess}
-                                        onSend={sendChatQuestion}
-                                        conversationId={appStateContext?.state.currentChat?.id ? appStateContext?.state.currentChat?.id : undefined}
-                                        speechEnabled={SPEECH_ENABLED ? true : false}
+                                disabled={isLoading || formSuccess}
+                            />
+                            {!messages || messages.length < 1 ? (
+                                <div className={styles.chatEmptyState}>
+                                    {
+                                        appStateContext?.state.frontendSettings?.frontpage_show_image && (
+                                            <Image
+                                                src={appStateContext?.state.frontendSettings?.frontpage_image_url ? appStateContext?.state.frontendSettings?.frontpage_image_url : LogoImage}
+                                                height={120}
+                                                width={120}
+                                                aria-hidden="true"
+                                            />
+                                        )
+                                    }
+                                    {
+                                        appStateContext?.state.frontendSettings?.frontpage_subheading && (
+                                            <p className={styles.subtitle}>{appStateContext?.state.frontendSettings?.frontpage_subheading}</p>
+                                        )
+                                    }
+                                    {
+                                        appStateContext?.state.frontendSettings?.frontpage_links?.map((link, index) => (
+                                            <Link key={index} href={link.url} target="_blank">{link.text}</Link>
+                                        ))
+                                    }
+                                    <SuggestionButtons
+                                        onButtonClick={sendChatQuestion}
                                     />
+                                </div>
+                            ) : (
+                                <div className={styles.chatMessageStream} role="log">
+                                    {messages.map((answer, index) => (
+                                        <div key={`answer-${index}`}>
+                                            {
+                                                answer.role === "user" ? (
+                                                    <div className={styles.questionDisplayRow}>
+                                                        <QuestionDisplay
+                                                            content={answer.content}
+                                                        />
+                                                    </div>
+                                                ) : (
+                                                    answer.role === "assistant" ? <div
+                                                        style={{
+                                                            marginBottom: '12px',
+                                                            maxWidth: '80%',
+                                                            display: 'flex'
+                                                        }}>
+                                                        <Answer
+                                                            answer={{
+                                                                answer: answer.content,
+                                                                citations: parseCitationFromMessage(messages[index - 1]),
+                                                                message_id: answer.id,
+                                                                feedback: answer.feedback
+                                                            }}
+                                                            onCitationClicked={c => onShowCitation(c)}
+                                                            isLastAnswer={index === messages.length - 1}
+                                                        />
+                                                    </div> : answer.role === ERROR ? <div className={styles.chatMessageError}>
+                                                        <div className={styles.chatMessageErrorContent}>
+                                                            <ErrorCircleRegular />
+                                                            <span>Error</span>
+                                                        </div>
+                                                        <span className={styles.chatMessageErrorContent}>{answer.content}</span>
+                                                    </div> : null
+                                                )
+                                            }
+                                        </div>
+                                    ))}
+                                    {showLoadingMessage && (
+                                        <></>
+                                        // <>
+                                        //     <div style={{
+                                        //         marginBottom: '12px',
+                                        //         maxWidth: '80%',
+                                        //         display: 'flex'
+                                        //     }}>
+                                        //         <Answer
+                                        //             answer={{
+                                        //                 message_id: "generating",
+                                        //                 answer: "Generating answer...",
+                                        //                 citations: []
+                                        //             }}
+                                        //             onCitationClicked={() => null}
+                                        //             isLastAnswer={true}
+                                        //         />
+                                        //     </div>
+                                        // </>
+                                    )}
+                                    <div ref={chatMessageStreamEnd} />
+                                </div>
+                            )}
+                            <div className={styles.bottomSection}>
+                                <div className={styles.stopGeneratingContainer}>
+                                    {
+                                        // If audio is enabled, show speaker icon for mute/unmute
+                                        SPEECH_ENABLED && (
+                                            <Button
+                                                appearance="transparent"
+                                                size="large"
+                                                icon={appStateContext?.state.audioMuted ? <SpeakerMuteRegular /> : <Speaker224Regular />}
+                                                aria-label={appStateContext?.state.audioMuted ? "Unmute" : "Mute"}
+                                                tabIndex={0}
+                                                onClick={toggleAudioMute}
+                                                onKeyDown={e => e.key === "Enter" || e.key === " " ? toggleAudioMute() : null}
+                                                title={appStateContext?.state.audioMuted ? "Unmute" : "Mute"}
+                                            />
+                                        )
+                                    }
+                                </div>
+                                <div className={styles.chatInputContainer}>
+                                    <div className={styles.chatInput}>
+                                        <div className={styles.chatButtonsLeftContainer}>
+                                            {
+                                                appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured && (
+                                                    <Button
+                                                        icon={<Add16Regular />}
+                                                        onClick={newChat}
+                                                        disabled={disabledButton()}
+                                                        aria-label="start a new chat button"
+                                                    />
+                                                )
+                                            }
+                                        </div>
+                                        <QuestionInput
+                                            clearOnSend
+                                            placeholder={appStateContext?.state.frontendSettings?.input_placeholder}
+                                            disabled={isLoading || formSuccess}
+                                            onSend={sendChatQuestion}
+                                            conversationId={appStateContext?.state.currentChat?.id ? appStateContext?.state.currentChat?.id : undefined}
+                                            speechEnabled={SPEECH_ENABLED ? true : false}
+                                        />
+                                    </div>
                                 </div>
                             </div>
                         </div>
+                        <DynamicForm
+                            formTitle="Your profile"
+                            fields={formData || []}
+                            onFieldChange={(fields) => {
+                                setFormData(fields);
+                            }}
+                            onClearAllClick={onClearAllClick}
+                            onSuccessfulSubmit={() => {
+                                setFormSuccess(true);
+                            }}
+                        />
+                        {/* Citation Panel */}
+                        <CitationDetails
+                            open={((messages && messages.length > 0) && (isCitationPanelOpen && activeCitation)) ? true : false}
+                            citation={activeCitation}
+                            onClose={() => setIsCitationPanelOpen(false)}
+                        />
+                        <ChatHistoryPanel
+                            open={appStateContext?.state.isChatHistoryOpen && appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured}
+                        />
                     </div>
-                    <DynamicForm
-                        formTitle="Your profile"
-                        fields={formData}
-                        onFieldChange={(fields) => {
-                            setFormData(fields);
-                        }}
-                        onClearAllClick={onClearAllClick}
-                        onSuccessfulSubmit={() => {
-                            setFormSuccess(true);
-                        }}
-                    />
-                    {/* Citation Panel */}
-                    <CitationDetails
-                        open={((messages && messages.length > 0) && (isCitationPanelOpen && activeCitation)) ? true : false}
-                        citation={activeCitation}
-                        onClose={() => setIsCitationPanelOpen(false)}
-                    />
-                    <ChatHistoryPanel
-                        open={appStateContext?.state.isChatHistoryOpen && appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured}
-                    />
-                </div>
-            )}
-            <Dialog
-                open={!hideErrorDialog}
-                onOpenChange={handleErrorDialogClose}
-            >
-                <DialogSurface>
-                    <DialogBody>
-                        <DialogTitle>{errorMsg?.title}</DialogTitle>
-                        <DialogContent>
-                            {errorMsg?.subtitle}
-                        </DialogContent>
-                        <DialogActions>
-                            <DialogTrigger disableButtonEnhancement>
-                                <Button appearance="secondary">Close</Button>
-                            </DialogTrigger>
-                        </DialogActions>
-                    </DialogBody>
-                </DialogSurface>
-            </Dialog>
-            <LoadingDialog
-                open={showImportingData || isLoading}
-                title={showImportingData ? "Importing file and building profile" : "Working on your request"}
-                subTitle={showImportingData ? "This may take a while." : "This shouldn't take long."}
-            />
-            <ImportProfileDialog
-                onProfileFinish={sendWizardProfile}
-                open={true}
-            />
-        </div>
-    );
-};
+                )}
+                <Dialog
+                    open={!hideErrorDialog}
+                    onOpenChange={handleErrorDialogClose}
+                >
+                    <DialogSurface>
+                        <DialogBody>
+                            <DialogTitle>{errorMsg?.title}</DialogTitle>
+                            <DialogContent>
+                                {errorMsg?.subtitle}
+                            </DialogContent>
+                            <DialogActions>
+                                <DialogTrigger disableButtonEnhancement>
+                                    <Button appearance="secondary">Close</Button>
+                                </DialogTrigger>
+                            </DialogActions>
+                        </DialogBody>
+                    </DialogSurface>
+                </Dialog>
+                <LoadingDialog
+                    open={showImportingData || isLoading}
+                    title={showImportingData ? "Importing file and building profile" : "Working on your request"}
+                    subTitle={showImportingData ? "This may take a while." : "This shouldn't take long."}
+                />
+                <ImportProfileDialog
+                    onProfileFinish={sendWizardProfile}
+                    open={showImportProfileDialog}
+                />
+            </div>
+        );
+    };
 
-export default Chat;
+    export default Chat;

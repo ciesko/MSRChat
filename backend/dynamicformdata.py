@@ -56,4 +56,21 @@ class DynamicFormDataClient():
                 'data': data
             }
             self.container_client.upsert_item(data)
-           
+
+    def get_user_form_data(self, user_id):
+        """
+        Gets all the form data for a user.
+
+        Args:
+            user_id (str): The ID of the user needs to match the userAlias field in the db
+
+        Returns:
+            one item that matches the user_id and most recent item/version.  if no item is found, returns None
+        """
+        query = f"SELECT * FROM c WHERE c.userAlias = '{user_id}' ORDER BY c.timestamp DESC OFFSET 0 LIMIT 1"
+        items = list(self.container_client.query_items(query=query, enable_cross_partition_query=True))
+        if items:
+            return items[0]
+        else:
+            return None
+      
