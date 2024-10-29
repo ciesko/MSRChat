@@ -602,7 +602,7 @@ const Chat = ({ embedDisplay }: { embedDisplay: boolean }) => {
                                 <span className={styles.title}>{appStateContext?.state.frontendSettings?.frontpage_heading}</span>
                                 {
                                     appStateContext?.state.frontendSettings?.frontpage_subheading && (
-                                        <p className={styles.subtitle}>{appStateContext?.state.frontendSettings?.frontpage_subheading}</p>
+                                        <div className={styles.subtitle} dangerouslySetInnerHTML={{ __html: appStateContext?.state.frontendSettings?.frontpage_subheading || "" }}/>
                                     )
                                 }
                                 {
